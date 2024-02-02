@@ -1,0 +1,20 @@
+[package]
+name = "substreams-solana-quickstart"
+version = "1.0.0"
+edition = "2021"
+
+[lib]
+name = "substreams"
+crate-type = ["cdylib"]
+
+[dependencies]
+substreams = "0.5.0"
+substreams-solana = "0.2.0"
+substreams-database-change = "1"
+prost = "0.11"
+num-bigint = "0.4"
+
+[profile.release]
+lto = true
+opt-level = 's'
+strip = "debuginfo"

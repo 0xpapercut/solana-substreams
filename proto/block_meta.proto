@@ -1,0 +1,12 @@
+syntax = "proto3";
+
+package sf.solana.block_meta.v1;
+
+message BlockMeta {
+  string hash = 1;
+  string parent_hash = 2;
+  uint64 slot = 3;
+  uint64 parent_slot = 4;
+  uint64 transaction_count = 5;
+  optional uint64 block_height = 6;
+}
