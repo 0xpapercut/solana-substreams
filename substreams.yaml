@@ -6,6 +6,7 @@ package:
 protobuf:
   files:
     - block_meta.proto
+    - swap.proto
   importPaths:
     - ./proto
 
@@ -25,6 +26,13 @@ modules:
       - source: sf.solana.type.v1.Block
     output:
       type: proto:sf.solana.block_meta.v1.BlockMeta
+
+  - name: map_swap
+    kind: map
+    inputs:
+      - source: sf.solana.type.v1.Block
+    output:
+      type: proto:swap.Swaps
 
   - name: db_out
     kind: map
