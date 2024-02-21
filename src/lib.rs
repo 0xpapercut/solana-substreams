@@ -86,13 +86,17 @@ fn map_swap(block: Block) -> Result<Swaps, substreams::errors::Error> {
                     continue;
                 }
 
-                let user_source_token_account = accounts[inner_instruction.accounts[15] as usize].clone();
-                let user_dest_token_account = accounts[inner_instruction.accounts[16] as usize].clone();
+                let user_source_token_account = accounts[inner_instruction.accounts[inner_instruction.accounts.len() - 3] as usize].clone();
+                let user_dest_token_account = accounts[inner_instruction.accounts[inner_instruction.accounts.len() - 2] as usize].clone();
 
-                let data = inner_instructions.instructions[i + 1].data.clone();
+                let data = inner_instructions.instructions.get(i + 1)
+                    .ok_or(substreams::errors::Error::msg(format!("{}:{} - Failed to process transaction {}", file!(), line!(), signature)))?
+                    .data.clone();
                 let amount_in = u64::from_le_bytes(data[1..9].try_into().expect("Slice with incorrect length."));
 
-                let data = inner_instructions.instructions[i + 2].data.clone();
+                let data = inner_instructions.instructions.get(i + 2)
+                    .ok_or(substreams::errors::Error::msg(format!("{}:{} - Failed to process transaction {}", file!(), line!(), signature)))?
+                    .data.clone();
                 let amount_out = u64::from_le_bytes(data[1..9].try_into().expect("Slice with incorrect length."));
 
                 let token_in = mints.get(&user_source_token_account).unwrap_or(&SOL_MINT.to_string()).clone();
@@ -101,6 +105,7 @@ fn map_swap(block: Block) -> Result<Swaps, substreams::errors::Error> {
                 let amm = accounts[inner_instruction.accounts[1] as usize].clone();
 
                 swaps.push(Swap {
+                    // signer: format!("{:?}", ),
                     signer: accounts[0].clone(),
                     token_in,
                     token_out,
@@ -112,7 +117,7 @@ fn map_swap(block: Block) -> Result<Swaps, substreams::errors::Error> {
             }
         }
     }
-    // swaps = swaps.iter().filter(|x| x.amm == "EGG6GngmG1sHKSMQr2aKo9HuMuLGXoP3DJ6FHkBaJFo3").cloned().collect();
+    swaps = swaps.iter().filter(|x| x.amm == "HbiF1RijTGZCSP5DyBUvjBsLM7N8UeRoNhqBm3pz6PUq").cloned().collect();
     return Ok(Swaps {swaps});
 }
 
