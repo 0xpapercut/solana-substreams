@@ -17,10 +17,10 @@ const SOL_MINT: &str = "So11111111111111111111111111111111111111112";
 fn map_swap(block: Block) -> Result<Swaps, substreams::errors::Error> {
     let mut swaps: Vec<Swap> = Vec::new();
 
-    for successfulTxn in block.transactions {
-        let accounts = successfulTxn.resolved_accounts_as_strings();
-        let signature = bs58::encode(successfulTxn.clone().transaction.unwrap().signatures[0].clone()).into_string();
-        let meta = successfulTxn.clone().meta.unwrap();
+    for successful_txn in block.transactions {
+        let accounts = successful_txn.resolved_accounts_as_strings();
+        let signature = bs58::encode(successful_txn.clone().transaction.unwrap().signatures[0].clone()).into_string();
+        let meta = successful_txn.clone().meta.unwrap();
 
         if meta.clone().err.is_some() {
             continue;
@@ -31,7 +31,7 @@ fn map_swap(block: Block) -> Result<Swaps, substreams::errors::Error> {
             mints.insert(accounts[token_balance.account_index as usize].clone(), token_balance.mint);
         }
 
-        for (index, instruction) in successfulTxn.instructions().enumerate() {
+        for (index, instruction) in successful_txn.instructions().enumerate() {
             let program_id = accounts[instruction.instruction.program_id_index as usize].as_str();
             if program_id != RAYDIUM_LIQUIDITY_POOL {
                 continue;
@@ -60,11 +60,8 @@ fn map_swap(block: Block) -> Result<Swaps, substreams::errors::Error> {
             }
             let amount_out = u64::from_le_bytes(data[1..9].try_into().expect("Slice with incorrect length."));
 
-            let user_source_token_account = accounts[instruction.instruction.accounts[15] as usize].clone();
-            let user_dest_token_account = accounts[instruction.instruction.accounts[16] as usize].clone();
-
-            let token_in = mints.get(&user_source_token_account).unwrap_or(&SOL_MINT.to_string()).clone();
-            let token_out = mints.get(&user_dest_token_account).unwrap_or(&SOL_MINT.to_string()).clone();
+            let token_in = mints.get(&accounts[inner_instructions.instructions[0].accounts[0] as usize]).unwrap_or(&SOL_MINT.to_string()).clone();
+            let token_out = mints.get(&accounts[inner_instructions.instructions[1].accounts[0] as usize]).unwrap_or(&SOL_MINT.to_string()).clone();
 
             let amm = accounts[instruction.instruction.accounts[1] as usize].clone();
 
@@ -86,26 +83,22 @@ fn map_swap(block: Block) -> Result<Swaps, substreams::errors::Error> {
                     continue;
                 }
 
-                let user_source_token_account = accounts[inner_instruction.accounts[inner_instruction.accounts.len() - 3] as usize].clone();
-                let user_dest_token_account = accounts[inner_instruction.accounts[inner_instruction.accounts.len() - 2] as usize].clone();
-
-                let data = inner_instructions.instructions.get(i + 1)
+                let data = &inner_instructions.instructions.get(i + 1)
                     .ok_or(substreams::errors::Error::msg(format!("{}:{} - Failed to process transaction {}", file!(), line!(), signature)))?
-                    .data.clone();
+                    .data;
                 let amount_in = u64::from_le_bytes(data[1..9].try_into().expect("Slice with incorrect length."));
 
-                let data = inner_instructions.instructions.get(i + 2)
+                let data = &inner_instructions.instructions.get(i + 2)
                     .ok_or(substreams::errors::Error::msg(format!("{}:{} - Failed to process transaction {}", file!(), line!(), signature)))?
-                    .data.clone();
+                    .data;
                 let amount_out = u64::from_le_bytes(data[1..9].try_into().expect("Slice with incorrect length."));
 
-                let token_in = mints.get(&user_source_token_account).unwrap_or(&SOL_MINT.to_string()).clone();
-                let token_out = mints.get(&user_dest_token_account).unwrap_or(&SOL_MINT.to_string()).clone();
+                let token_in = mints.get(&accounts[inner_instructions.instructions[i + 1].accounts[0] as usize]).unwrap_or(&SOL_MINT.to_string()).clone();
+                let token_out = mints.get(&accounts[inner_instructions.instructions[i + 2].accounts[0] as usize]).unwrap_or(&SOL_MINT.to_string()).clone();
 
                 let amm = accounts[inner_instruction.accounts[1] as usize].clone();
 
                 swaps.push(Swap {
-                    // signer: format!("{:?}", ),
                     signer: accounts[0].clone(),
                     token_in,
                     token_out,
@@ -117,7 +110,6 @@ fn map_swap(block: Block) -> Result<Swaps, substreams::errors::Error> {
             }
         }
     }
-    swaps = swaps.iter().filter(|x| x.amm == "HbiF1RijTGZCSP5DyBUvjBsLM7N8UeRoNhqBm3pz6PUq").cloned().collect();
     return Ok(Swaps {swaps});
 }
 
