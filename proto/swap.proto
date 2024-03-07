@@ -14,4 +14,5 @@ message Swap {
     uint64 amountOut = 5;
     string signature = 6;
     string amm = 7;
+    uint64 slot = 8;
 }

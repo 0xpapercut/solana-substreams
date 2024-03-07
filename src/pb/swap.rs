@@ -22,5 +22,7 @@ pub struct Swap {
     pub signature: ::prost::alloc::string::String,
     #[prost(string, tag="7")]
     pub amm: ::prost::alloc::string::String,
+    #[prost(uint64, tag="8")]
+    pub slot: u64,
 }
 // @@protoc_insertion_point(module)
