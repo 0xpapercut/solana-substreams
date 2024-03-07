@@ -6,7 +6,7 @@ build:
 
 .PHONY: swaps
 swaps: build
-	substreams run -e $(ENDPOINT) substreams.yaml swaps -s $(START)
+	substreams run -e $(ENDPOINT) substreams.yaml swaps -s $(START) -o jsonl
 
 .PHONY: protogen
 protogen:
