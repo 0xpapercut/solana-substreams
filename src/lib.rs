@@ -2,19 +2,15 @@ mod pb;
 
 use std::collections::HashMap;
 
-use pb::sf::solana::block_meta::v1::BlockMeta;
 use substreams_solana::pb::sf::solana::r#type::v1::Block;
-use substreams_database_change::pb::database::DatabaseChanges;
-use substreams_database_change::tables::Tables as DatabaseChangeTables;
-use pb::swap::Swap;
-use pb::swap::Swaps;
+use pb::swap::{Swap, Swaps};
 use bs58;
 
 const RAYDIUM_LIQUIDITY_POOL: &str = "675kPX9MHTjS2zt1qfr1NYHuzeLXfQM9H24wFSUt1Mp8";
 const SOL_MINT: &str = "So11111111111111111111111111111111111111112";
 
 #[substreams::handlers::map]
-fn map_swap(block: Block) -> Result<Swaps, substreams::errors::Error> {
+fn swaps(block: Block) -> Result<Swaps, substreams::errors::Error> {
     let mut swaps: Vec<Swap> = Vec::new();
 
     for successful_txn in block.transactions {
@@ -73,6 +69,7 @@ fn map_swap(block: Block) -> Result<Swaps, substreams::errors::Error> {
                 amount_out,
                 signature: signature.clone(),
                 amm,
+                slot: block.slot,
             });
         }
 
@@ -106,22 +103,11 @@ fn map_swap(block: Block) -> Result<Swaps, substreams::errors::Error> {
                     amount_out,
                     signature: signature.clone(),
                     amm,
+                    slot: block.slot,
                 })
             }
         }
     }
-    return Ok(Swaps {swaps});
-}
 
-#[substreams::handlers::map]
-fn db_out(bm: BlockMeta) -> Result<DatabaseChanges, substreams::errors::Error> {
-    // Initialize changes container
-    let mut tables = DatabaseChangeTables::new();
-
-    tables
-        .create_row("block", [("hash", bm.hash)])
-        .set("parent_hash", bm.parent_hash)
-        .set("block_height", bm.slot)
-        .set("transaction_count", bm.transaction_count);
-    Ok(tables.to_database_changes())
+    Ok(Swaps {swaps})
 }
