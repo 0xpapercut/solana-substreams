@@ -4,9 +4,9 @@ ENDPOINT ?= mainnet.sol.streamingfast.io:443
 build:
 	cargo build --target wasm32-unknown-unknown --release
 
-.PHONY: stream
-stream: build
-	substreams run -e $(ENDPOINT) substreams.yaml map_block -s 12292922 -t +10
+.PHONY: swaps
+swaps: build
+	substreams run -e $(ENDPOINT) substreams.yaml swaps -s $(START)
 
 .PHONY: protogen
 protogen:
