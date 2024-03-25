@@ -1,0 +1,47 @@
+syntax = "proto3";
+
+package raydium;
+
+message Events {
+    repeated Event events = 1;
+}
+
+message Event {
+    EventType type = 1;
+    string signer = 2;
+    string signature = 3;
+    string amm = 4;
+    uint64 slot = 5;
+    oneof event {
+        InitializeEvent initialize = 6;
+        DepositEvent deposit = 7;
+        WithdrawEvent withdraw = 8;
+        SwapEvent swap = 9;
+    }
+}
+
+enum EventType {
+    INITIALIZE = 0;
+    DEPOSIT = 1;
+    WITHDRAW = 2;
+    SWAP = 3;
+}
+
+message InitializeEvent {
+
+}
+
+message DepositEvent {
+
+}
+
+message WithdrawEvent {
+
+}
+
+message SwapEvent {
+    string tokenIn = 1;
+    string tokenOut = 2;
+    uint64 amountIn = 3;
+    uint64 amountOut = 4;
+}
