@@ -4,9 +4,9 @@ ENDPOINT ?= mainnet.sol.streamingfast.io:443
 build:
 	cargo build --target wasm32-unknown-unknown --release
 
-.PHONY: swaps
-swaps: build
-	substreams run -e $(ENDPOINT) substreams.yaml swaps -s $(START) -o jsonl
+.PHONY: stream
+debug: build
+	substreams run -e $(ENDPOINT) substreams.yaml raydium -s $(START) -t $(STOP)
 
 .PHONY: protogen
 protogen:
