@@ -24,7 +24,6 @@ arrayref = "0.3.7"
 bytemuck = "1.15.0"
 safe-transmute = "0.11.2"
 substreams-solana-program-instructions = "0.1.1"
-# raydium_amm = { path = "./raydium_amm" }
 
 [profile.release]
 lto = true
