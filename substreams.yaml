@@ -1,6 +1,6 @@
 specVersion: v0.1.0
 package:
-  name: 'substreams_raydium_events'
+  name: 'raydium_events'
   version: v1.0.0
 
 protobuf:
