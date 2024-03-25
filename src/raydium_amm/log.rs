@@ -1,36 +1,6 @@
-use arrform::{arrform, ArrForm};
 use serde::{Deserialize, Serialize};
-// use solana_program::{
-//     msg,
-//     // entrypoint::ProgramResult,
-//     pubkey::Pubkey,
-// };
-use substreams_solana_program_instructions::pubkey::Pubkey;
-
-use crate::pb::swap::Swap;
 
 pub const LOG_SIZE: usize = 256;
-
-#[macro_export]
-macro_rules! check_assert_eq {
-    ($input:expr, $expected:expr, $msg:expr, $err:expr) => {
-        if $input != $expected {
-            log_keys_mismatch(concat!($msg, " mismatch:"), $input, $expected);
-            return Err($err.into());
-        }
-    };
-}
-
-// pub fn log_keys_mismatch(msg: &str, input: Pubkey, expected: Pubkey) {
-//     msg!(arrform!(
-//         LOG_SIZE,
-//         "ray_log: {} input:{}, expected:{}",
-//         msg,
-//         input,
-//         expected
-//     )
-//     .as_str());
-// }
 
 /// LogType enum
 #[derive(Debug)]
