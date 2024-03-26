@@ -1,113 +1,182 @@
 mod pb;
+mod raydium_amm;
+mod spl_token;
+mod utils;
 
 use std::collections::HashMap;
 
-use substreams_solana::pb::sf::solana::r#type::v1::Block;
-use pb::swap::{Swap, Swaps};
+use substreams::errors::Error;
+use substreams_solana::pb::sf::solana::r#type::v1::InnerInstruction;
+use substreams_solana::pb::sf::solana::r#type::v1::{Block, InnerInstructions};
+
 use bs58;
 
-const RAYDIUM_LIQUIDITY_POOL: &str = "675kPX9MHTjS2zt1qfr1NYHuzeLXfQM9H24wFSUt1Mp8";
+use pb::raydium::event::Data;
+use pb::raydium::{Event, EventType, Events, SwapData};
+
+use raydium_amm::instruction::AmmInstruction;
+use spl_token::instruction::TokenInstruction;
+use crate::raydium_amm::RAYDIUM_LIQUIDITY_POOL;
+
 const SOL_MINT: &str = "So11111111111111111111111111111111111111112";
 
 #[substreams::handlers::map]
-fn swaps(block: Block) -> Result<Swaps, substreams::errors::Error> {
-    let mut swaps: Vec<Swap> = Vec::new();
+pub fn events(block: Block) -> Result<Events, Error> {
+    let mut events: Vec<Event> = Vec::new();
 
-    for successful_txn in block.transactions {
-        let accounts = successful_txn.resolved_accounts_as_strings();
-        let signature = bs58::encode(successful_txn.clone().transaction.unwrap().signatures[0].clone()).into_string();
-        let meta = successful_txn.clone().meta.unwrap();
+    for transaction in block.transactions {
+        let accounts = transaction.resolved_accounts_as_strings();
 
-        if meta.clone().err.is_some() {
+        let meta = transaction.meta.unwrap();
+        let txn = transaction.transaction.unwrap();
+
+        if let Some(err) = meta.err {
             continue;
         }
 
-        let mut mints: HashMap<String, String> = HashMap::new();
+        let signature = bs58::encode(&txn.signatures[0]).into_string();
+        let inner_instructions = &meta.inner_instructions;
+        let message = &txn.message.unwrap();
+
+        let mut owners: HashMap<String, String> = HashMap::new();
         for token_balance in meta.clone().pre_token_balances {
-            mints.insert(accounts[token_balance.account_index as usize].clone(), token_balance.mint);
+            owners.insert(
+                accounts[token_balance.account_index as usize].clone(),
+                token_balance.mint,
+            );
         }
 
-        for (index, instruction) in successful_txn.instructions().enumerate() {
-            let program_id = accounts[instruction.instruction.program_id_index as usize].as_str();
-            if program_id != RAYDIUM_LIQUIDITY_POOL {
+        let signer = accounts[0].clone(); // TODO: There might be more than one signer.
+
+        // Raydium was called directly
+        for (i, instruction) in message.instructions.iter().enumerate() {
+            if &accounts[instruction.program_id_index as usize] != RAYDIUM_LIQUIDITY_POOL {
                 continue;
             }
-            if instruction.instruction.accounts.len() <= 15 {
-                break;
-            }
-            let filtered = meta.inner_instructions.iter().find(|inner| inner.index == index as u32);
-            if filtered.is_none() {
-                break;
-            }
-            let inner_instructions = filtered.unwrap();
-            if inner_instructions.instructions.len() == 1 {
-                break;
-            }
 
-            let data = inner_instructions.instructions[0].data.clone();
-            if data.len() == 1 {
-                break; // remove later
+            match AmmInstruction::unpack(&instruction.data).unwrap() {
+                AmmInstruction::Deposit(deposit) => {}
+                AmmInstruction::Initialize2(initialize) => {}
+                AmmInstruction::SwapBaseIn(swap_base_in) => {
+                    let token_program_key = instruction.accounts[0];
+                    let instructions = &find_inner_instructions(inner_instructions, i as u32).unwrap().instructions;
+                    let transfer_instructions = find_swap_transfer_instructions(token_program_key, instructions, 0);
+
+                    let amm = &accounts[instruction.accounts[1] as usize];
+                    let slot = block.slot;
+
+                    let swap_event = get_swap_event(&transfer_instructions, &accounts, &owners, &signer, &signature, amm, slot);
+                    events.push(swap_event);
+                }
+                AmmInstruction::SwapBaseOut(swap_base_out) => {
+                    let token_program_key = instruction.accounts[0];
+                    let instructions = &find_inner_instructions(inner_instructions, i as u32).unwrap().instructions;
+                    let transfer_instructions = find_swap_transfer_instructions(token_program_key, instructions, 0);
+
+                    let amm = &accounts[instruction.accounts[1] as usize];
+                    let slot = block.slot;
+
+                    let swap_event = get_swap_event(&transfer_instructions, &accounts, &owners, &signer, &signature, amm, slot);
+                    events.push(swap_event);
+                }
+                _ => (),
             }
-            let amount_in = u64::from_le_bytes(data[1..9].try_into().expect("Slice with incorrect length."));
-
-            let data = inner_instructions.instructions[1].data.clone();
-            if data.len() == 1 {
-                break; // remove later
-            }
-            let amount_out = u64::from_le_bytes(data[1..9].try_into().expect("Slice with incorrect length."));
-
-            let token_in = mints.get(&accounts[inner_instructions.instructions[0].accounts[0] as usize]).unwrap_or(&SOL_MINT.to_string()).clone();
-            let token_out = mints.get(&accounts[inner_instructions.instructions[1].accounts[0] as usize]).unwrap_or(&SOL_MINT.to_string()).clone();
-
-            let amm = accounts[instruction.instruction.accounts[1] as usize].clone();
-
-            swaps.push(Swap {
-                signer: accounts[0].clone(),
-                token_in,
-                token_out,
-                amount_in,
-                amount_out,
-                signature: signature.clone(),
-                amm,
-                slot: block.slot,
-            });
         }
 
-        for inner_instructions in meta.clone().inner_instructions {
-            for (i, inner_instruction) in inner_instructions.instructions.clone().iter().enumerate() {
-                let program_id = &accounts[inner_instruction.program_id_index as usize];
-                if program_id != RAYDIUM_LIQUIDITY_POOL {
+        // Raydium was invoked from another program
+        for instructions in inner_instructions {
+            for (i, instruction) in instructions.instructions.iter().enumerate() {
+                if &accounts[instruction.program_id_index as usize] != RAYDIUM_LIQUIDITY_POOL {
                     continue;
                 }
 
-                let data = &inner_instructions.instructions.get(i + 1)
-                    .ok_or(substreams::errors::Error::msg(format!("{}:{} - Failed to process transaction {}", file!(), line!(), signature)))?
-                    .data;
-                let amount_in = u64::from_le_bytes(data[1..9].try_into().expect("Slice with incorrect length."));
-
-                let data = &inner_instructions.instructions.get(i + 2)
-                    .ok_or(substreams::errors::Error::msg(format!("{}:{} - Failed to process transaction {}", file!(), line!(), signature)))?
-                    .data;
-                let amount_out = u64::from_le_bytes(data[1..9].try_into().expect("Slice with incorrect length."));
-
-                let token_in = mints.get(&accounts[inner_instructions.instructions[i + 1].accounts[0] as usize]).unwrap_or(&SOL_MINT.to_string()).clone();
-                let token_out = mints.get(&accounts[inner_instructions.instructions[i + 2].accounts[0] as usize]).unwrap_or(&SOL_MINT.to_string()).clone();
-
-                let amm = accounts[inner_instruction.accounts[1] as usize].clone();
-
-                swaps.push(Swap {
-                    signer: accounts[0].clone(),
-                    token_in,
-                    token_out,
-                    amount_in,
-                    amount_out,
-                    signature: signature.clone(),
-                    amm,
-                    slot: block.slot,
-                })
+                match AmmInstruction::unpack(&instruction.data).unwrap() {
+                    AmmInstruction::Deposit(deposit) => {}
+                    AmmInstruction::Initialize2(initialize) => {}
+                    AmmInstruction::SwapBaseIn(swap_base_in) => {
+                        let amm = accounts[instruction.accounts[1] as usize].clone();
+                        let token_program_key = instruction.accounts[0];
+                        let transfer_instructions = &find_swap_transfer_instructions(token_program_key, &instructions.instructions, i);
+                        let swap_event = get_swap_event(transfer_instructions, &accounts, &owners, &signer, &signature, &amm, block.slot);
+                        events.push(swap_event);
+                    }
+                    AmmInstruction::SwapBaseOut(swap_base_out) => {
+                        let amm = accounts[instruction.accounts[1] as usize].clone();
+                        let token_program_key = instruction.accounts[0];
+                        let token_program_key = instruction.accounts[0];
+                        let transfer_instructions = &find_swap_transfer_instructions(token_program_key, &instructions.instructions, i);
+                        let swap_event = get_swap_event(transfer_instructions, &accounts, &owners, &signer, &signature, &amm, block.slot);
+                        events.push(swap_event);
+                    }
+                    _ => (),
+                }
             }
         }
     }
 
-    Ok(Swaps {swaps})
+    Ok(Events { events })
+}
+
+fn get_swap_event<'a>(
+    transfer_instructions: &[&InnerInstruction; 2],
+    accounts: &Vec<String>,
+    owners: &'a HashMap<String, String>,
+    signer: &String,
+    signature: &String,
+    amm: &String,
+    slot: u64,
+) -> Event {
+    let in_transfer_instruction = &transfer_instructions[0];
+    let out_transfer_instruction = &transfer_instructions[1];
+
+    let amount_in = match TokenInstruction::unpack(&in_transfer_instruction.data).unwrap() {
+        TokenInstruction::Transfer { amount } => amount,
+        _ => {
+            panic!();
+        }
+    };
+
+    let amount_out = match TokenInstruction::unpack(&out_transfer_instruction.data).unwrap() {
+        TokenInstruction::Transfer { amount } => amount,
+        _ => {
+            panic!();
+        }
+    };
+
+    let token_in = owners.get(&accounts[in_transfer_instruction.accounts[0] as usize]).unwrap_or(&SOL_MINT.to_string()).clone();
+    let token_out = owners.get(&accounts[out_transfer_instruction.accounts[0] as usize]).unwrap_or(&SOL_MINT.to_string()).clone();
+
+    let data = SwapData {
+        amount_in,
+        token_in,
+        amount_out,
+        token_out,
+    };
+    Event {
+        r#type: EventType::Swap.into(),
+        signer: signer.clone(),
+        signature: signature.clone(),
+        amm: amm.clone(),
+        slot,
+        data: Some(Data::Swap(data))
+    }
+}
+
+fn find_inner_instructions<'a>(
+    inner_instructions: &'a Vec<InnerInstructions>,
+    index: u32,
+) -> Option<&'a InnerInstructions> {
+    inner_instructions.iter().find(|inner| inner.index == index)
+}
+
+fn find_swap_transfer_instructions<'a>(token_program_key: u8, instructions: &'a Vec<InnerInstruction>, from: usize) -> [&'a InnerInstruction; 2] {
+    for (j, instruction) in instructions.iter().skip(from as usize).enumerate() {
+        if instruction.program_id_index == token_program_key as u32 {
+            return [
+                &instructions[from + j],
+                &instructions[from + j + 1],
+            ];
+        }
+    }
+    panic!();
 }
