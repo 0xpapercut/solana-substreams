@@ -1,12 +1,17 @@
 ENDPOINT ?= mainnet.sol.streamingfast.io:443
+START = 25645200
 
 .PHONY: build
 build:
 	cargo build --target wasm32-unknown-unknown --release
 
 .PHONY: stream
-debug: build
-	substreams run -e $(ENDPOINT) substreams.yaml raydium -s $(START) -t $(STOP)
+stream: build
+	if [ -n "$(STOP)" ]; then \
+		substreams run -e $(ENDPOINT) substreams.yaml events -s $(START) -t $(STOP); \
+	else \
+		substreams run -e $(ENDPOINT) substreams.yaml events -s $(START); \
+	fi
 
 .PHONY: protogen
 protogen:
