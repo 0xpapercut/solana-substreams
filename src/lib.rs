@@ -23,6 +23,46 @@ pub fn events(block: Block) -> Result<pb::raydium::Events, Error> {
     Ok(pb::raydium::Events { events: events })
 }
 
+pub fn get_token_events(block: Block) -> Vec<pb::raydium::Event> {
+    let mut events: Vec<pb::raydium::Event> = Vec::new();
+
+    for transaction in block.transactions {
+        let accounts = transaction.resolved_accounts_as_strings();
+
+        let meta = transaction.meta.unwrap();
+        let txn = transaction.transaction.unwrap();
+
+        if let Some(err) = meta.err {
+            continue;
+        }
+
+        let signature = bs58::encode(&txn.signatures[0]).into_string();
+        let inner_instructions = &meta.inner_instructions;
+        let message = &txn.message.unwrap();
+
+        let mut owners: HashMap<String, String> = HashMap::new();
+        for token_balance in meta.clone().pre_token_balances {
+            owners.insert(
+                accounts[token_balance.account_index as usize].clone(),
+                token_balance.mint
+            );
+        }
+
+        let signer = accounts[0].clone(); // TODO: There might be more than one signer.
+
+        // Token Program was called directly
+        // for (i, instruction) in message.instructions.iter().enumerate() {
+        //     if &accounts[instruction.program_id_index as usize] != RAYDIUM_LIQUIDITY_POOL {
+        //         continue;
+        //     }
+
+        //     match
+        // }
+    }
+
+    events
+}
+
 pub fn get_raydium_events(block: Block) -> Vec<pb::raydium::Event> {
     let mut events: Vec<pb::raydium::Event> = Vec::new();
 
@@ -67,9 +107,10 @@ pub fn get_raydium_events(block: Block) -> Vec<pb::raydium::Event> {
                     let amm = &accounts[instruction.accounts[1] as usize];
                     let slot = block.slot;
 
-                    let raydium_event = get_swap_event(&transfer_instructions, &accounts, &owners, &signer, &signature, amm, slot);
+                    let raydium_event = get_raydium_swap_event(&transfer_instructions, &accounts, &owners, amm);
                     events.push(pb::raydium::Event {
                         program: pb::raydium::Program::Raydium.into(),
+                        program_id: RAYDIUM_LIQUIDITY_POOL.to_string(),
                         signer: signer.clone(),
                         signature: signature.clone(),
                         slot,
@@ -84,9 +125,10 @@ pub fn get_raydium_events(block: Block) -> Vec<pb::raydium::Event> {
                     let amm = &accounts[instruction.accounts[1] as usize];
                     let slot = block.slot;
 
-                    let raydium_event = get_swap_event(&transfer_instructions, &accounts, &owners, &signer, &signature, amm, slot);
+                    let raydium_event = get_raydium_swap_event(&transfer_instructions, &accounts, &owners, amm);
                     events.push(pb::raydium::Event {
                         program: pb::raydium::Program::Raydium.into(),
+                        program_id: RAYDIUM_LIQUIDITY_POOL.to_string(),
                         signer: signer.clone(),
                         signature: signature.clone(),
                         slot,
@@ -112,9 +154,10 @@ pub fn get_raydium_events(block: Block) -> Vec<pb::raydium::Event> {
                         let token_program_key = instruction.accounts[0];
                         let transfer_instructions = &find_swap_transfer_instructions(token_program_key, &instructions.instructions, i);
 
-                        let raydium_event = get_swap_event(&transfer_instructions, &accounts, &owners, &signer, &signature, amm, block.slot);
+                        let raydium_event = get_raydium_swap_event(&transfer_instructions, &accounts, &owners, amm);
                         events.push(pb::raydium::Event {
                             program: pb::raydium::Program::Raydium.into(),
+                            program_id: RAYDIUM_LIQUIDITY_POOL.to_string(),
                             signer: signer.clone(),
                             signature: signature.clone(),
                             slot: block.slot,
@@ -124,13 +167,12 @@ pub fn get_raydium_events(block: Block) -> Vec<pb::raydium::Event> {
                     AmmInstruction::SwapBaseOut(swap_base_out) => {
                         let amm = &accounts[instruction.accounts[1] as usize].clone();
                         let token_program_key = instruction.accounts[0];
-                        let token_program_key = instruction.accounts[0];
-                        let transfer_instructions = &find_swap_transfer_instructions(token_program_key, &instructions.instructions, i);
                         let transfer_instructions = &find_swap_transfer_instructions(token_program_key, &instructions.instructions, i);
 
-                        let raydium_event = get_swap_event(&transfer_instructions, &accounts, &owners, &signer, &signature, amm, block.slot);
+                        let raydium_event = get_raydium_swap_event(&transfer_instructions, &accounts, &owners, amm);
                         events.push(pb::raydium::Event {
                             program: pb::raydium::Program::Raydium.into(),
+                            program_id: RAYDIUM_LIQUIDITY_POOL.to_string(),
                             signer: signer.clone(),
                             signature: signature.clone(),
                             slot: block.slot,
@@ -146,15 +188,25 @@ pub fn get_raydium_events(block: Block) -> Vec<pb::raydium::Event> {
     events
 }
 
-fn get_swap_event<'a>(
+fn get_raydium_swap_event<'a>(
     transfer_instructions: &[&InnerInstruction; 2],
     accounts: &Vec<String>,
     owners: &'a HashMap<String, String>,
-    signer: &String,
-    signature: &String,
     amm: &String,
-    slot: u64,
 ) -> pb::raydium::RaydiumEvent {
+    let data = get_swap_data(transfer_instructions, accounts, owners);
+    pb::raydium::RaydiumEvent {
+        r#type: pb::raydium::RaydiumEventType::Swap.into(),
+        amm: amm.clone(),
+        data: Some(pb::raydium::raydium_event::Data::Swap(data))
+    }
+}
+
+fn get_swap_data<'a>(
+    transfer_instructions: &[&InnerInstruction; 2],
+    accounts: &Vec<String>,
+    owners: &'a HashMap<String, String>,
+) -> pb::raydium::RaydiumSwapData {
     let in_transfer_instruction = &transfer_instructions[0];
     let out_transfer_instruction = &transfer_instructions[1];
 
@@ -175,16 +227,11 @@ fn get_swap_event<'a>(
     let token_in = owners.get(&accounts[in_transfer_instruction.accounts[0] as usize]).unwrap_or(&SOL_MINT.to_string()).clone();
     let token_out = owners.get(&accounts[out_transfer_instruction.accounts[0] as usize]).unwrap_or(&SOL_MINT.to_string()).clone();
 
-    let data = pb::raydium::RaydiumSwapData {
+    pb::raydium::RaydiumSwapData {
         amount_in,
         token_in,
         amount_out,
         token_out,
-    };
-    pb::raydium::RaydiumEvent {
-        r#type: pb::raydium::RaydiumEventType::Swap.into(),
-        amm: amm.clone(),
-        data: Some(pb::raydium::raydium_event::Data::Swap(data))
     }
 }
 
