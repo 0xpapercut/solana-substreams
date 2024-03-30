@@ -8,27 +8,29 @@ message Events {
 
 message Event {
     Program program = 1;
-    string signer = 2;
-    string signature = 3;
-    uint64 slot = 4;
+    string program_id = 2;
+    string signer = 3;
+    // string parent_program = 4;
+    // string parent_program_id = 5;
+    string signature = 6;
+    uint64 slot = 7;
     oneof event {
-        RaydiumEvent raydium = 5;
+        RaydiumEvent raydium = 8;
+        TokenEvent token = 9;
     }
 }
 
 enum Program {
     RAYDIUM = 0;
     TOKEN = 1;
+    UNKNOWN = 2;
 }
 
 // Raydium
 
 message RaydiumEvent {
     RaydiumEventType type = 1;
-    string signer = 2;
-    string signature = 3;
     string amm = 4;
-    uint64 slot = 5;
     oneof data {
         RaydiumInitializeData initialize = 6;
         RaydiumDepositData deposit = 7;
@@ -64,3 +66,51 @@ message RaydiumSwapData {
 }
 
 // Token
+
+message TokenEvent {
+    TokenEventType type = 1;
+    oneof data {
+        TokenTransferData transfer = 2;
+    }
+}
+
+enum TokenEventType {
+    INITIALIZE_MINT = 0;
+    INITIALIZE_ACCOUNT = 1;
+    INITIALIZE_MULTISIG = 2;
+    TRANSFER = 3;
+    APPROVE = 4;
+    REVOKE = 5;
+    SET_AUTHORITY = 6;
+    MINT_TO = 7;
+    BURN = 8;
+    CLOSE_ACCOUNT = 9;
+    FREEZE_ACCOUNT = 10;
+    THAW_ACCOUNT = 11;
+    TRANSFER_CHECKED = 12;
+    APPROVE_CHECKED = 13;
+    MINT_TO_CHECKED = 14;
+    BURN_CHECKED = 15;
+    INITIALIZE_ACCOUNT_2 = 16;
+    SYNC_NATIVE = 17;
+    INITIALIZE_ACCOUNT_3 = 18;
+    INITIALIZE_MULTISIG_2 = 19;
+    INITIALIZE_MINT_2 = 20;
+    GET_ACCOUNT_DATA_SIZE = 21;
+    INITIALIZE_IMMUTABLE_OWNER = 22;
+    AMOUNT_TO_UI_AMOUNT = 23;
+    UI_AMOUNT_TO_AMOUNT = 24;
+}
+
+message TokenInitializeData {
+
+}
+
+message TokenTransferData {
+    string source = 1;
+    string destination = 2;
+    string mint = 3;
+    string source_token_account = 4;
+    string destination_token_account = 5;
+}
+
