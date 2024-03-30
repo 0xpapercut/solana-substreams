@@ -19,7 +19,17 @@ const SOL_MINT: &str = "So11111111111111111111111111111111111111112";
 
 #[substreams::handlers::map]
 pub fn events(block: Block) -> Result<pb::raydium::Events, Error> {
-    Ok(pb::raydium::Events { events: get_raydium_events(block) })
+    let events = get_raydium_events(block);
+    let events = events.iter().map(|event| {
+        pb::raydium::Event {
+            program: pb::raydium::Program::Raydium.into(),
+            signer: event.signer.clone(),
+            signature: event.signature.clone(),
+            slot: event.slot,
+            event: Some(pb::raydium::event::Event::Raydium(event.clone()))
+        }
+    }).collect();
+    Ok(pb::raydium::Events { events: events })
 }
 
 pub fn get_raydium_events(block: Block) -> Vec<pb::raydium::RaydiumEvent> {
