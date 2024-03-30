@@ -3,12 +3,25 @@ syntax = "proto3";
 package raydium;
 
 message Events {
-    repeated RaydiumEvent events = 1;
+    repeated Event events = 1;
 }
 
-// message Event {
-//     E
-// }
+message Event {
+    Program program = 1;
+    string signer = 2;
+    string signature = 3;
+    uint64 slot = 4;
+    oneof event {
+        RaydiumEvent raydium = 5;
+    }
+}
+
+enum Program {
+    RAYDIUM = 0;
+    TOKEN = 1;
+}
+
+// Raydium
 
 message RaydiumEvent {
     RaydiumEventType type = 1;
@@ -49,3 +62,5 @@ message RaydiumSwapData {
     uint64 amountIn = 3;
     uint64 amountOut = 4;
 }
+
+// Token
