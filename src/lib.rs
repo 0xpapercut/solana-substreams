@@ -20,20 +20,11 @@ const SOL_MINT: &str = "So11111111111111111111111111111111111111112";
 #[substreams::handlers::map]
 pub fn events(block: Block) -> Result<pb::raydium::Events, Error> {
     let events = get_raydium_events(block);
-    let events = events.iter().map(|event| {
-        pb::raydium::Event {
-            program: pb::raydium::Program::Raydium.into(),
-            signer: event.signer.clone(),
-            signature: event.signature.clone(),
-            slot: event.slot,
-            event: Some(pb::raydium::event::Event::Raydium(event.clone()))
-        }
-    }).collect();
     Ok(pb::raydium::Events { events: events })
 }
 
-pub fn get_raydium_events(block: Block) -> Vec<pb::raydium::RaydiumEvent> {
-    let mut events: Vec<pb::raydium::RaydiumEvent> = Vec::new();
+pub fn get_raydium_events(block: Block) -> Vec<pb::raydium::Event> {
+    let mut events: Vec<pb::raydium::Event> = Vec::new();
 
     for transaction in block.transactions {
         let accounts = transaction.resolved_accounts_as_strings();
@@ -76,8 +67,14 @@ pub fn get_raydium_events(block: Block) -> Vec<pb::raydium::RaydiumEvent> {
                     let amm = &accounts[instruction.accounts[1] as usize];
                     let slot = block.slot;
 
-                    let swap_event = get_swap_event(&transfer_instructions, &accounts, &owners, &signer, &signature, amm, slot);
-                    events.push(swap_event);
+                    let raydium_event = get_swap_event(&transfer_instructions, &accounts, &owners, &signer, &signature, amm, slot);
+                    events.push(pb::raydium::Event {
+                        program: pb::raydium::Program::Raydium.into(),
+                        signer: signer.clone(),
+                        signature: signature.clone(),
+                        slot,
+                        event: Some(pb::raydium::event::Event::Raydium(raydium_event))
+                    });
                 }
                 AmmInstruction::SwapBaseOut(swap_base_out) => {
                     let token_program_key = instruction.accounts[0];
@@ -87,8 +84,14 @@ pub fn get_raydium_events(block: Block) -> Vec<pb::raydium::RaydiumEvent> {
                     let amm = &accounts[instruction.accounts[1] as usize];
                     let slot = block.slot;
 
-                    let swap_event = get_swap_event(&transfer_instructions, &accounts, &owners, &signer, &signature, amm, slot);
-                    events.push(swap_event);
+                    let raydium_event = get_swap_event(&transfer_instructions, &accounts, &owners, &signer, &signature, amm, slot);
+                    events.push(pb::raydium::Event {
+                        program: pb::raydium::Program::Raydium.into(),
+                        signer: signer.clone(),
+                        signature: signature.clone(),
+                        slot,
+                        event: Some(pb::raydium::event::Event::Raydium(raydium_event))
+                    });
                 }
                 _ => (),
             }
@@ -105,19 +108,34 @@ pub fn get_raydium_events(block: Block) -> Vec<pb::raydium::RaydiumEvent> {
                     AmmInstruction::Deposit(deposit) => {}
                     AmmInstruction::Initialize2(initialize) => {}
                     AmmInstruction::SwapBaseIn(swap_base_in) => {
-                        let amm = accounts[instruction.accounts[1] as usize].clone();
+                        let amm = &accounts[instruction.accounts[1] as usize].clone();
                         let token_program_key = instruction.accounts[0];
                         let transfer_instructions = &find_swap_transfer_instructions(token_program_key, &instructions.instructions, i);
-                        let swap_event = get_swap_event(transfer_instructions, &accounts, &owners, &signer, &signature, &amm, block.slot);
-                        events.push(swap_event);
+
+                        let raydium_event = get_swap_event(&transfer_instructions, &accounts, &owners, &signer, &signature, amm, block.slot);
+                        events.push(pb::raydium::Event {
+                            program: pb::raydium::Program::Raydium.into(),
+                            signer: signer.clone(),
+                            signature: signature.clone(),
+                            slot: block.slot,
+                            event: Some(pb::raydium::event::Event::Raydium(raydium_event))
+                        });
                     }
                     AmmInstruction::SwapBaseOut(swap_base_out) => {
-                        let amm = accounts[instruction.accounts[1] as usize].clone();
+                        let amm = &accounts[instruction.accounts[1] as usize].clone();
                         let token_program_key = instruction.accounts[0];
                         let token_program_key = instruction.accounts[0];
                         let transfer_instructions = &find_swap_transfer_instructions(token_program_key, &instructions.instructions, i);
-                        let swap_event = get_swap_event(transfer_instructions, &accounts, &owners, &signer, &signature, &amm, block.slot);
-                        events.push(swap_event);
+                        let transfer_instructions = &find_swap_transfer_instructions(token_program_key, &instructions.instructions, i);
+
+                        let raydium_event = get_swap_event(&transfer_instructions, &accounts, &owners, &signer, &signature, amm, block.slot);
+                        events.push(pb::raydium::Event {
+                            program: pb::raydium::Program::Raydium.into(),
+                            signer: signer.clone(),
+                            signature: signature.clone(),
+                            slot: block.slot,
+                            event: Some(pb::raydium::event::Event::Raydium(raydium_event))
+                        });
                     }
                     _ => (),
                 }
@@ -165,10 +183,7 @@ fn get_swap_event<'a>(
     };
     pb::raydium::RaydiumEvent {
         r#type: pb::raydium::RaydiumEventType::Swap.into(),
-        signer: signer.clone(),
-        signature: signature.clone(),
         amm: amm.clone(),
-        slot,
         data: Some(pb::raydium::raydium_event::Data::Swap(data))
     }
 }
