@@ -1,6 +1,6 @@
 // @generated
-// @@protoc_insertion_point(attribute:swap)
-pub mod swap {
-    include!("swap.rs");
-    // @@protoc_insertion_point(swap)
+// @@protoc_insertion_point(attribute:event)
+pub mod event {
+    include!("event.rs");
+    // @@protoc_insertion_point(event)
 }
