@@ -1,3 +1,0 @@
-pub mod instruction;
-
-pub const SOL_MINT: &str = "So11111111111111111111111111111111111111112";

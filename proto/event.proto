@@ -1,0 +1,53 @@
+syntax = "proto3";
+
+package event;
+
+message Events {
+    repeated Event events = 1;
+}
+
+message Event {
+    string signer = 1;
+    string signature = 2;
+    uint64 slot = 3;
+    string amm = 4;
+    EventType type = 5;
+    oneof data {
+        InitializeData initialize = 6;
+        DepositData deposit = 7;
+        WithdrawData withdraw = 8;
+        SwapData swap = 9;
+    }
+}
+
+enum EventType {
+    INITIALIZE = 0;
+    DEPOSIT = 1;
+    WITHDRAW = 2;
+    SWAP = 3;
+}
+
+message InitializeData {
+    uint64 pcInitAmount = 1;
+    uint64 coinInitAmount = 2;
+    uint64 lpInitAmount = 3;
+}
+
+message DepositData {
+    uint64 pcAmount = 1;
+    uint64 coinAmount = 2;
+    uint64 lpAmount = 3;
+}
+
+message WithdrawData {
+    uint64 pcAmount = 1;
+    uint64 coinAmount = 2;
+    uint64 lpAmount = 3;
+}
+
+message SwapData {
+    string mintIn = 1;
+    string mintOut = 2;
+    uint64 amountIn = 3;
+    uint64 amountOut = 4;
+}
