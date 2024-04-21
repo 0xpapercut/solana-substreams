@@ -6,20 +6,17 @@ mod transaction;
 
 use std::collections::HashMap;
 
-use pb::event::{Event, RaydiumEvent};
 use substreams::errors::Error;
-use substreams::log::println;
 use substreams_solana::pb::sf::solana::r#type::v1::{ConfirmedTransaction, InnerInstruction};
-use substreams_solana::pb::sf::solana::r#type::v1::{Block, InnerInstructions};
+use substreams_solana::pb::sf::solana::r#type::v1::Block;
 
 use bs58;
 
 use raydium_amm::instruction::AmmInstruction;
 use spl_token::instruction::TokenInstruction;
-use substreams_solana_program_instructions::pubkey;
 use utils::{get_token_accounts, TokenAccount};
 use crate::raydium_amm::RAYDIUM_LIQUIDITY_POOL;
-use crate::spl_token::{SOL_MINT, TOKEN_PROGRAM};
+use crate::spl_token::TOKEN_PROGRAM;
 
 #[substreams::handlers::map]
 pub fn events(block: Block) -> Result<pb::event::Events, Error> {
@@ -54,6 +51,8 @@ fn parse_transaction(transaction: &ConfirmedTransaction, slot: u64) -> Vec<pb::e
     let message = txn.message.as_ref().unwrap();
     let signature = bs58::encode(&txn.signatures[0]).into_string();
 
+    substreams::log::println(format!("{}", signature));
+
     let token_accounts = get_token_accounts(transaction);
 
     // Raydium was called directly
@@ -61,28 +60,35 @@ fn parse_transaction(transaction: &ConfirmedTransaction, slot: u64) -> Vec<pb::e
         if accounts[instruction.program_id_index as usize] != RAYDIUM_LIQUIDITY_POOL {
             continue;
         }
-        let instructions = &meta.inner_instructions.iter().find(|x| x.index == i as u32).unwrap().instructions;
+        let instructions = &meta.inner_instructions.iter().find(|x| x.index == i as u32).map_or_else(Vec::new, |x| x.instructions.clone());
         let inner_instructions = fetch_inner_instructions(&instructions, None);
-        let event = parse_event(&instruction.data, &instruction.accounts, inner_instructions, &accounts, &token_accounts).unwrap();
-        events.push(pb::event::Event {
-            event: Some(event),
-            signer: accounts[0].clone(),
-            signature: signature.clone(),
-            slot,
-        });
+        let event = parse_event(&instruction.data, &instruction.accounts, inner_instructions, &accounts, &token_accounts);
+        if event.is_ok() {
+            events.push(pb::event::Event {
+                event: Some(event.unwrap()),
+                signer: accounts[0].clone(),
+                signature: signature.clone(),
+                slot,
+            });
+        }
     }
 
     // Raydium was invoked from another program
     for instructions in &meta.inner_instructions {
         for (i, instruction) in instructions.instructions.iter().enumerate() {
+            if accounts[instruction.program_id_index as usize] != RAYDIUM_LIQUIDITY_POOL {
+                continue;
+            }
             let inner_instructions = fetch_inner_instructions(&instructions.instructions, Some(i));
-            let event = parse_event(&instruction.data, &instruction.accounts, inner_instructions, &accounts, &token_accounts).unwrap();
-            events.push(pb::event::Event {
-                event: Some(event),
-                signer: accounts[0].clone(),
-                signature: signature.clone(),
-                slot,
-            });
+            let event = parse_event(&instruction.data, &instruction.accounts, inner_instructions, &accounts, &token_accounts);
+            if event.is_ok() {
+                events.push(pb::event::Event {
+                    event: Some(event.unwrap()),
+                    signer: accounts[0].clone(),
+                    signature: signature.clone(),
+                    slot,
+                });
+            }
         }
     }
 
@@ -112,7 +118,7 @@ fn parse_event(
     inner_instructions: Vec<&InnerInstruction>,
     accounts: &Vec<String>,
     token_accounts: &HashMap<String, TokenAccount>
-) -> Result<RaydiumEvent, &'static str> {
+) -> Result<pb::event::RaydiumEvent, &'static str> {
     let unpacked = AmmInstruction::unpack(&instruction_data);
     if unpacked.is_err() { return Err("Not a Raydium event."); }
 
@@ -129,6 +135,8 @@ fn parse_swap_event(
     accounts: &Vec<String>,
     token_accounts: &HashMap<String, TokenAccount>,
 ) -> pb::event::RaydiumEvent {
+    let inner_instructions: Vec<_> = inner_instructions.iter().filter(|x| accounts[x.program_id_index as usize] == TOKEN_PROGRAM).collect();
+
     let amm = accounts[instruction_accounts[1] as usize].clone();
 
     let transfer_in = parse_token_transfer(inner_instructions[0], accounts).unwrap();
@@ -197,50 +205,3 @@ fn parse_token_transfer(
         _ => Err("Not an SplToken transfer")
     }
 }
-
-// fn get_raydium_swap_event<'a>(
-//     transfer_instructions: &[&InnerInstruction; 2],
-//     accounts: &Vec<String>,
-//     owners: &'a HashMap<String, String>,
-//     amm: &String,
-// ) -> pb::raydium::RaydiumEvent {
-//     let data = get_swap_data(transfer_instructions, accounts, owners);
-//     pb::raydium::RaydiumEvent {
-//         r#type: pb::raydium::RaydiumEventType::Swap.into(),
-//         amm: amm.clone(),
-//         data: Some(pb::raydium::raydium_event::Data::Swap(data))
-//     }
-// }
-
-// fn get_swap_data<'a>(
-//     transfer_instructions: &[&InnerInstruction; 2],
-//     accounts: &Vec<String>,
-//     owners: &'a HashMap<String, String>,
-// ) -> pb::raydium::RaydiumSwapData {
-//     let in_transfer_instruction = &transfer_instructions[0];
-//     let out_transfer_instruction = &transfer_instructions[1];
-
-//     let amount_in = match TokenInstruction::unpack(&in_transfer_instruction.data).unwrap() {
-//         TokenInstruction::Transfer { amount } => amount,
-//         _ => {
-//             panic!();
-//         }
-//     };
-
-//     let amount_out = match TokenInstruction::unpack(&out_transfer_instruction.data).unwrap() {
-//         TokenInstruction::Transfer { amount } => amount,
-//         _ => {
-//             panic!();
-//         }
-//     };
-
-//     let token_in = owners.get(&accounts[in_transfer_instruction.accounts[0] as usize]).unwrap_or(&SOL_MINT.to_string()).clone();
-//     let token_out = owners.get(&accounts[out_transfer_instruction.accounts[0] as usize]).unwrap_or(&SOL_MINT.to_string()).clone();
-
-//     pb::raydium::RaydiumSwapData {
-//         amount_in,
-//         token_in,
-//         amount_out,
-//         token_out,
-//     }
-// }
