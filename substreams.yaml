@@ -5,7 +5,7 @@ package:
 
 protobuf:
   files:
-    - raydium.proto
+    - event.proto
   importPaths:
     - ./proto
 
@@ -20,6 +20,6 @@ modules:
     inputs:
       - source: sf.solana.type.v1.Block
     output:
-      type: proto:raydium.Events
+      type: proto:event.Events
 
 network: solana
