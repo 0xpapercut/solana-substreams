@@ -10,13 +10,17 @@ message Event {
     string signer = 1;
     string signature = 2;
     uint64 slot = 3;
-    string amm = 4;
-    EventType type = 5;
+    RaydiumEvent event = 4;
+}
+
+message RaydiumEvent {
+    string amm = 1;
+    EventType type = 2;
     oneof data {
-        InitializeData initialize = 6;
-        DepositData deposit = 7;
-        WithdrawData withdraw = 8;
-        SwapData swap = 9;
+        InitializeData initialize = 3;
+        DepositData deposit = 4;
+        WithdrawData withdraw = 5;
+        SwapData swap = 6;
     }
 }
 
