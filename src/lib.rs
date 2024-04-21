@@ -50,8 +50,6 @@ fn parse_transaction(transaction: &ConfirmedTransaction, slot: u64) -> Vec<pb::e
     let message = txn.message.as_ref().unwrap();
     let signature = bs58::encode(&txn.signatures[0]).into_string();
 
-    substreams::log::println(format!("{}", signature));
-
     let token_accounts = get_token_accounts(transaction);
 
     // Raydium was called directly
