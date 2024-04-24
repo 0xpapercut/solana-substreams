@@ -1,6 +1,3 @@
-[workspace]
-# members = ["raydium-amm/program"]
-
 [package]
 name = "substreams-solana-quickstart"
 version = "1.0.0"
@@ -25,6 +22,7 @@ bytemuck = "1.15.0"
 safe-transmute = "0.11.2"
 substreams-solana-program-instructions = "0.1.1"
 num-derive = "0.4.2"
+substreams-solana-structured-instructions = { git = "https://github.com/0xpapercut/substreams-solana-structured-instructions", branch = "main" }
 
 [profile.release]
 lto = true
