@@ -25,11 +25,6 @@ pub fn events(block: Block) -> Result<pb::event::Events, Error> {
     Ok(pb::event::Events { events: events })
 }
 
-pub struct TokenAccountInfo {
-    pub owner: String,
-    pub mint: String
-}
-
 pub fn parse_block(block: Block) -> Vec<pb::event::Event> {
     let mut events: Vec<pb::event::Event> = Vec::new();
     for transaction in block.transactions {
