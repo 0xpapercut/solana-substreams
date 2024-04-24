@@ -2,8 +2,9 @@
 Stream Raydium events with [substreams](https://substreams.streamingfast.io).
 
 ## Usage
-First, setup your Substreams API token. This can be done using `token.sh`. Setup the environment variable `STREAMINGFAST_KEY` (you can find it on the Streamingfast dashboard), and run `. ./token.sh`.
+1. Setup the environment variable `STREAMINGFAST_KEY` with an [API key](https://app.streamingfast.io/keys).
+2. Run `. ./token.sh`
+3. Start streaming with `make stream START=<slot>`. You can verify the most recent slot on the [Solana Explorer](https://explorer.solana.com).
 
-Finally, to start the stream, run `make stream START=<slot>`. You might wanna test it out with recent slots first.
-
-Note that currently only swap transactions are parsed.
+## Limitations
+Currently only swap transactions are parsed. Thus the stream does not register `Initialize`, `Deposit` or `Withdraw` events. Feel free to send a PR though :).
