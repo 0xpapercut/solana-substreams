@@ -1,21 +1,23 @@
-mod pb;
-mod raydium_amm;
-mod spl_token;
-mod utils;
-
 use std::collections::HashMap;
-
-use substreams::errors::Error;
-use substreams_solana::pb::sf::solana::r#type::v1::{ConfirmedTransaction, InnerInstruction};
-use substreams_solana::pb::sf::solana::r#type::v1::Block;
-
 use bs58;
 
+use substreams::errors::Error;
+use substreams_solana::pb::sf::solana::r#type::v1::ConfirmedTransaction;
+use substreams_solana::pb::sf::solana::r#type::v1::Block;
+use substreams_solana_structured_instructions::{get_structured_instructions, StructuredInstruction};
+
+mod raydium_amm;
 use raydium_amm::instruction::AmmInstruction;
+use raydium_amm::RAYDIUM_LIQUIDITY_POOL;
+
+mod spl_token;
 use spl_token::instruction::TokenInstruction;
+use spl_token::TOKEN_PROGRAM;
+
+mod utils;
 use utils::{get_token_accounts, TokenAccount};
-use crate::raydium_amm::RAYDIUM_LIQUIDITY_POOL;
-use crate::spl_token::TOKEN_PROGRAM;
+
+mod pb;
 
 #[substreams::handlers::map]
 pub fn events(block: Block) -> Result<pb::event::Events, Error> {
@@ -39,30 +41,21 @@ pub fn parse_block(block: Block) -> Vec<pb::event::Event> {
 fn parse_transaction(transaction: &ConfirmedTransaction, slot: u64) -> Vec<pb::event::Event> {
     let mut events: Vec<pb::event::Event> = Vec::new();
 
+    let instructions = get_structured_instructions(transaction);
     let accounts = transaction.resolved_accounts_as_strings();
-    let meta = transaction.meta.as_ref().unwrap();
     let txn = transaction.transaction.as_ref().unwrap();
+    let meta = transaction.meta.as_ref().unwrap();
+    let token_accounts = get_token_accounts(transaction);
+    let signature = bs58::encode(&txn.signatures[0]).into_string();
 
-    if let Some(err) = meta.err.as_ref() {
+    if let Some(_) = meta.err.as_ref() {
         return Vec::new();
     }
 
-    let message = txn.message.as_ref().unwrap();
-    let signature = bs58::encode(&txn.signatures[0]).into_string();
-
-    let token_accounts = get_token_accounts(transaction);
-
-    // Raydium was called directly
-    for (i, instruction) in message.instructions.iter().enumerate() {
-        if accounts[instruction.program_id_index as usize] != RAYDIUM_LIQUIDITY_POOL {
-            continue;
-        }
-        let instructions = &meta.inner_instructions.iter().find(|x| x.index == i as u32).map_or_else(Vec::new, |x| x.instructions.clone());
-        let inner_instructions = fetch_inner_instructions(&instructions, None);
-        let event = parse_event(&instruction.data, &instruction.accounts, inner_instructions, &accounts, &token_accounts);
-        if event.is_ok() {
+    for instr in instructions {
+        for event in parse_instruction(&instr, &accounts, &token_accounts) {
             events.push(pb::event::Event {
-                event: Some(event.unwrap()),
+                event: Some(event),
                 signer: accounts[0].clone(),
                 signature: signature.clone(),
                 slot,
@@ -70,76 +63,43 @@ fn parse_transaction(transaction: &ConfirmedTransaction, slot: u64) -> Vec<pb::e
         }
     }
 
-    // Raydium was invoked from another program
-    for instructions in &meta.inner_instructions {
-        for (i, instruction) in instructions.instructions.iter().enumerate() {
-            if accounts[instruction.program_id_index as usize] != RAYDIUM_LIQUIDITY_POOL {
-                continue;
-            }
-            let inner_instructions = fetch_inner_instructions(&instructions.instructions, Some(i));
-            let event = parse_event(&instruction.data, &instruction.accounts, inner_instructions, &accounts, &token_accounts);
-            if event.is_ok() {
-                events.push(pb::event::Event {
-                    event: Some(event.unwrap()),
-                    signer: accounts[0].clone(),
-                    signature: signature.clone(),
-                    slot,
-                });
-            }
-        }
-    }
-
     events
 }
 
-fn fetch_inner_instructions(instructions: &Vec<InnerInstruction>, index: Option<usize>) -> Vec<&InnerInstruction> {
-    if let Some(idx) = index {
-        let stack_height = instructions[idx].stack_height();
-        let mut inner_instructions: Vec<&InnerInstruction> = Vec::new();
-        for instruction in instructions[idx + 1..].iter() {
-            if instruction.stack_height() == stack_height + 1 {
-                inner_instructions.push(instruction);
-            } else if instruction.stack_height() == stack_height {
-                break;
-            }
+fn parse_instruction(instruction: &StructuredInstruction, accounts: &Vec<String>, token_accounts: &HashMap<String, TokenAccount>) -> Vec<pb::event::RaydiumEvent> {
+    let mut events: Vec<pb::event::RaydiumEvent> = Vec::new();
+    if accounts[instruction.program_id_index as usize] != RAYDIUM_LIQUIDITY_POOL {
+        for instr in &instruction.inner_instructions {
+            events.extend(parse_instruction(instr, accounts, token_accounts));
         }
-        inner_instructions
-    } else {
-        instructions.iter().filter(|x| x.stack_height() == 2).collect()
+    } else if let Ok(event) = parse_raydium_instruction(instruction, accounts, token_accounts) {
+        events.push(event);
+    }
+    events
+}
+
+fn parse_raydium_instruction(instruction: &StructuredInstruction, accounts: &Vec<String>, token_accounts: &HashMap<String, TokenAccount>) -> Result<pb::event::RaydiumEvent, &'static str> {
+    match AmmInstruction::unpack(&instruction.data) {
+        Ok(unpacked) => match unpacked {
+            AmmInstruction::SwapBaseIn(_) => Ok(parse_raydium_swap_instruction(instruction, accounts, token_accounts)),
+            AmmInstruction::SwapBaseOut(_) => Ok(parse_raydium_swap_instruction(instruction, accounts, token_accounts)),
+            _ => Err("Unsupported."),
+        },
+        Err(_) => Err("Not a Raydium event.")
     }
 }
 
-fn parse_event(
-    instruction_data: &Vec<u8>,
-    instructions_accounts: &Vec<u8>,
-    inner_instructions: Vec<&InnerInstruction>,
-    accounts: &Vec<String>,
-    token_accounts: &HashMap<String, TokenAccount>
-) -> Result<pb::event::RaydiumEvent, &'static str> {
-    let unpacked = AmmInstruction::unpack(&instruction_data);
-    if unpacked.is_err() { return Err("Not a Raydium event."); }
-
-    match unpacked.unwrap() {
-        AmmInstruction::SwapBaseIn(swap_base_in) => Ok(parse_swap_event(instructions_accounts, inner_instructions, accounts, token_accounts)),
-        AmmInstruction::SwapBaseOut(swap_base_out) => Ok(parse_swap_event(instructions_accounts, inner_instructions, accounts, token_accounts)),
-        _ => Err("Unsupported Raydium event."),
-    }
-}
-
-fn parse_swap_event(
-    instruction_accounts: &Vec<u8>,
-    inner_instructions: Vec<&InnerInstruction>,
-    accounts: &Vec<String>,
-    token_accounts: &HashMap<String, TokenAccount>,
-) -> pb::event::RaydiumEvent {
-    let inner_instructions: Vec<_> = inner_instructions.iter().filter(|x| accounts[x.program_id_index as usize] == TOKEN_PROGRAM).collect();
-
-    let amm = accounts[instruction_accounts[1] as usize].clone();
-
-    let transfer_in = parse_token_transfer(inner_instructions[0], accounts).unwrap();
-    let transfer_out = parse_token_transfer(inner_instructions[1], accounts).unwrap();
+fn parse_raydium_swap_instruction(instruction: &StructuredInstruction, accounts: &Vec<String>, token_accounts: &HashMap<String, TokenAccount>) -> pb::event::RaydiumEvent {
+    let amm = accounts[instruction.accounts[1] as usize].clone();
+    
+    // Sometimes OpenBook is also invoked, so we filter the inner instructions
+    let inner_instructions: Vec<_> = instruction.inner_instructions.iter().filter(|x| accounts[x.program_id_index as usize] == TOKEN_PROGRAM).collect();
+    let transfer_in = parse_token_transfer_instruction(inner_instructions[0], accounts);
+    let transfer_out = parse_token_transfer_instruction(inner_instructions[1], accounts);
 
     let amount_in = transfer_in.amount;
+    let amount_out = transfer_out.amount;
+
     let mint_in: String;
     if let Some(token_account) = token_accounts.get(&transfer_in.source) {
         mint_in = token_account.mint.clone()
@@ -148,25 +108,47 @@ fn parse_swap_event(
         mint_in = token_account.mint.clone();
     }
 
-    let amount_out = transfer_out.amount;
     let mint_out: String;
     if let Some(token_account) = token_accounts.get(&transfer_out.source) {
-        mint_out = token_account.mint.clone();
+        mint_out = token_account.mint.clone()
     } else {
         let token_account = token_accounts.get(&transfer_out.destination).unwrap();
         mint_out = token_account.mint.clone();
     }
 
-    let data = pb::event::SwapData {
-        amount_in,
-        amount_out,
-        mint_in,
-        mint_out
-    };
     pb::event::RaydiumEvent {
         amm,
         r#type: pb::event::EventType::Swap.into(),
-        data: Some(pb::event::raydium_event::Data::Swap(data))
+        data: Some(pb::event::raydium_event::Data::Swap(pb::event::SwapData {
+            mint_in,
+            mint_out,
+            amount_in,
+            amount_out,
+        })),
+    }
+}
+
+fn parse_token_transfer_instruction(instruction: &StructuredInstruction, accounts: &Vec<String>) -> TokenTransfer {
+    match TokenInstruction::unpack(&instruction.data).unwrap() {
+        TokenInstruction::Transfer { amount } => {
+            let source = accounts[instruction.accounts[0] as usize].clone();
+            let destination = accounts[instruction.accounts[1] as usize].clone();
+            TokenTransfer {
+                amount,
+                source,
+                destination,
+            }
+        },
+        TokenInstruction::TransferChecked { amount, decimals: _ } => {
+            let source = accounts[instruction.accounts[0] as usize].clone();
+            let destination = accounts[instruction.accounts[1] as usize].clone();
+            TokenTransfer {
+                amount,
+                source,
+                destination,
+            }
+        }
+        _ => panic!(),
     }
 }
 
@@ -174,31 +156,4 @@ pub struct TokenTransfer {
     pub source: String,
     pub destination: String,
     pub amount: u64,
-}
-
-fn parse_token_transfer(
-    instruction: &InnerInstruction,
-    accounts: &Vec<String>,
-) -> Result<TokenTransfer, &'static str> {
-    match TokenInstruction::unpack(&instruction.data).unwrap() {
-        TokenInstruction::Transfer { amount } => {
-            let source = &accounts[instruction.accounts[0] as usize];
-            let destination = &accounts[instruction.accounts[1] as usize];
-            Ok(TokenTransfer {
-                source: source.clone(),
-                destination: destination.clone(),
-                amount,
-            })
-        },
-        TokenInstruction::TransferChecked { amount, decimals } => {
-            let source = &accounts[instruction.accounts[0] as usize];
-            let destination = &accounts[instruction.accounts[1] as usize];
-            Ok(TokenTransfer {
-                source: source.clone(),
-                destination: destination.clone(),
-                amount,
-            })
-        },
-        _ => Err("Not an SplToken transfer")
-    }
 }

@@ -1,6 +1,6 @@
 use std::collections::HashMap;
 
-use substreams_solana::pb::sf::solana::r#type::v1::{CompiledInstruction, ConfirmedTransaction, InnerInstruction, Transaction, TransactionStatusMeta};
+use substreams_solana::pb::sf::solana::r#type::v1::ConfirmedTransaction;
 
 pub struct TokenAccount {
     pub owner: String,
