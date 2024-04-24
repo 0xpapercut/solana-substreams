@@ -1,5 +1,4 @@
 ENDPOINT ?= mainnet.sol.streamingfast.io:443
-START = 25645200
 
 .PHONY: build
 build:
