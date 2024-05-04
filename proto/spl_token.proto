@@ -1,0 +1,110 @@
+syntax = "proto3";
+
+package spl_token;
+
+message Events {
+    repeated Event events = 1;
+}
+
+message Transaction {
+    string signature = 1;
+    repeated string signers = 2;
+    uint64 slot = 3;
+}
+
+message Event {
+    Transaction transaction = 1;
+    oneof event {
+        TransferEvent transfer = 2;
+        InitializeMintEvent initialize_mint = 3;
+        InitializeAccountEvent initialize_account = 4;
+        InitializeMultiSigEvent initialize_multi_sig = 5;
+        InitializeImmutableOwnerEvent initialize_immutable_owner = 6;
+        ApproveEvent approve = 7;
+        RevokeEvent revoke = 8;
+        SetAuthorityEvent set_authority = 9;
+        MintToEvent mint_to = 10;
+        BurnEvent burn = 11;
+        CloseAccountEvent close_account = 12;
+        FreezeAcccountEvent freeze_account = 13;
+        ThawAccountEvent thaw_account = 14;
+        SyncNativeEvent sync_native = 15;
+    }
+}
+
+message TransferEvent {
+    TokenAccount source = 1;
+    TokenAccount destination = 2;
+    uint64 amount = 3;
+}
+
+message InitializeMintEvent {
+    string mint = 1;
+    string mint_authority = 2;
+    optional string freeze_authority = 3;
+}
+
+message InitializeMultiSigEvent {
+    string address = 1;
+    uint32 m = 2;
+}
+
+message InitializeImmutableOwnerEvent {
+    TokenAccount account = 1;
+}
+
+message ApproveEvent {
+
+}
+
+message RevokeEvent {
+
+}
+
+message SetAuthorityEvent {
+    AuthorityType authority_type = 1;
+    optional string new_authority = 2;
+    // string account = 4;
+}
+
+message MintToEvent {
+    TokenAccount destination = 1;
+    uint64 amount = 2;
+}
+
+message BurnEvent {
+
+}
+
+message CloseAccountEvent {
+
+}
+
+message FreezeAcccountEvent {
+
+}
+
+message ThawAccountEvent {
+
+}
+
+message SyncNativeEvent {
+
+}
+
+message InitializeAccountEvent {
+    TokenAccount account = 1;
+}
+
+message TokenAccount {
+    string address = 1;
+    string owner = 2;
+    string mint = 3;
+}
+
+enum AuthorityType {
+    MintTokens = 0;
+    FreezeAccount = 1;
+    AccountOwner = 2;
+    CloseAccount = 3;
+}

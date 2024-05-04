@@ -1,0 +1,25 @@
+specVersion: v0.1.0
+package:
+  name: 'spl_token_events'
+  version: v1.0.0
+
+protobuf:
+  files:
+    - spl_token.proto
+  importPaths:
+    - ./proto
+
+binaries:
+  default:
+    type: wasm/rust-v1
+    file: target/wasm32-unknown-unknown/release/substreams.wasm
+
+modules:
+  - name: events
+    kind: map
+    inputs:
+      - source: sf.solana.type.v1.Block
+    output:
+      type: proto:spl_token.Events
+
+network: solana
