@@ -6,29 +6,31 @@ message Events {
     repeated Event events = 1;
 }
 
-message Transaction {
-    string signature = 1;
-    repeated string signers = 2;
-    uint64 slot = 3;
+message Event {
+    SplTokenEvent event = 1;
+    TransactionData transaction = 2;
 }
 
-message Event {
-    Transaction transaction = 1;
+message TransactionData {
+    string signature = 1;
+    uint64 slot = 2;
+}
+
+message SplTokenEvent {
     oneof event {
-        TransferEvent transfer = 2;
-        InitializeMintEvent initialize_mint = 3;
+        TransferEvent transfer = 1;
+        InitializeMintEvent initialize_mint = 2;
+        InitializeImmutableOwnerEvent initialize_immutable_owner = 3;
         InitializeAccountEvent initialize_account = 4;
-        InitializeMultiSigEvent initialize_multi_sig = 5;
-        InitializeImmutableOwnerEvent initialize_immutable_owner = 6;
-        ApproveEvent approve = 7;
+        InitializeMultisigEvent initialize_multisig = 5;
+        ApproveEvent approve = 6;
+        MintToEvent mint_to = 7;
         RevokeEvent revoke = 8;
         SetAuthorityEvent set_authority = 9;
-        MintToEvent mint_to = 10;
-        BurnEvent burn = 11;
-        CloseAccountEvent close_account = 12;
-        FreezeAcccountEvent freeze_account = 13;
-        ThawAccountEvent thaw_account = 14;
-        SyncNativeEvent sync_native = 15;
+        BurnEvent burn = 10;
+        CloseAccountEvent close_account = 11;
+        FreezeAcccountEvent freeze_account = 12;
+        ThawAccountEvent thaw_account = 13;
     }
 }
 
@@ -43,7 +45,7 @@ message InitializeAccountEvent {
     TokenAccount account = 1;
 }
 
-message InitializeMultiSigEvent {
+message InitializeMultisigEvent {
     // TODO
 }
 
