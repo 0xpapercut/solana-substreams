@@ -32,67 +32,68 @@ message Event {
     }
 }
 
+message InitializeMintEvent {
+    string mint = 1;
+    uint32 decimals = 2;
+    string mint_authority = 3;
+    optional string freeze_authority = 4;
+}
+
+message InitializeAccountEvent {
+    TokenAccount account = 1;
+}
+
+message InitializeMultiSigEvent {
+    // TODO
+}
+
 message TransferEvent {
     TokenAccount source = 1;
     TokenAccount destination = 2;
     uint64 amount = 3;
 }
 
-message InitializeMintEvent {
-    string mint = 1;
-    string mint_authority = 2;
-    optional string freeze_authority = 3;
-}
-
-message InitializeMultiSigEvent {
-    string address = 1;
-    uint32 m = 2;
-}
-
-message InitializeImmutableOwnerEvent {
-    TokenAccount account = 1;
-}
-
 message ApproveEvent {
-
+    TokenAccount account = 1;
+    string delegate = 2;
+    uint64 amount = 3;
 }
 
 message RevokeEvent {
-
+    TokenAccount source = 1;
 }
 
 message SetAuthorityEvent {
-    AuthorityType authority_type = 1;
-    optional string new_authority = 2;
-    // string account = 4;
+    string mint = 1;
+    AuthorityType authority_type = 2;
+    optional string new_authority = 3;
 }
 
 message MintToEvent {
-    TokenAccount destination = 1;
-    uint64 amount = 2;
+    string mint = 1;
+    TokenAccount destination = 2;
+    uint64 amount = 3;
 }
 
 message BurnEvent {
-
+    TokenAccount account = 1;
+    uint64 amount = 2;
 }
 
 message CloseAccountEvent {
-
+    TokenAccount account = 1;
+    TokenAccount destination = 2;
 }
 
-message FreezeAcccountEvent {
-
+message FreezeAccountEvent {
+    TokenAccount account = 1;
 }
 
 message ThawAccountEvent {
-
+    TokenAccount account = 1;
 }
 
-message SyncNativeEvent {
-
-}
-
-message InitializeAccountEvent {
+message InitializeImmutableOwnerEvent {
     TokenAccount account = 1;
 }
 
