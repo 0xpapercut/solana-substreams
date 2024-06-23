@@ -7,56 +7,81 @@ pub struct Events {
 }
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
-pub struct Transaction {
+pub struct Event {
+    #[prost(message, optional, tag="1")]
+    pub event: ::core::option::Option<SplTokenEvent>,
+    #[prost(message, optional, tag="2")]
+    pub transaction: ::core::option::Option<TransactionData>,
+}
+#[allow(clippy::derive_partial_eq_without_eq)]
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct TransactionData {
     #[prost(string, tag="1")]
     pub signature: ::prost::alloc::string::String,
-    #[prost(string, repeated, tag="2")]
-    pub signers: ::prost::alloc::vec::Vec<::prost::alloc::string::String>,
-    #[prost(uint64, tag="3")]
+    #[prost(uint64, tag="2")]
     pub slot: u64,
 }
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
-pub struct Event {
-    #[prost(message, optional, tag="1")]
-    pub transaction: ::core::option::Option<Transaction>,
-    #[prost(oneof="event::Event", tags="2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15")]
-    pub event: ::core::option::Option<event::Event>,
+pub struct SplTokenEvent {
+    #[prost(oneof="spl_token_event::Event", tags="1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13")]
+    pub event: ::core::option::Option<spl_token_event::Event>,
 }
-/// Nested message and enum types in `Event`.
-pub mod event {
+/// Nested message and enum types in `SplTokenEvent`.
+pub mod spl_token_event {
     #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Oneof)]
     pub enum Event {
-        #[prost(message, tag="2")]
+        #[prost(message, tag="1")]
         Transfer(super::TransferEvent),
-        #[prost(message, tag="3")]
+        #[prost(message, tag="2")]
         InitializeMint(super::InitializeMintEvent),
+        #[prost(message, tag="3")]
+        InitializeImmutableOwner(super::InitializeImmutableOwnerEvent),
         #[prost(message, tag="4")]
         InitializeAccount(super::InitializeAccountEvent),
         #[prost(message, tag="5")]
-        InitializeMultiSig(super::InitializeMultiSigEvent),
+        InitializeMultisig(super::InitializeMultisigEvent),
         #[prost(message, tag="6")]
-        InitializeImmutableOwner(super::InitializeImmutableOwnerEvent),
-        #[prost(message, tag="7")]
         Approve(super::ApproveEvent),
+        #[prost(message, tag="7")]
+        MintTo(super::MintToEvent),
         #[prost(message, tag="8")]
         Revoke(super::RevokeEvent),
         #[prost(message, tag="9")]
         SetAuthority(super::SetAuthorityEvent),
         #[prost(message, tag="10")]
-        MintTo(super::MintToEvent),
-        #[prost(message, tag="11")]
         Burn(super::BurnEvent),
-        #[prost(message, tag="12")]
+        #[prost(message, tag="11")]
         CloseAccount(super::CloseAccountEvent),
+        #[prost(message, tag="12")]
+        FreezeAccount(super::FreezeAccountEvent),
         #[prost(message, tag="13")]
-        FreezeAccount(super::FreezeAcccountEvent),
-        #[prost(message, tag="14")]
         ThawAccount(super::ThawAccountEvent),
-        #[prost(message, tag="15")]
-        SyncNative(super::SyncNativeEvent),
     }
+}
+#[allow(clippy::derive_partial_eq_without_eq)]
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct InitializeMintEvent {
+    #[prost(string, tag="1")]
+    pub mint: ::prost::alloc::string::String,
+    #[prost(uint32, tag="2")]
+    pub decimals: u32,
+    #[prost(string, tag="3")]
+    pub mint_authority: ::prost::alloc::string::String,
+    #[prost(string, optional, tag="4")]
+    pub freeze_authority: ::core::option::Option<::prost::alloc::string::String>,
+}
+#[allow(clippy::derive_partial_eq_without_eq)]
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct InitializeAccountEvent {
+    #[prost(message, optional, tag="1")]
+    pub account: ::core::option::Option<TokenAccount>,
+}
+/// TODO
+#[allow(clippy::derive_partial_eq_without_eq)]
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct InitializeMultisigEvent {
 }
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
@@ -70,79 +95,71 @@ pub struct TransferEvent {
 }
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
-pub struct InitializeMintEvent {
-    #[prost(string, tag="1")]
-    pub mint: ::prost::alloc::string::String,
-    #[prost(string, tag="2")]
-    pub mint_authority: ::prost::alloc::string::String,
-    #[prost(string, optional, tag="3")]
-    pub freeze_authority: ::core::option::Option<::prost::alloc::string::String>,
-}
-#[allow(clippy::derive_partial_eq_without_eq)]
-#[derive(Clone, PartialEq, ::prost::Message)]
-pub struct InitializeMultiSigEvent {
-    #[prost(string, tag="1")]
-    pub address: ::prost::alloc::string::String,
-    #[prost(uint32, tag="2")]
-    pub m: u32,
-}
-#[allow(clippy::derive_partial_eq_without_eq)]
-#[derive(Clone, PartialEq, ::prost::Message)]
-pub struct InitializeImmutableOwnerEvent {
-    #[prost(message, optional, tag="1")]
-    pub account: ::core::option::Option<TokenAccount>,
-}
-#[allow(clippy::derive_partial_eq_without_eq)]
-#[derive(Clone, PartialEq, ::prost::Message)]
 pub struct ApproveEvent {
+    #[prost(message, optional, tag="1")]
+    pub source: ::core::option::Option<TokenAccount>,
+    #[prost(string, tag="2")]
+    pub delegate: ::prost::alloc::string::String,
+    #[prost(uint64, tag="3")]
+    pub amount: u64,
 }
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct RevokeEvent {
+    #[prost(message, optional, tag="1")]
+    pub source: ::core::option::Option<TokenAccount>,
 }
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct SetAuthorityEvent {
-    #[prost(enumeration="AuthorityType", tag="1")]
+    #[prost(string, tag="1")]
+    pub mint: ::prost::alloc::string::String,
+    #[prost(enumeration="AuthorityType", tag="2")]
     pub authority_type: i32,
-    #[prost(string, optional, tag="2")]
+    #[prost(string, optional, tag="3")]
     pub new_authority: ::core::option::Option<::prost::alloc::string::String>,
-    #[prost(string, tag="3")]
-    pub authority: ::prost::alloc::string::String,
-    #[prost(string, tag="4")]
-    pub account: ::prost::alloc::string::String,
 }
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct MintToEvent {
-    #[prost(message, optional, tag="1")]
+    #[prost(string, tag="1")]
+    pub mint: ::prost::alloc::string::String,
+    #[prost(message, optional, tag="2")]
     pub destination: ::core::option::Option<TokenAccount>,
-    #[prost(uint64, tag="2")]
+    #[prost(uint64, tag="3")]
     pub amount: u64,
 }
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct BurnEvent {
+    #[prost(message, optional, tag="1")]
+    pub source: ::core::option::Option<TokenAccount>,
+    #[prost(uint64, tag="2")]
+    pub amount: u64,
 }
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct CloseAccountEvent {
+    #[prost(message, optional, tag="1")]
+    pub source: ::core::option::Option<TokenAccount>,
+    #[prost(string, tag="2")]
+    pub destination: ::prost::alloc::string::String,
 }
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
-pub struct FreezeAcccountEvent {
+pub struct FreezeAccountEvent {
+    #[prost(message, optional, tag="1")]
+    pub source: ::core::option::Option<TokenAccount>,
 }
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct ThawAccountEvent {
+    #[prost(message, optional, tag="1")]
+    pub source: ::core::option::Option<TokenAccount>,
 }
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
-pub struct SyncNativeEvent {
-}
-#[allow(clippy::derive_partial_eq_without_eq)]
-#[derive(Clone, PartialEq, ::prost::Message)]
-pub struct InitializeAccountEvent {
+pub struct InitializeImmutableOwnerEvent {
     #[prost(message, optional, tag="1")]
     pub account: ::core::option::Option<TokenAccount>,
 }

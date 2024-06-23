@@ -29,7 +29,7 @@ message SplTokenEvent {
         SetAuthorityEvent set_authority = 9;
         BurnEvent burn = 10;
         CloseAccountEvent close_account = 11;
-        FreezeAcccountEvent freeze_account = 12;
+        FreezeAccountEvent freeze_account = 12;
         ThawAccountEvent thaw_account = 13;
     }
 }
@@ -56,7 +56,7 @@ message TransferEvent {
 }
 
 message ApproveEvent {
-    TokenAccount account = 1;
+    TokenAccount source = 1;
     string delegate = 2;
     uint64 amount = 3;
 }
@@ -78,21 +78,21 @@ message MintToEvent {
 }
 
 message BurnEvent {
-    TokenAccount account = 1;
+    TokenAccount source = 1;
     uint64 amount = 2;
 }
 
 message CloseAccountEvent {
-    TokenAccount account = 1;
-    TokenAccount destination = 2;
+    TokenAccount source = 1;
+    string destination = 2;
 }
 
 message FreezeAccountEvent {
-    TokenAccount account = 1;
+    TokenAccount source = 1;
 }
 
 message ThawAccountEvent {
-    TokenAccount account = 1;
+    TokenAccount source = 1;
 }
 
 message InitializeImmutableOwnerEvent {
