@@ -7,27 +7,19 @@ message RaydiumSubstreamBlockEvents {
 }
 
 message RaydiumSubstreamTransactionEvents {
-    string signer = 1;
-    string signature = 2;
-    uint64 slot = 3;
-    RaydiumEvent event = 4;
+    string signature = 1;
+    uint64 slot = 2;
+    repeated RaydiumEvent events = 3;
 }
 
 message RaydiumEvent {
     string amm = 1;
-    oneof event {
+    oneof data {
         InitializeData initialize = 3;
         DepositData deposit = 4;
         WithdrawData withdraw = 5;
         SwapData swap = 6;
     }
-}
-
-enum EventType {
-    INITIALIZE = 0;
-    DEPOSIT = 1;
-    WITHDRAW = 2;
-    SWAP = 3;
 }
 
 message InitializeData {
