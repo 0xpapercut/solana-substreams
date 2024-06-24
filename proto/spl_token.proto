@@ -2,10 +2,14 @@ syntax = "proto3";
 
 package spl_token;
 
-message Transaction {
+message SplTokenSubstreamBlockEvents {
+    repeated SplTokenSubstreamTransactionEvents transactions = 1;
+}
+
+message SplTokenSubstreamTransactionEvents {
     string signature = 1;
     uint64 slot = 2;
-    repeated SplTokenEvent spl_token_events = 3;
+    repeated SplTokenEvent events = 3;
 }
 
 message SplTokenEvent {
