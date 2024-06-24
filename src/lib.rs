@@ -24,20 +24,20 @@ mod pb;
 mod utils;
 
 #[substreams::handlers::map]
-fn events(block: Block) -> Result<pb::spl_token::SplTokenSubstreamBlockEvents, Error> {
-    Ok(pb::spl_token::SplTokenSubstreamBlockEvents {
+fn spl_token_block_events(block: Block) -> Result<pb::spl_token::SplTokenBlockEvents, Error> {
+    Ok(pb::spl_token::SplTokenBlockEvents {
         transactions: parse_block(block)
     })
 }
 
-fn parse_block(block: Block) -> Vec<pb::spl_token::SplTokenSubstreamTransactionEvents> {
-    let mut transactions_events: Vec<pb::spl_token::SplTokenSubstreamTransactionEvents> = Vec::new();
+fn parse_block(block: Block) -> Vec<pb::spl_token::SplTokenTransactionEvents> {
+    let mut transactions_events: Vec<pb::spl_token::SplTokenTransactionEvents> = Vec::new();
     for confirmed_transaction in block.transactions() {
         let events = parse_confirmed_transaction(confirmed_transaction);
         if events.is_empty() {
             continue;
         }
-        transactions_events.push(pb::spl_token::SplTokenSubstreamTransactionEvents {
+        transactions_events.push(pb::spl_token::SplTokenTransactionEvents {
             signature: bs58::encode(confirmed_transaction.signature()).into_string(),
             slot: block.slot,
             events
