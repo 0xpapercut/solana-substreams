@@ -1,13 +1,13 @@
 // @generated
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
-pub struct SplTokenSubstreamBlockEvents {
+pub struct SplTokenBlockEvents {
     #[prost(message, repeated, tag="1")]
-    pub transactions: ::prost::alloc::vec::Vec<SplTokenSubstreamTransactionEvents>,
+    pub transactions: ::prost::alloc::vec::Vec<SplTokenTransactionEvents>,
 }
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
-pub struct SplTokenSubstreamTransactionEvents {
+pub struct SplTokenTransactionEvents {
     #[prost(string, tag="1")]
     pub signature: ::prost::alloc::string::String,
     #[prost(uint64, tag="2")]
