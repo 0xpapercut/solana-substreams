@@ -24,61 +24,51 @@ mod pb;
 mod utils;
 
 #[substreams::handlers::map]
-fn events(block: Block) -> Result<pb::spl_token::Events, Error> {
-    let events = parse_block(block);
-    Ok(pb::spl_token::Events { events })
+fn events(block: Block) -> Result<pb::spl_token::SplTokenSubstreamBlockEvents, Error> {
+    Ok(pb::spl_token::SplTokenSubstreamBlockEvents {
+        transactions: parse_block(block)
+    })
 }
 
-fn parse_block(block: Block) -> Vec<pb::spl_token::Event> {
-    let mut events: Vec<pb::spl_token::Event> = Vec::new();
+fn parse_block(block: Block) -> Vec<pb::spl_token::SplTokenSubstreamTransactionEvents> {
+    let mut transactions_events: Vec<pb::spl_token::SplTokenSubstreamTransactionEvents> = Vec::new();
     for confirmed_transaction in block.transactions() {
-        events.extend(parse_confirmed_transaction(confirmed_transaction, block.slot));
+        let events = parse_confirmed_transaction(confirmed_transaction);
+        if events.is_empty() {
+            continue;
+        }
+        transactions_events.push(pb::spl_token::SplTokenSubstreamTransactionEvents {
+            signature: bs58::encode(confirmed_transaction.signature()).into_string(),
+            slot: block.slot,
+            events
+        })
     }
-    events
+    transactions_events
 }
 
-fn parse_confirmed_transaction(confirmed_transaction: &ConfirmedTransaction, slot: u64) -> Vec<pb::spl_token::Event> {
-    let mut events: Vec<pb::spl_token::Event> = Vec::new();
+fn parse_confirmed_transaction(confirmed_transaction: &ConfirmedTransaction) -> Vec<pb::spl_token::SplTokenEvent> {
+    let mut events: Vec<pb::spl_token::SplTokenEvent> = Vec::new();
 
     let instructions = get_structured_instructions(&confirmed_transaction);
     let accounts = confirmed_transaction.resolved_accounts();
     let mut token_accounts = utils::get_token_accounts(confirmed_transaction);
+    let signature = bs58::encode(confirmed_transaction.signature()).into_string();
 
     if let Some(_) = confirmed_transaction.meta.as_ref().unwrap().err {
         return Vec::new();
     }
 
-    let transaction = pb::spl_token::TransactionData {
-        signature: bs58::encode(confirmed_transaction.signature()).into_string(),
-        slot,
-    };
     for instruction in instructions.flattened() {
-        // if bs58::encode(accounts[instruction.program_id_index as usize]).into_string() == TOKEN_PROGRAM {
-        //     substreams::log::println(format!("{}", bs58::encode(confirmed_transaction.signature()).into_string()));
-        // }
         if bs58::encode(accounts[instruction.program_id_index as usize]).into_string() != TOKEN_PROGRAM {
             continue;
         }
         match parse_instruction(&instruction, &accounts, &mut token_accounts) {
             Ok(event) => {
-                if event.is_none() {
-                    continue;
-                }
-                events.push(pb::spl_token::Event {
-                    transaction: Some(transaction.clone()),
-                    event: Some(pb::spl_token::SplTokenEvent {
-                        event
-                    })
-                })
+                events.push(pb::spl_token::SplTokenEvent { event });
             }
-            Err(e) => panic!("Transaction {}: {}", transaction.signature, e),
+            Err(e) => panic!("Transaction {}: {}", signature, e),
         }
     }
-
-    // let events: Vec<_> = events.iter().filter(|x| match x.event.as_ref().unwrap() {
-    //     pb::spl_token::event::Event::SetAuthority(_) => true,
-    //     _ => false,
-    // }).cloned().collect();
     events
 }
 
@@ -143,8 +133,9 @@ pub fn parse_instruction(
         },
 
         TokenInstruction::SetAuthority { authority_type, new_authority } => {
-            let event = parse_set_authority_instruction(instruction, accounts, token_accounts, authority_type, new_authority)?;
-            Ok(Some(pb::spl_token::spl_token_event::Event::SetAuthority(event)))
+            Ok(None)
+            // let event = parse_set_authority_instruction(instruction, accounts, token_accounts, authority_type, new_authority)?;
+            // Ok(Some(pb::spl_token::spl_token_event::Event::SetAuthority(event)))
         },
 
         TokenInstruction::MintTo { amount } => {
@@ -301,16 +292,20 @@ fn parse_set_authority_instruction(
     authority_type: spl_token::AuthorityType,
     new_authority: Option<Pubkey>,
 ) -> Result<pb::spl_token::SetAuthorityEvent, &'static str> {
-    let account = accounts[instruction.accounts[0] as usize];
-    let authority = accounts[instruction.accounts[1] as usize];
-    substreams::log::println(format!("{:#?}", authority_type));
+    let mint = accounts[instruction.accounts[0] as usize];
     let authority_type: i32 = match authority_type {
         spl_token::AuthorityType::MintTokens => pb::spl_token::AuthorityType::MintTokens.into(),
         spl_token::AuthorityType::FreezeAccount => pb::spl_token::AuthorityType::FreezeAccount.into(),
         spl_token::AuthorityType::AccountOwner => pb::spl_token::AuthorityType::AccountOwner.into(),
         spl_token::AuthorityType::CloseAccount => pb::spl_token::AuthorityType::CloseAccount.into(),
     };
-    unimplemented!()
+    let new_authority = new_authority.map(|x| bs58::encode(x).into_string());
+
+    Ok(pb::spl_token::SetAuthorityEvent {
+        mint: bs58::encode(mint).into_string(),
+        authority_type,
+        new_authority,
+    })
 }
 
 fn parse_mint_to_instruction(
