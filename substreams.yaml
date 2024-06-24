@@ -20,6 +20,6 @@ modules:
     inputs:
       - source: sf.solana.type.v1.Block
     output:
-      type: proto:spl_token.Events
+      type: proto:spl_token.SplTokenSubstreamBlockEvents
 
 network: solana
