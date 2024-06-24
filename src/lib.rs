@@ -133,9 +133,8 @@ pub fn parse_instruction(
         },
 
         TokenInstruction::SetAuthority { authority_type, new_authority } => {
-            Ok(None)
-            // let event = parse_set_authority_instruction(instruction, accounts, token_accounts, authority_type, new_authority)?;
-            // Ok(Some(pb::spl_token::spl_token_event::Event::SetAuthority(event)))
+            let event = parse_set_authority_instruction(instruction, accounts, token_accounts, authority_type, new_authority)?;
+            Ok(Some(pb::spl_token::spl_token_event::Event::SetAuthority(event)))
         },
 
         TokenInstruction::MintTo { amount } => {
@@ -227,10 +226,10 @@ fn parse_initialize_account_instruction(
 fn parse_initialize_multisig_instruction(
     instruction: &StructuredInstruction,
     accounts: &Vec<&Vec<u8>>,
-    token_accounts: &HashMap<Vec<u8>, utils::TokenAccount>,
-    m: u8,
+    _token_accounts: &HashMap<Vec<u8>, utils::TokenAccount>,
+    _m: u8,
 ) -> Result<pb::spl_token::InitializeMultisigEvent, &'static str> {
-    let multisig = accounts[instruction.accounts[0] as usize];
+    let _multisig = accounts[instruction.accounts[0] as usize];
 
     Ok(pb::spl_token::InitializeMultisigEvent::default())
 }
@@ -288,7 +287,7 @@ fn parse_revoke_instruction(
 fn parse_set_authority_instruction(
     instruction: &StructuredInstruction,
     accounts: &Vec<&Vec<u8>>,
-    token_accounts: &HashMap<Vec<u8>, utils::TokenAccount>,
+    _token_accounts: &HashMap<Vec<u8>, utils::TokenAccount>,
     authority_type: spl_token::AuthorityType,
     new_authority: Option<Pubkey>,
 ) -> Result<pb::spl_token::SetAuthorityEvent, &'static str> {
@@ -329,7 +328,6 @@ fn parse_burn_instruction(
     accounts: &Vec<&Vec<u8>>,
     token_accounts: &HashMap<Vec<u8>, utils::TokenAccount>,
     amount: u64,
-    // expected_decimals: Option<u8>,
 ) -> Result<pb::spl_token::BurnEvent, &'static str> {
     let source = &token_accounts[accounts[instruction.accounts[0] as usize]];
 
@@ -379,15 +377,10 @@ fn parse_thaw_account_instruction(
 }
 
 fn parse_initialize_immutable_owner_instruction(
-    instruction: &StructuredInstruction,
-    accounts: &Vec<&Vec<u8>>,
-    token_accounts: &HashMap<Vec<u8>, utils::TokenAccount>,
+    _instruction: &StructuredInstruction,
+    _accounts: &Vec<&Vec<u8>>,
+    _token_accounts: &HashMap<Vec<u8>, utils::TokenAccount>,
 ) -> Result<pb::spl_token::InitializeImmutableOwnerEvent, &'static str> {
-    // let account = &token_accounts[accounts[instruction.accounts[0] as usize]];
-
-    // pb::spl_token::InitializeImmutableOwnerEvent {
-    //     account: Some(account.clone().into()),
-    // }
     Ok(pb::spl_token::InitializeImmutableOwnerEvent::default())
 }
 
