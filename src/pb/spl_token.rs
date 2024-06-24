@@ -1,25 +1,13 @@
 // @generated
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
-pub struct Events {
-    #[prost(message, repeated, tag="1")]
-    pub events: ::prost::alloc::vec::Vec<Event>,
-}
-#[allow(clippy::derive_partial_eq_without_eq)]
-#[derive(Clone, PartialEq, ::prost::Message)]
-pub struct Event {
-    #[prost(message, optional, tag="1")]
-    pub event: ::core::option::Option<SplTokenEvent>,
-    #[prost(message, optional, tag="2")]
-    pub transaction: ::core::option::Option<TransactionData>,
-}
-#[allow(clippy::derive_partial_eq_without_eq)]
-#[derive(Clone, PartialEq, ::prost::Message)]
-pub struct TransactionData {
+pub struct Transaction {
     #[prost(string, tag="1")]
     pub signature: ::prost::alloc::string::String,
     #[prost(uint64, tag="2")]
     pub slot: u64,
+    #[prost(message, repeated, tag="3")]
+    pub spl_token_events: ::prost::alloc::vec::Vec<SplTokenEvent>,
 }
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
