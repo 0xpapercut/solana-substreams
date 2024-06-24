@@ -2,6 +2,7 @@ use std::collections::HashMap;
 
 use substreams_solana::pb::sf::solana::r#type::v1::ConfirmedTransaction;
 use substreams_solana_program_instructions::pubkey::Pubkey;
+use structured_instructions::StructuredInstruction;
 
 #[derive(Debug, Clone)]
 pub struct TokenAccount {
@@ -51,5 +52,18 @@ pub trait ConfirmedTransactionExt {
 impl ConfirmedTransactionExt for ConfirmedTransaction {
     fn signature(&self) -> &Vec<u8> {
         &self.transaction.as_ref().unwrap().signatures[0]
+    }
+}
+
+struct TransactionParser {
+    signatures: Vec<String>,
+    signers: Vec<Pubkey>,
+    token_accounts: HashMap<Pubkey, TokenAccount>,
+    instructions: Vec<StructuredInstruction>,
+}
+
+impl TransactionParser {
+    pub fn new(transaction: &ConfirmedTransaction) {
+
     }
 }
