@@ -1,6 +1,6 @@
 // @generated
-// @@protoc_insertion_point(attribute:event)
-pub mod event {
-    include!("event.rs");
-    // @@protoc_insertion_point(event)
+// @@protoc_insertion_point(attribute:raydium)
+pub mod raydium {
+    include!("raydium.rs");
+    // @@protoc_insertion_point(raydium)
 }

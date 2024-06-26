@@ -1,15 +1,15 @@
 syntax = "proto3";
 
-package event;
+package raydium;
 
-message RaydiumSubstreamBlockEvents {
-    repeated Event events = 1;
+message BlockRaydiumEvents {
+    repeated TransactionRaydiumEvents transactions = 1;
+    uint64 slot = 2;
 }
 
-message RaydiumSubstreamTransactionEvents {
+message TransactionRaydiumEvents {
     string signature = 1;
-    uint64 slot = 2;
-    repeated RaydiumEvent events = 3;
+    repeated RaydiumEvent events = 2;
 }
 
 message RaydiumEvent {
@@ -26,6 +26,9 @@ message InitializeData {
     uint64 pcInitAmount = 1;
     uint64 coinInitAmount = 2;
     uint64 lpInitAmount = 3;
+    string pcMint = 4;
+    string coinMint = 5;
+    string lpMint = 6;
 }
 
 message DepositData {
