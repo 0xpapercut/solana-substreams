@@ -4,11 +4,13 @@ use bs58;
 use substreams::errors::Error;
 use substreams_solana::pb::sf::solana::r#type::v1::ConfirmedTransaction;
 use substreams_solana::pb::sf::solana::r#type::v1::Block;
-use substreams_solana_structured_instructions::{get_structured_instructions, StructuredInstruction};
+use structured_instructions::{get_structured_instructions, StructuredInstruction};
 
-mod raydium_amm;
+use substreams_solana_raydium_amm as raydium_amm;
 use raydium_amm::instruction::AmmInstruction;
 use raydium_amm::RAYDIUM_LIQUIDITY_POOL;
+
+use spl_token_substream;
 
 mod spl_token;
 use spl_token::instruction::TokenInstruction;
@@ -20,21 +22,32 @@ use utils::{get_token_accounts, TokenAccount};
 mod pb;
 
 #[substreams::handlers::map]
-pub fn events(block: Block) -> Result<pb::event::Events, Error> {
-    let events = parse_block(block);
-    Ok(pb::event::Events { events: events })
+pub fn raydium_events(block: Block) -> Result<pb::raydium::BlockRaydiumEvents, Error> {
+    let slot = block.slot;
+    let transactions = parse_block(block);
+    Ok(pb::raydium::BlockRaydiumEvents {
+        transactions,
+        slot,
+    })
 }
 
-pub fn parse_block(block: Block) -> Vec<pb::event::Event> {
-    let mut events: Vec<pb::event::Event> = Vec::new();
+pub fn parse_block(block: Block) -> Vec<pb::raydium::TransactionRaydiumEvents> {
+    let mut transactions_events: Vec<pb::raydium::TransactionRaydiumEvents> = Vec::new();
     for transaction in block.transactions {
-        events.extend(parse_transaction(&transaction, block.slot));
+        let events = parse_transaction(&transaction);
+        if !events.is_empty() {
+            let signature = bs58::encode(transaction.transaction.as_ref().unwrap().signatures.get(0).unwrap()).into_string();
+            transactions_events.push(pb::raydium::TransactionRaydiumEvents {
+                signature,
+                events,
+            });
+        }
     }
-    events
+    transactions_events
 }
 
-fn parse_transaction(transaction: &ConfirmedTransaction, slot: u64) -> Vec<pb::event::Event> {
-    let mut events: Vec<pb::event::Event> = Vec::new();
+fn parse_transaction(transaction: &ConfirmedTransaction) -> Vec<pb::raydium::RaydiumEvent> {
+    let mut events: Vec<pb::raydium::RaydiumEvent> = Vec::new();
 
     let instructions = get_structured_instructions(transaction);
     let accounts = transaction.resolved_accounts_as_strings();
@@ -49,20 +62,15 @@ fn parse_transaction(transaction: &ConfirmedTransaction, slot: u64) -> Vec<pb::e
 
     for instr in instructions {
         for event in parse_instruction(&instr, &accounts, &token_accounts) {
-            events.push(pb::event::Event {
-                event: Some(event),
-                signer: accounts[0].clone(),
-                signature: signature.clone(),
-                slot,
-            });
+            events.push(event);
         }
     }
 
     events
 }
 
-fn parse_instruction(instruction: &StructuredInstruction, accounts: &Vec<String>, token_accounts: &HashMap<String, TokenAccount>) -> Vec<pb::event::RaydiumEvent> {
-    let mut events: Vec<pb::event::RaydiumEvent> = Vec::new();
+fn parse_instruction(instruction: &StructuredInstruction, accounts: &Vec<String>, token_accounts: &HashMap<String, TokenAccount>) -> Vec<pb::raydium::RaydiumEvent> {
+    let mut events: Vec<pb::raydium::RaydiumEvent> = Vec::new();
     if accounts[instruction.program_id_index as usize] != RAYDIUM_LIQUIDITY_POOL {
         for instr in &instruction.inner_instructions {
             events.extend(parse_instruction(instr, accounts, token_accounts));
@@ -73,20 +81,31 @@ fn parse_instruction(instruction: &StructuredInstruction, accounts: &Vec<String>
     events
 }
 
-fn parse_raydium_instruction(instruction: &StructuredInstruction, accounts: &Vec<String>, token_accounts: &HashMap<String, TokenAccount>) -> Result<pb::event::RaydiumEvent, &'static str> {
+fn parse_raydium_instruction(instruction: &StructuredInstruction, accounts: &Vec<String>, token_accounts: &HashMap<String, TokenAccount>) -> Result<pb::raydium::RaydiumEvent, String> {
     match AmmInstruction::unpack(&instruction.data) {
         Ok(unpacked) => match unpacked {
-            AmmInstruction::SwapBaseIn(_) => Ok(parse_raydium_swap_instruction(instruction, accounts, token_accounts)),
-            AmmInstruction::SwapBaseOut(_) => Ok(parse_raydium_swap_instruction(instruction, accounts, token_accounts)),
-            _ => Err("Unsupported."),
+            AmmInstruction::SwapBaseIn(_) |
+            AmmInstruction::SwapBaseOut(_) => {
+                Ok(parse_raydium_swap_instruction(instruction, accounts, token_accounts))
+            },
+            AmmInstruction::Initialize2(initialize) => {
+                unimplemented!()
+            }
+            AmmInstruction::Deposit(deposit) => {
+                unimplemented!()
+            },
+            AmmInstruction::Withdraw(withdraw) => {
+                unimplemented!()
+            }
+            _ => Err(format!("Unsupported instruction {:#?}.", unpacked)),
         },
-        Err(_) => Err("Not a Raydium event.")
+        Err(_) => Err("Not a Raydium event.".to_string())
     }
 }
 
-fn parse_raydium_swap_instruction(instruction: &StructuredInstruction, accounts: &Vec<String>, token_accounts: &HashMap<String, TokenAccount>) -> pb::event::RaydiumEvent {
+fn parse_raydium_swap_instruction(instruction: &StructuredInstruction, accounts: &Vec<String>, token_accounts: &HashMap<String, TokenAccount>) -> pb::raydium::RaydiumEvent {
     let amm = accounts[instruction.accounts[1] as usize].clone();
-    
+
     // Sometimes OpenBook is also invoked, so we filter the inner instructions
     let inner_instructions: Vec<_> = instruction.inner_instructions.iter().filter(|x| accounts[x.program_id_index as usize] == TOKEN_PROGRAM).collect();
     let transfer_in = parse_token_transfer_instruction(inner_instructions[0], accounts);
@@ -111,10 +130,9 @@ fn parse_raydium_swap_instruction(instruction: &StructuredInstruction, accounts:
         mint_out = token_account.mint.clone();
     }
 
-    pb::event::RaydiumEvent {
+    pb::raydium::RaydiumEvent {
         amm,
-        r#type: pb::event::EventType::Swap.into(),
-        data: Some(pb::event::raydium_event::Data::Swap(pb::event::SwapData {
+        data: Some(pb::raydium::raydium_event::Data::Swap(pb::raydium::SwapData {
             mint_in,
             mint_out,
             amount_in,
