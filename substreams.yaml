@@ -5,7 +5,7 @@ package:
 
 protobuf:
   files:
-    - event.proto
+    - raydium.proto
   importPaths:
     - ./proto
 
@@ -15,11 +15,11 @@ binaries:
     file: target/wasm32-unknown-unknown/release/substreams.wasm
 
 modules:
-  - name: events
+  - name: raydium_events
     kind: map
     inputs:
       - source: sf.solana.type.v1.Block
     output:
-      type: proto:event.Events
+      type: proto:raydium.BlockRaydiumEvents
 
 network: solana
