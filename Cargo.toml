@@ -10,6 +10,7 @@ crate-type = ["lib", "cdylib"]
 [dependencies]
 substreams = "^0.5.0"
 substreams-solana = { git = "https://github.com/streamingfast/substreams-solana", branch = "master" }
+substreams-solana-raydium-amm = { git = "https://github.com/0xpapercut/substreams-solana-raydium-amm", branch = "main" }
 prost = "0.11"
 bs58 = "0.5.0"
 arrform = { git = "https://github.com/raydium-io/arrform" }
