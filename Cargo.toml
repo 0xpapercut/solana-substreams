@@ -24,6 +24,8 @@ safe-transmute = "0.11.2"
 substreams-solana-program-instructions = "0.1.1"
 num-derive = "0.4.2"
 substreams-solana-structured-instructions = { git = "https://github.com/0xpapercut/substreams-solana-structured-instructions", branch = "main" }
+spl-token-substream = { git = "https://github.com/0xpapercut/spl-token-substream", branch = "main" }
+substreams-solana-utils = { git = "https://github.com/0xpapercut/substreams-solana-utils", branch = "main" }
 
 [profile.release]
 lto = true
