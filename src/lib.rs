@@ -14,11 +14,11 @@ use structured_instructions::{
 };
 
 use substreams_solana_utils::{
-    InstructionContext,
+    TransactionContext,
     ConfirmedTransactionExt,
 };
 
-mod pb;
+pub mod pb;
 
 #[substreams::handlers::map]
 fn spl_token_block_events(block: Block) -> Result<pb::spl_token::SplTokenBlockEvents, Error> {
@@ -45,7 +45,7 @@ fn parse_block(block: Block) -> Vec<pb::spl_token::SplTokenTransactionEvents> {
 }
 
 fn parse_transaction(transaction: &ConfirmedTransaction) -> Vec<pb::spl_token::SplTokenEvent> {
-    let context = InstructionContext::construct(transaction);
+    let context = TransactionContext::construct(transaction);
     let mut events: Vec<pb::spl_token::SplTokenEvent> = Vec::new();
     let instructions = get_structured_instructions(&transaction);
     let signature = bs58::encode(transaction.signature()).into_string();
@@ -70,7 +70,7 @@ fn parse_transaction(transaction: &ConfirmedTransaction) -> Vec<pb::spl_token::S
 
 pub fn parse_instruction(
     instruction: &StructuredInstruction,
-    context: &InstructionContext,
+    context: &TransactionContext,
 ) -> Result<Option<pb::spl_token::spl_token_event::Event>, &'static str> {
     if bs58::encode(context.get_account_from_index(instruction.program_id_index as usize)).into_string() != TOKEN_PROGRAM {
         return Err("Not a Token program instruction.");
@@ -177,9 +177,9 @@ pub fn parse_instruction(
     }
 }
 
-fn parse_initialize_mint_instruction(
+pub fn parse_initialize_mint_instruction(
     instruction: &StructuredInstruction,
-    context: &InstructionContext,
+    context: &TransactionContext,
     decimals: u32,
     mint_authority: Pubkey,
     freeze_authority: Option<Pubkey>,
@@ -196,9 +196,9 @@ fn parse_initialize_mint_instruction(
     })
 }
 
-fn parse_initialize_account_instruction(
+pub fn parse_initialize_account_instruction(
     instruction: &StructuredInstruction,
-    context: &InstructionContext,
+    context: &TransactionContext,
     _owner: Option<Pubkey>,
 ) -> Result<pb::spl_token::InitializeAccountEvent, &'static str> {
     let address = context.get_account_from_index(instruction.accounts[0] as usize);
@@ -208,17 +208,17 @@ fn parse_initialize_account_instruction(
     })
 }
 
-fn parse_initialize_multisig_instruction(
+pub fn parse_initialize_multisig_instruction(
     _instruction: &StructuredInstruction,
-    _context: &InstructionContext,
+    _context: &TransactionContext,
     _m: u8,
 ) -> Result<pb::spl_token::InitializeMultisigEvent, &'static str> {
     Ok(pb::spl_token::InitializeMultisigEvent::default())
 }
 
-fn parse_transfer_instruction(
+pub fn parse_transfer_instruction(
     instruction: &StructuredInstruction,
-    context: &InstructionContext,
+    context: &TransactionContext,
     amount: u64,
     expected_decimals: Option<u8>,
 ) -> Result<pb::spl_token::TransferEvent, &'static str> {
@@ -232,9 +232,9 @@ fn parse_transfer_instruction(
     })
 }
 
-fn parse_approve_instruction(
+pub fn parse_approve_instruction(
     instruction: &StructuredInstruction,
-    context: &InstructionContext,
+    context: &TransactionContext,
     amount: u64,
     expected_decimals: Option<u8>,
 ) -> Result<pb::spl_token::ApproveEvent, &'static str> {
@@ -248,9 +248,9 @@ fn parse_approve_instruction(
     })
 }
 
-fn parse_revoke_instruction(
+pub fn parse_revoke_instruction(
     instruction: &StructuredInstruction,
-    context: &InstructionContext,
+    context: &TransactionContext,
 ) -> Result<pb::spl_token::RevokeEvent, &'static str> {
     let source = context.get_token_account_from_index(instruction.accounts[0] as usize);
     Ok(pb::spl_token::RevokeEvent {
@@ -258,9 +258,9 @@ fn parse_revoke_instruction(
     })
 }
 
-fn parse_set_authority_instruction(
+pub fn parse_set_authority_instruction(
     instruction: &StructuredInstruction,
-    context: &InstructionContext,
+    context: &TransactionContext,
     authority_type: spl_token::AuthorityType,
     new_authority: Option<Pubkey>,
 ) -> Result<pb::spl_token::SetAuthorityEvent, &'static str> {
@@ -279,9 +279,9 @@ fn parse_set_authority_instruction(
     })
 }
 
-fn parse_mint_to_instruction(
+pub fn parse_mint_to_instruction(
     instruction: &StructuredInstruction,
-    context: &InstructionContext,
+    context: &TransactionContext,
     amount: u64,
 ) -> Result<pb::spl_token::MintToEvent, &'static str> {
     let mint = bs58::encode(context.get_account_from_index(instruction.accounts[0] as usize)).into_string();
@@ -293,9 +293,9 @@ fn parse_mint_to_instruction(
     })
 }
 
-fn parse_burn_instruction(
+pub fn parse_burn_instruction(
     instruction: &StructuredInstruction,
-    context: &InstructionContext,
+    context: &TransactionContext,
     amount: u64,
 ) -> Result<pb::spl_token::BurnEvent, &'static str> {
     let source = context.get_token_account_from_index(instruction.accounts[0] as usize);
@@ -305,9 +305,9 @@ fn parse_burn_instruction(
     })
 }
 
-fn parse_close_account_instruction(
+pub fn parse_close_account_instruction(
     instruction: &StructuredInstruction,
-    context: &InstructionContext,
+    context: &TransactionContext,
 ) -> Result<pb::spl_token::CloseAccountEvent, &'static str> {
     let source = context.get_token_account_from_index(instruction.accounts[0] as usize);
     let destination = bs58::encode(context.get_account_from_index(instruction.accounts[1] as usize)).into_string();
@@ -317,9 +317,9 @@ fn parse_close_account_instruction(
     })
 }
 
-fn parse_freeze_account_instruction(
+pub fn parse_freeze_account_instruction(
     instruction: &StructuredInstruction,
-    context: &InstructionContext,
+    context: &TransactionContext,
 ) -> Result<pb::spl_token::FreezeAccountEvent, &'static str> {
     let source = context.get_token_account_from_index(instruction.accounts[0] as usize);
     Ok(pb::spl_token::FreezeAccountEvent {
@@ -327,9 +327,9 @@ fn parse_freeze_account_instruction(
     })
 }
 
-fn parse_thaw_account_instruction(
+pub fn parse_thaw_account_instruction(
     instruction: &StructuredInstruction,
-    context: &InstructionContext,
+    context: &TransactionContext,
 ) -> Result<pb::spl_token::ThawAccountEvent, &'static str> {
     let source = context.get_token_account_from_index(instruction.accounts[0] as usize);
     Ok(pb::spl_token::ThawAccountEvent {
@@ -337,9 +337,9 @@ fn parse_thaw_account_instruction(
     })
 }
 
-fn parse_initialize_immutable_owner_instruction(
+pub fn parse_initialize_immutable_owner_instruction(
     _instruction: &StructuredInstruction,
-    _context: &InstructionContext,
+    _context: &TransactionContext,
 ) -> Result<pb::spl_token::InitializeImmutableOwnerEvent, &'static str> {
     Ok(pb::spl_token::InitializeImmutableOwnerEvent::default())
 }
