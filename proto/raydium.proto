@@ -14,6 +14,7 @@ message TransactionRaydiumEvents {
 
 message RaydiumEvent {
     string amm = 1;
+    string user = 2;
     oneof data {
         InitializeData initialize = 3;
         DepositData deposit = 4;
@@ -29,6 +30,7 @@ message InitializeData {
     string pcMint = 4;
     string coinMint = 5;
     string lpMint = 6;
+    uint32 nonce = 7;
 }
 
 message DepositData {

@@ -20,6 +20,8 @@ pub struct TransactionRaydiumEvents {
 pub struct RaydiumEvent {
     #[prost(string, tag="1")]
     pub amm: ::prost::alloc::string::String,
+    #[prost(string, tag="2")]
+    pub user: ::prost::alloc::string::String,
     #[prost(oneof="raydium_event::Data", tags="3, 4, 5, 6")]
     pub data: ::core::option::Option<raydium_event::Data>,
 }
@@ -53,6 +55,8 @@ pub struct InitializeData {
     pub coin_mint: ::prost::alloc::string::String,
     #[prost(string, tag="6")]
     pub lp_mint: ::prost::alloc::string::String,
+    #[prost(uint32, tag="7")]
+    pub nonce: u32,
 }
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
