@@ -467,6 +467,30 @@ dependencies = [
 ]
 
 [[package]]
+name = "spl-token-substream"
+version = "0.1.0"
+source = "git+https://github.com/0xpapercut/spl-token-substream?branch=main#a718782e8d0111441338ff500e16cb854c3fce87"
+dependencies = [
+ "arrayref",
+ "arrform",
+ "base64",
+ "bincode",
+ "bs58 0.5.0",
+ "bytemuck",
+ "num-derive",
+ "prost",
+ "regex",
+ "safe-transmute",
+ "serde",
+ "substreams",
+ "substreams-solana",
+ "substreams-solana-program-instructions",
+ "substreams-solana-spl-token",
+ "substreams-solana-structured-instructions",
+ "substreams-solana-utils",
+]
+
+[[package]]
 name = "substreams"
 version = "0.5.13"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -556,10 +580,35 @@ dependencies = [
  "regex",
  "safe-transmute",
  "serde",
+ "spl-token-substream",
  "substreams",
  "substreams-solana",
  "substreams-solana-program-instructions",
+ "substreams-solana-raydium-amm",
  "substreams-solana-structured-instructions",
+ "substreams-solana-utils",
+]
+
+[[package]]
+name = "substreams-solana-raydium-amm"
+version = "0.1.0"
+source = "git+https://github.com/0xpapercut/substreams-solana-raydium-amm?branch=main#8435de07dbbd1bc2ca16de16ce55eff04754f3a8"
+dependencies = [
+ "arrayref",
+ "base64",
+ "bincode",
+ "bytemuck",
+ "safe-transmute",
+ "serde",
+ "substreams-solana-program-instructions",
+]
+
+[[package]]
+name = "substreams-solana-spl-token"
+version = "0.1.0"
+source = "git+https://github.com/0xpapercut/substreams-solana-spl-token?branch=main#4c879aa7505b5b7aa177f8a5ba5821baabaf0c82"
+dependencies = [
+ "substreams-solana-program-instructions",
 ]
 
 [[package]]
@@ -569,6 +618,18 @@ source = "git+https://github.com/0xpapercut/substreams-solana-structured-instruc
 dependencies = [
  "substreams",
  "substreams-solana",
+]
+
+[[package]]
+name = "substreams-solana-utils"
+version = "0.1.0"
+source = "git+https://github.com/0xpapercut/substreams-solana-utils?branch=main#462cc5e685f4bada81deea8ca4ba12ab8b986a86"
+dependencies = [
+ "bs58 0.5.0",
+ "substreams-solana",
+ "substreams-solana-program-instructions",
+ "substreams-solana-spl-token",
+ "substreams-solana-structured-instructions",
 ]
 
 [[package]]
