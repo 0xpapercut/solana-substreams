@@ -6,5 +6,4 @@ Stream Raydium events with [substreams](https://substreams.streamingfast.io).
 2. Run `. ./token.sh`
 3. Start streaming with `make stream START=<slot>`. You can verify the most recent slot on the [Solana Explorer](https://explorer.solana.com).
 
-## Limitations
-Currently only swap transactions are parsed. Thus the stream does not register `Initialize`, `Deposit` or `Withdraw` events. Feel free to send a PR though :).
+Suported events are swap, initialize, deposit and withdraw.
