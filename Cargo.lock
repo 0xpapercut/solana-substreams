@@ -399,6 +399,30 @@ dependencies = [
 ]
 
 [[package]]
+name = "raydium-substream"
+version = "1.0.0"
+dependencies = [
+ "arrayref",
+ "arrform",
+ "base64",
+ "bincode",
+ "bs58 0.5.0",
+ "bytemuck",
+ "num-derive",
+ "prost",
+ "regex",
+ "safe-transmute",
+ "serde",
+ "spl-token-substream",
+ "substreams",
+ "substreams-solana",
+ "substreams-solana-program-instructions",
+ "substreams-solana-raydium-amm",
+ "substreams-solana-structured-instructions",
+ "substreams-solana-utils",
+]
+
+[[package]]
 name = "regex"
 version = "1.10.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -563,30 +587,6 @@ dependencies = [
  "anyhow",
  "num_enum",
  "substreams",
-]
-
-[[package]]
-name = "substreams-solana-quickstart"
-version = "1.0.0"
-dependencies = [
- "arrayref",
- "arrform",
- "base64",
- "bincode",
- "bs58 0.5.0",
- "bytemuck",
- "num-derive",
- "prost",
- "regex",
- "safe-transmute",
- "serde",
- "spl-token-substream",
- "substreams",
- "substreams-solana",
- "substreams-solana-program-instructions",
- "substreams-solana-raydium-amm",
- "substreams-solana-structured-instructions",
- "substreams-solana-utils",
 ]
 
 [[package]]

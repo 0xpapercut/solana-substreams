@@ -1,10 +1,10 @@
 [package]
-name = "substreams-solana-quickstart"
+name = "raydium-substream"
 version = "1.0.0"
 edition = "2021"
 
 [lib]
-name = "substreams"
+name = "raydium_substream"
 crate-type = ["lib", "cdylib"]
 
 [dependencies]
