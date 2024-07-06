@@ -7,7 +7,7 @@ use substreams_solana_program_instructions::pubkey::Pubkey;
 
 use substreams_solana_spl_token as spl_token;
 use spl_token::{TokenInstruction, TOKEN_PROGRAM};
-use structured_instructions::{
+use substreams_solana_structured_instructions::{
     get_structured_instructions,
     StructuredInstruction,
     StructuredInstructions,
