@@ -1,7 +1,7 @@
 use substreams::errors::Error;
 use substreams_solana::pb::sf::solana::r#type::v1::ConfirmedTransaction;
 use substreams_solana::pb::sf::solana::r#type::v1::Block;
-use structured_instructions::{get_structured_instructions, StructuredInstruction, StructuredInstructions};
+use substreams_solana_structured_instructions::{get_structured_instructions, StructuredInstruction, StructuredInstructions};
 
 use substreams_solana_raydium_amm as raydium_amm;
 use raydium_amm::instruction::AmmInstruction;
@@ -9,7 +9,8 @@ use raydium_amm::RAYDIUM_LIQUIDITY_POOL;
 
 use spl_token_substream;
 use bs58;
-mod pb;
+
+pub mod pb;
 
 use substreams_solana_utils::{
     TransactionContext,
