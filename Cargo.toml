@@ -31,3 +31,8 @@ substreams-solana-utils = { git = "https://github.com/0xpapercut/substreams-sola
 lto = true
 opt-level = 's'
 strip = "debuginfo"
+
+[patch.'https://github.com/0xpapercut/substreams-solana-utils']
+substreams-solana-utils = { git = "https://github.com/nabeel99/substreams-solana-utils", branch = "main" }
+[patch.'https://github.com/0xpapercut/spl-token-substream']
+spl-token-substream = { git = "https://github.com/nabeel99/spl-token-substream", branch = "main" }
