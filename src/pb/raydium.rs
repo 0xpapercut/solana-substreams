@@ -1,15 +1,13 @@
 // @generated
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
-pub struct BlockRaydiumEvents {
+pub struct RaydiumBlockEvents {
     #[prost(message, repeated, tag="1")]
-    pub transactions: ::prost::alloc::vec::Vec<TransactionRaydiumEvents>,
-    #[prost(uint64, tag="2")]
-    pub slot: u64,
+    pub transactions: ::prost::alloc::vec::Vec<RaydiumTransactionEvents>,
 }
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
-pub struct TransactionRaydiumEvents {
+pub struct RaydiumTransactionEvents {
     #[prost(string, tag="1")]
     pub signature: ::prost::alloc::string::String,
     #[prost(message, repeated, tag="2")]
@@ -67,6 +65,12 @@ pub struct DepositData {
     pub coin_amount: u64,
     #[prost(uint64, tag="3")]
     pub lp_amount: u64,
+    #[prost(string, tag="4")]
+    pub pc_mint: ::prost::alloc::string::String,
+    #[prost(string, tag="5")]
+    pub coin_mint: ::prost::alloc::string::String,
+    #[prost(string, tag="6")]
+    pub lp_mint: ::prost::alloc::string::String,
 }
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
@@ -77,6 +81,12 @@ pub struct WithdrawData {
     pub coin_amount: u64,
     #[prost(uint64, tag="3")]
     pub lp_amount: u64,
+    #[prost(string, tag="4")]
+    pub pc_mint: ::prost::alloc::string::String,
+    #[prost(string, tag="5")]
+    pub coin_mint: ::prost::alloc::string::String,
+    #[prost(string, tag="6")]
+    pub lp_mint: ::prost::alloc::string::String,
 }
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]

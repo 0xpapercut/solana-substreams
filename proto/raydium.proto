@@ -2,12 +2,11 @@ syntax = "proto3";
 
 package raydium;
 
-message BlockRaydiumEvents {
-    repeated TransactionRaydiumEvents transactions = 1;
-    uint64 slot = 2;
+message RaydiumBlockEvents {
+    repeated RaydiumTransactionEvents transactions = 1;
 }
 
-message TransactionRaydiumEvents {
+message RaydiumTransactionEvents {
     string signature = 1;
     repeated RaydiumEvent events = 2;
 }
