@@ -15,11 +15,11 @@ binaries:
     file: target/wasm32-unknown-unknown/release/raydium_substream.wasm
 
 modules:
-  - name: raydium_events
+  - name: raydium_block_events
     kind: map
     inputs:
       - source: sf.solana.type.v1.Block
     output:
-      type: proto:raydium.BlockRaydiumEvents
+      type: proto:raydium.RaydiumBlockEvents
 
 network: solana
