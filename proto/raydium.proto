@@ -37,12 +37,18 @@ message DepositData {
     uint64 pcAmount = 1;
     uint64 coinAmount = 2;
     uint64 lpAmount = 3;
+    string pcMint = 4;
+    string coinMint = 5;
+    string lpMint = 6;
 }
 
 message WithdrawData {
     uint64 pcAmount = 1;
     uint64 coinAmount = 2;
     uint64 lpAmount = 3;
+    string pcMint = 4;
+    string coinMint = 5;
+    string lpMint = 6;
 }
 
 message SwapData {
