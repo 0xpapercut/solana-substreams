@@ -12,47 +12,53 @@ message RaydiumTransactionEvents {
 }
 
 message RaydiumEvent {
-    string amm = 1;
-    string user = 2;
-    oneof data {
-        InitializeData initialize = 3;
-        DepositData deposit = 4;
-        WithdrawData withdraw = 5;
-        SwapData swap = 6;
+    oneof event {
+        InitializeEvent initialize = 1;
+        DepositEvent deposit = 2;
+        WithdrawEvent withdraw = 3;
+        SwapEvent swap = 4;
     }
 }
 
-message InitializeData {
-    uint64 pcInitAmount = 1;
-    uint64 coinInitAmount = 2;
-    uint64 lpInitAmount = 3;
-    string pcMint = 4;
-    string coinMint = 5;
-    string lpMint = 6;
-    uint32 nonce = 7;
+message InitializeEvent {
+    string amm = 1;
+    string user = 2;
+    uint64 pcInitAmount = 3;
+    uint64 coinInitAmount = 4;
+    uint64 lpInitAmount = 5;
+    string pcMint = 6;
+    string coinMint = 7;
+    string lpMint = 8;
+    uint32 nonce = 9;
 }
 
-message DepositData {
-    uint64 pcAmount = 1;
-    uint64 coinAmount = 2;
-    uint64 lpAmount = 3;
-    string pcMint = 4;
-    string coinMint = 5;
-    string lpMint = 6;
+message DepositEvent {
+    string amm = 1;
+    string user = 2;
+    uint64 pcAmount = 3;
+    uint64 coinAmount = 4;
+    uint64 lpAmount = 5;
+    string pcMint = 6;
+    string coinMint = 7;
+    string lpMint = 8;
 }
 
-message WithdrawData {
-    uint64 pcAmount = 1;
-    uint64 coinAmount = 2;
-    uint64 lpAmount = 3;
-    string pcMint = 4;
-    string coinMint = 5;
-    string lpMint = 6;
+message WithdrawEvent {
+    string amm = 1;
+    string user = 2;
+    uint64 pcAmount = 3;
+    uint64 coinAmount = 4;
+    uint64 lpAmount = 5;
+    string pcMint = 6;
+    string coinMint = 7;
+    string lpMint = 8;
 }
 
-message SwapData {
-    string mintIn = 1;
-    string mintOut = 2;
-    uint64 amountIn = 3;
-    uint64 amountOut = 4;
+message SwapEvent {
+    string amm = 1;
+    string user = 2;
+    string mintIn = 3;
+    string mintOut = 4;
+    uint64 amountIn = 5;
+    uint64 amountOut = 6;
 }
