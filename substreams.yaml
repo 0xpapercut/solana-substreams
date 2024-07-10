@@ -1,7 +1,7 @@
 specVersion: v0.1.0
 package:
   name: 'raydium_events'
-  version: v1.0.0
+  version: v0.1.0
 
 protobuf:
   files:
