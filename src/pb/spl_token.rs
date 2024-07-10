@@ -10,9 +10,7 @@ pub struct SplTokenBlockEvents {
 pub struct SplTokenTransactionEvents {
     #[prost(string, tag="1")]
     pub signature: ::prost::alloc::string::String,
-    #[prost(uint64, tag="2")]
-    pub slot: u64,
-    #[prost(message, repeated, tag="3")]
+    #[prost(message, repeated, tag="2")]
     pub events: ::prost::alloc::vec::Vec<SplTokenEvent>,
 }
 #[allow(clippy::derive_partial_eq_without_eq)]
@@ -72,10 +70,13 @@ pub struct InitializeAccountEvent {
     #[prost(message, optional, tag="1")]
     pub account: ::core::option::Option<TokenAccount>,
 }
-/// TODO
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct InitializeMultisigEvent {
+    #[prost(string, tag="1")]
+    pub multisig: ::prost::alloc::string::String,
+    #[prost(string, repeated, tag="2")]
+    pub signers: ::prost::alloc::vec::Vec<::prost::alloc::string::String>,
 }
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
@@ -84,7 +85,9 @@ pub struct TransferEvent {
     pub source: ::core::option::Option<TokenAccount>,
     #[prost(message, optional, tag="2")]
     pub destination: ::core::option::Option<TokenAccount>,
-    #[prost(uint64, tag="3")]
+    #[prost(string, tag="3")]
+    pub authority: ::prost::alloc::string::String,
+    #[prost(uint64, tag="4")]
     pub amount: u64,
 }
 #[allow(clippy::derive_partial_eq_without_eq)]
@@ -108,9 +111,11 @@ pub struct RevokeEvent {
 pub struct SetAuthorityEvent {
     #[prost(string, tag="1")]
     pub mint: ::prost::alloc::string::String,
-    #[prost(enumeration="AuthorityType", tag="2")]
+    #[prost(string, tag="2")]
+    pub authority: ::prost::alloc::string::String,
+    #[prost(enumeration="AuthorityType", tag="3")]
     pub authority_type: i32,
-    #[prost(string, optional, tag="3")]
+    #[prost(string, optional, tag="4")]
     pub new_authority: ::core::option::Option<::prost::alloc::string::String>,
 }
 #[allow(clippy::derive_partial_eq_without_eq)]
@@ -118,9 +123,11 @@ pub struct SetAuthorityEvent {
 pub struct MintToEvent {
     #[prost(string, tag="1")]
     pub mint: ::prost::alloc::string::String,
-    #[prost(message, optional, tag="2")]
+    #[prost(string, tag="2")]
+    pub authority: ::prost::alloc::string::String,
+    #[prost(message, optional, tag="3")]
     pub destination: ::core::option::Option<TokenAccount>,
-    #[prost(uint64, tag="3")]
+    #[prost(uint64, tag="4")]
     pub amount: u64,
 }
 #[allow(clippy::derive_partial_eq_without_eq)]
@@ -128,6 +135,8 @@ pub struct MintToEvent {
 pub struct BurnEvent {
     #[prost(message, optional, tag="1")]
     pub source: ::core::option::Option<TokenAccount>,
+    #[prost(string, tag="3")]
+    pub authority: ::prost::alloc::string::String,
     #[prost(uint64, tag="2")]
     pub amount: u64,
 }
@@ -144,12 +153,16 @@ pub struct CloseAccountEvent {
 pub struct FreezeAccountEvent {
     #[prost(message, optional, tag="1")]
     pub source: ::core::option::Option<TokenAccount>,
+    #[prost(string, tag="2")]
+    pub freeze_authority: ::prost::alloc::string::String,
 }
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct ThawAccountEvent {
     #[prost(message, optional, tag="1")]
     pub source: ::core::option::Option<TokenAccount>,
+    #[prost(string, tag="2")]
+    pub freeze_authority: ::prost::alloc::string::String,
 }
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
@@ -170,10 +183,11 @@ pub struct TokenAccount {
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash, PartialOrd, Ord, ::prost::Enumeration)]
 #[repr(i32)]
 pub enum AuthorityType {
-    MintTokens = 0,
-    FreezeAccount = 1,
-    AccountOwner = 2,
-    CloseAccount = 3,
+    Null = 0,
+    MintTokens = 1,
+    FreezeAccount = 2,
+    AccountOwner = 3,
+    CloseAccount = 4,
 }
 impl AuthorityType {
     /// String value of the enum field names used in the ProtoBuf definition.
@@ -182,6 +196,7 @@ impl AuthorityType {
     /// (if the ProtoBuf definition does not change) and safe for programmatic use.
     pub fn as_str_name(&self) -> &'static str {
         match self {
+            AuthorityType::Null => "Null",
             AuthorityType::MintTokens => "MintTokens",
             AuthorityType::FreezeAccount => "FreezeAccount",
             AuthorityType::AccountOwner => "AccountOwner",
@@ -191,6 +206,7 @@ impl AuthorityType {
     /// Creates an enum from field names used in the ProtoBuf definition.
     pub fn from_str_name(value: &str) -> ::core::option::Option<Self> {
         match value {
+            "Null" => Some(Self::Null),
             "MintTokens" => Some(Self::MintTokens),
             "FreezeAccount" => Some(Self::FreezeAccount),
             "AccountOwner" => Some(Self::AccountOwner),

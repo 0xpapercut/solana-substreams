@@ -8,8 +8,7 @@ message SplTokenBlockEvents {
 
 message SplTokenTransactionEvents {
     string signature = 1;
-    uint64 slot = 2;
-    repeated SplTokenEvent events = 3;
+    repeated SplTokenEvent events = 2;
 }
 
 message SplTokenEvent {
@@ -42,13 +41,15 @@ message InitializeAccountEvent {
 }
 
 message InitializeMultisigEvent {
-    // TODO
+    string multisig = 1;
+    repeated string signers = 2;
 }
 
 message TransferEvent {
     TokenAccount source = 1;
     TokenAccount destination = 2;
-    uint64 amount = 3;
+    string authority = 3;
+    uint64 amount = 4;
 }
 
 message ApproveEvent {
@@ -63,18 +64,21 @@ message RevokeEvent {
 
 message SetAuthorityEvent {
     string mint = 1;
-    AuthorityType authority_type = 2;
-    optional string new_authority = 3;
+    string authority = 2;
+    AuthorityType authority_type = 3;
+    optional string new_authority = 4;
 }
 
 message MintToEvent {
     string mint = 1;
-    TokenAccount destination = 2;
-    uint64 amount = 3;
+    string authority = 2;
+    TokenAccount destination = 3;
+    uint64 amount = 4;
 }
 
 message BurnEvent {
     TokenAccount source = 1;
+    string authority = 3;
     uint64 amount = 2;
 }
 
@@ -85,10 +89,12 @@ message CloseAccountEvent {
 
 message FreezeAccountEvent {
     TokenAccount source = 1;
+    string freeze_authority = 2;
 }
 
 message ThawAccountEvent {
     TokenAccount source = 1;
+    string freeze_authority = 2;
 }
 
 message InitializeImmutableOwnerEvent {
@@ -102,8 +108,9 @@ message TokenAccount {
 }
 
 enum AuthorityType {
-    MintTokens = 0;
-    FreezeAccount = 1;
-    AccountOwner = 2;
-    CloseAccount = 3;
+    Null = 0;
+    MintTokens = 1;
+    FreezeAccount = 2;
+    AccountOwner = 3;
+    CloseAccount = 4;
 }
