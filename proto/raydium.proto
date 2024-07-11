@@ -8,15 +8,17 @@ message RaydiumBlockEvents {
 
 message RaydiumTransactionEvents {
     string signature = 1;
-    repeated RaydiumEvent events = 2;
+    uint32 transaction_index = 2;
+    repeated RaydiumEvent events = 3;
 }
 
 message RaydiumEvent {
+    uint32 instruction_index = 1;
     oneof event {
-        InitializeEvent initialize = 1;
-        DepositEvent deposit = 2;
-        WithdrawEvent withdraw = 3;
-        SwapEvent swap = 4;
+        InitializeEvent initialize = 2;
+        DepositEvent deposit = 3;
+        WithdrawEvent withdraw = 4;
+        SwapEvent swap = 5;
     }
 }
 

@@ -40,11 +40,12 @@ fn raydium_block_events(block: Block) -> Result<RaydiumBlockEvents, Error> {
 
 pub fn parse_block(block: &Block) -> Vec<RaydiumTransactionEvents> {
     let mut block_events: Vec<RaydiumTransactionEvents> = Vec::new();
-    for transaction in &block.transactions {
+    for (i, transaction) in block.transactions.iter().enumerate() {
         let events = parse_transaction(transaction);
         if !events.is_empty() {
             block_events.push(RaydiumTransactionEvents {
                 signature: bs58::encode(transaction.signature()).into_string(),
+                transaction_index: i as u32,
                 events,
             });
         }
@@ -61,13 +62,16 @@ pub fn parse_transaction(transaction: &ConfirmedTransaction) -> Vec<RaydiumEvent
         return Vec::new();
     }
 
-    for instruction in instructions.flattened() {
+    for (i, instruction) in instructions.flattened().iter().enumerate() {
         if bs58::encode(context.get_account_from_index(instruction.program_id_index as usize)).into_string() != RAYDIUM_LIQUIDITY_POOL {
             continue;
         }
         match parse_instruction(&instruction, &context) {
             Ok(Some(event)) => {
-                events.push(RaydiumEvent { event: Some(event) })
+                events.push(RaydiumEvent {
+                    instruction_index: i as u32,
+                    event: Some(event)
+                })
             }
             Ok(None) => (),
             Err(error) => substreams::log::println(format!("Failed to process instruction of transaction {}: {}", &context.signature, error))

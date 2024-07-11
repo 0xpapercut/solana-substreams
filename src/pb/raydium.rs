@@ -10,13 +10,17 @@ pub struct RaydiumBlockEvents {
 pub struct RaydiumTransactionEvents {
     #[prost(string, tag="1")]
     pub signature: ::prost::alloc::string::String,
-    #[prost(message, repeated, tag="2")]
+    #[prost(uint32, tag="2")]
+    pub transaction_index: u32,
+    #[prost(message, repeated, tag="3")]
     pub events: ::prost::alloc::vec::Vec<RaydiumEvent>,
 }
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct RaydiumEvent {
-    #[prost(oneof="raydium_event::Event", tags="1, 2, 3, 4")]
+    #[prost(uint32, tag="1")]
+    pub instruction_index: u32,
+    #[prost(oneof="raydium_event::Event", tags="2, 3, 4, 5")]
     pub event: ::core::option::Option<raydium_event::Event>,
 }
 /// Nested message and enum types in `RaydiumEvent`.
@@ -24,13 +28,13 @@ pub mod raydium_event {
     #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Oneof)]
     pub enum Event {
-        #[prost(message, tag="1")]
-        Initialize(super::InitializeEvent),
         #[prost(message, tag="2")]
-        Deposit(super::DepositEvent),
+        Initialize(super::InitializeEvent),
         #[prost(message, tag="3")]
-        Withdraw(super::WithdrawEvent),
+        Deposit(super::DepositEvent),
         #[prost(message, tag="4")]
+        Withdraw(super::WithdrawEvent),
+        #[prost(message, tag="5")]
         Swap(super::SwapEvent),
     }
 }
