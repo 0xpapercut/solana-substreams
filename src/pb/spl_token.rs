@@ -10,13 +10,17 @@ pub struct SplTokenBlockEvents {
 pub struct SplTokenTransactionEvents {
     #[prost(string, tag="1")]
     pub signature: ::prost::alloc::string::String,
-    #[prost(message, repeated, tag="2")]
+    #[prost(uint32, tag="2")]
+    pub transaction_index: u32,
+    #[prost(message, repeated, tag="3")]
     pub events: ::prost::alloc::vec::Vec<SplTokenEvent>,
 }
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct SplTokenEvent {
-    #[prost(oneof="spl_token_event::Event", tags="1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13")]
+    #[prost(uint32, tag="1")]
+    pub instruction_index: u32,
+    #[prost(oneof="spl_token_event::Event", tags="2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14")]
     pub event: ::core::option::Option<spl_token_event::Event>,
 }
 /// Nested message and enum types in `SplTokenEvent`.
@@ -24,31 +28,31 @@ pub mod spl_token_event {
     #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Oneof)]
     pub enum Event {
-        #[prost(message, tag="1")]
-        Transfer(super::TransferEvent),
         #[prost(message, tag="2")]
-        InitializeMint(super::InitializeMintEvent),
+        Transfer(super::TransferEvent),
         #[prost(message, tag="3")]
-        InitializeImmutableOwner(super::InitializeImmutableOwnerEvent),
+        InitializeMint(super::InitializeMintEvent),
         #[prost(message, tag="4")]
-        InitializeAccount(super::InitializeAccountEvent),
+        InitializeImmutableOwner(super::InitializeImmutableOwnerEvent),
         #[prost(message, tag="5")]
-        InitializeMultisig(super::InitializeMultisigEvent),
+        InitializeAccount(super::InitializeAccountEvent),
         #[prost(message, tag="6")]
-        Approve(super::ApproveEvent),
+        InitializeMultisig(super::InitializeMultisigEvent),
         #[prost(message, tag="7")]
-        MintTo(super::MintToEvent),
+        Approve(super::ApproveEvent),
         #[prost(message, tag="8")]
-        Revoke(super::RevokeEvent),
+        MintTo(super::MintToEvent),
         #[prost(message, tag="9")]
-        SetAuthority(super::SetAuthorityEvent),
+        Revoke(super::RevokeEvent),
         #[prost(message, tag="10")]
-        Burn(super::BurnEvent),
+        SetAuthority(super::SetAuthorityEvent),
         #[prost(message, tag="11")]
-        CloseAccount(super::CloseAccountEvent),
+        Burn(super::BurnEvent),
         #[prost(message, tag="12")]
-        FreezeAccount(super::FreezeAccountEvent),
+        CloseAccount(super::CloseAccountEvent),
         #[prost(message, tag="13")]
+        FreezeAccount(super::FreezeAccountEvent),
+        #[prost(message, tag="14")]
         ThawAccount(super::ThawAccountEvent),
     }
 }
@@ -124,7 +128,7 @@ pub struct MintToEvent {
     #[prost(string, tag="1")]
     pub mint: ::prost::alloc::string::String,
     #[prost(string, tag="2")]
-    pub authority: ::prost::alloc::string::String,
+    pub mint_authority: ::prost::alloc::string::String,
     #[prost(message, optional, tag="3")]
     pub destination: ::core::option::Option<TokenAccount>,
     #[prost(uint64, tag="4")]

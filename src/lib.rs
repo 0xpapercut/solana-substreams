@@ -49,11 +49,12 @@ fn spl_token_block_events(block: Block) -> Result<SplTokenBlockEvents, Error> {
 
 pub fn parse_block(block: &Block) -> Vec<SplTokenTransactionEvents> {
     let mut transactions_events: Vec<SplTokenTransactionEvents> = Vec::new();
-    for transaction in block.transactions() {
+    for (i, transaction) in block.transactions().enumerate() {
         let events = parse_transaction(transaction);
         if !events.is_empty() {
             transactions_events.push(SplTokenTransactionEvents {
                 signature: bs58::encode(transaction.signature()).into_string(),
+                transaction_index: i as u32,
                 events
             })
         }
@@ -71,13 +72,16 @@ pub fn parse_transaction(transaction: &ConfirmedTransaction) -> Vec<SplTokenEven
         return Vec::new();
     }
 
-    for instruction in instructions.flattened() {
+    for (i, instruction) in instructions.flattened().iter().enumerate() {
         if bs58::encode(context.get_account_from_index(instruction.program_id_index as usize)).into_string() != TOKEN_PROGRAM {
             continue;
         }
         match parse_instruction(&instruction, &context) {
             Ok(event) => {
-                events.push(SplTokenEvent { event });
+                events.push(SplTokenEvent {
+                    instruction_index: i as u32,
+                    event
+                });
             }
             Err(e) => panic!("Transaction {}: {}", signature, e),
         }
@@ -320,12 +324,12 @@ fn _parse_mint_to_instruction(
 ) -> Result<MintToEvent, &'static str> {
     let mint = bs58::encode(context.get_account_from_index(instruction.accounts[0] as usize)).into_string();
     let destination = context.get_token_account_from_index(instruction.accounts[1] as usize);
-    let authority = bs58::encode(context.get_account_from_index(instruction.accounts[2] as usize)).into_string();
+    let mint_authority = bs58::encode(context.get_account_from_index(instruction.accounts[2] as usize)).into_string();
 
     Ok(MintToEvent {
         mint,
         destination: Some(destination.into()),
-        authority,
+        mint_authority,
         amount,
     })
 }

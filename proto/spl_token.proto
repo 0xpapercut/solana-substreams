@@ -8,24 +8,26 @@ message SplTokenBlockEvents {
 
 message SplTokenTransactionEvents {
     string signature = 1;
-    repeated SplTokenEvent events = 2;
+    uint32 transaction_index = 2;
+    repeated SplTokenEvent events = 3;
 }
 
 message SplTokenEvent {
+    uint32 instruction_index = 1;
     oneof event {
-        TransferEvent transfer = 1;
-        InitializeMintEvent initialize_mint = 2;
-        InitializeImmutableOwnerEvent initialize_immutable_owner = 3;
-        InitializeAccountEvent initialize_account = 4;
-        InitializeMultisigEvent initialize_multisig = 5;
-        ApproveEvent approve = 6;
-        MintToEvent mint_to = 7;
-        RevokeEvent revoke = 8;
-        SetAuthorityEvent set_authority = 9;
-        BurnEvent burn = 10;
-        CloseAccountEvent close_account = 11;
-        FreezeAccountEvent freeze_account = 12;
-        ThawAccountEvent thaw_account = 13;
+        TransferEvent transfer = 2;
+        InitializeMintEvent initialize_mint = 3;
+        InitializeImmutableOwnerEvent initialize_immutable_owner = 4;
+        InitializeAccountEvent initialize_account = 5;
+        InitializeMultisigEvent initialize_multisig = 6;
+        ApproveEvent approve = 7;
+        MintToEvent mint_to = 8;
+        RevokeEvent revoke = 9;
+        SetAuthorityEvent set_authority = 10;
+        BurnEvent burn = 11;
+        CloseAccountEvent close_account = 12;
+        FreezeAccountEvent freeze_account = 13;
+        ThawAccountEvent thaw_account = 14;
     }
 }
 
@@ -71,7 +73,7 @@ message SetAuthorityEvent {
 
 message MintToEvent {
     string mint = 1;
-    string authority = 2;
+    string mint_authority = 2;
     TokenAccount destination = 3;
     uint64 amount = 4;
 }
