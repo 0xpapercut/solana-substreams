@@ -3,6 +3,8 @@ use bs58;
 use substreams::errors::Error;
 use substreams_solana::pb::sf::solana::r#type::v1::ConfirmedTransaction;
 use substreams_solana::pb::sf::solana::r#type::v1::Block;
+use substreams_database_change::tables::Tables;
+use substreams_database_change::pb::database::TableChange;
 use substreams_solana_structured_instructions::{
     get_structured_instructions,
     StructuredInstruction,
@@ -229,4 +231,66 @@ fn _parse_withdraw_instruction(
         coin_mint,
         lp_mint,
     })
+}
+
+pub fn tables_changes(block: &Block) -> Result<Vec<TableChange>, substreams::errors::Error> {
+    let mut tables = Tables::new();
+    for transaction in parse_block(block) {
+        for event in transaction.events.iter() {
+            match &event.event {
+                Some(Event::Swap(swap)) => {
+                    tables.create_row("raydium_swap_events", [("signature", transaction.signature.clone()), ("instruction_index", event.instruction_index.to_string())])
+                        .set("transaction_index", transaction.transaction_index)
+                        .set("slot", block.slot)
+                        .set("amm", &swap.amm)
+                        .set("user", &swap.user)
+                        .set("amount_in", swap.amount_in)
+                        .set("amount_out", swap.amount_out)
+                        .set("mint_in", &swap.mint_in)
+                        .set("mint_out", &swap.mint_out);
+                }
+                Some(Event::Initialize(initialize)) => {
+                    tables.create_row("raydium_initialize_events", [("signature", transaction.signature.clone()), ("instruction_index", event.instruction_index.to_string())])
+                        .set("transaction_index", transaction.transaction_index)
+                        .set("slot", block.slot)
+                        .set("amm", &initialize.amm)
+                        .set("user", &initialize.user)
+                        .set("pc_init_amount", initialize.pc_init_amount)
+                        .set("coin_init_amount", initialize.coin_init_amount)
+                        .set("lp_init_amount", initialize.lp_init_amount)
+                        .set("pc_mint", &initialize.pc_mint)
+                        .set("coin_mint", &initialize.coin_mint)
+                        .set("lp_mint", &initialize.lp_mint);
+                },
+                Some(Event::Deposit(deposit)) => {
+                    tables.create_row("raydium_deposit_events", [("signature", transaction.signature.clone()), ("instruction_index", event.instruction_index.to_string())])
+                        .set("transaction_index", transaction.transaction_index)
+                        .set("slot", block.slot)
+                        .set("amm", &deposit.amm)
+                        .set("user", &deposit.user)
+                        .set("pc_amount", deposit.pc_amount)
+                        .set("coin_amount", deposit.coin_amount)
+                        .set("lp_amount", deposit.lp_amount)
+                        .set("pc_mint", &deposit.pc_mint)
+                        .set("coin_mint", &deposit.coin_mint)
+                        .set("lp_mint", &deposit.lp_mint);
+                },
+                Some(Event::Withdraw(withdraw)) => {
+                    tables.create_row("raydium_withdraw_events", [("signature", transaction.signature.clone()), ("instruction_index", event.instruction_index.to_string())])
+                        .set("transaction_index", transaction.transaction_index)
+                        .set("slot", block.slot)
+                        .set("amm", &withdraw.amm)
+                        .set("user", &withdraw.user)
+                        .set("pc_amount", withdraw.pc_amount)
+                        .set("coin_amount", withdraw.coin_amount)
+                        .set("lp_amount", withdraw.lp_amount)
+                        .set("pc_mint", &withdraw.pc_mint)
+                        .set("coin_mint", &withdraw.coin_mint)
+                        .set("lp_mint", &withdraw.lp_mint);
+                }
+                None => ()
+            }
+        }
+    }
+    Ok(tables.to_database_changes().table_changes)
 }
