@@ -393,7 +393,7 @@ dependencies = [
  "substreams-database-change",
  "substreams-solana",
  "substreams-solana-raydium-amm",
- "substreams-solana-structured-instructions 0.1.0",
+ "substreams-solana-structured-instructions",
  "substreams-solana-utils",
 ]
 
@@ -468,15 +468,15 @@ dependencies = [
 [[package]]
 name = "spl-token-substream"
 version = "0.1.0"
+source = "git+https://github.com/0xpapercut/spl-token-substream?rev=696500d8c615b02310b8b4387cf5b02b1fb9fd70#696500d8c615b02310b8b4387cf5b02b1fb9fd70"
 dependencies = [
  "bs58 0.5.0",
  "prost",
  "substreams",
- "substreams-database-change",
  "substreams-solana",
  "substreams-solana-program-instructions",
- "substreams-solana-spl-token 0.1.0",
- "substreams-solana-structured-instructions 0.1.0",
+ "substreams-solana-spl-token",
+ "substreams-solana-structured-instructions",
  "substreams-solana-utils",
 ]
 
@@ -583,24 +583,9 @@ dependencies = [
 [[package]]
 name = "substreams-solana-spl-token"
 version = "0.1.0"
-dependencies = [
- "substreams-solana-program-instructions",
-]
-
-[[package]]
-name = "substreams-solana-spl-token"
-version = "0.1.0"
 source = "git+https://github.com/0xpapercut/substreams-solana-spl-token?branch=main#4c879aa7505b5b7aa177f8a5ba5821baabaf0c82"
 dependencies = [
  "substreams-solana-program-instructions",
-]
-
-[[package]]
-name = "substreams-solana-structured-instructions"
-version = "0.1.0"
-dependencies = [
- "substreams",
- "substreams-solana",
 ]
 
 [[package]]
@@ -615,12 +600,13 @@ dependencies = [
 [[package]]
 name = "substreams-solana-utils"
 version = "0.1.0"
+source = "git+https://github.com/0xpapercut/substreams-solana-utils?branch=main#e99b0279e56bb120f11bb04ce4bcb4fc1f0f6ac7"
 dependencies = [
  "bs58 0.5.0",
  "substreams-solana",
  "substreams-solana-program-instructions",
- "substreams-solana-spl-token 0.1.0 (git+https://github.com/0xpapercut/substreams-solana-spl-token?branch=main)",
- "substreams-solana-structured-instructions 0.1.0 (git+https://github.com/0xpapercut/substreams-solana-structured-instructions?branch=main)",
+ "substreams-solana-spl-token",
+ "substreams-solana-structured-instructions",
 ]
 
 [[package]]
