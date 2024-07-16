@@ -81,6 +81,8 @@ pub struct InitializeMultisigEvent {
     pub multisig: ::prost::alloc::string::String,
     #[prost(string, repeated, tag="2")]
     pub signers: ::prost::alloc::vec::Vec<::prost::alloc::string::String>,
+    #[prost(uint32, tag="3")]
+    pub m: u32,
 }
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]

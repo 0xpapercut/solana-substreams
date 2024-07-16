@@ -121,9 +121,12 @@ pub fn parse_instruction(
             Ok(Some(Event::InitializeAccount(event)))
         },
 
-        TokenInstruction::InitializeMultisig { m } |
+        TokenInstruction::InitializeMultisig { m } => {
+            let event = _parse_initialize_multisig_instruction(instruction, context, m, true)?;
+            Ok(Some(Event::InitializeMultisig(event)))
+        }
         TokenInstruction::InitializeMultisig2 { m } => {
-            let event = _parse_initialize_multisig_instruction(instruction, context, m)?;
+            let event = _parse_initialize_multisig_instruction(instruction, context, m, false)?;
             Ok(Some(Event::InitializeMultisig(event)))
         },
 
@@ -235,16 +238,19 @@ fn _parse_initialize_multisig_instruction(
     instruction: &StructuredInstruction,
     context: &TransactionContext,
     m: u8,
+    rent_sysvar_account: bool,
 ) -> Result<InitializeMultisigEvent, &'static str> {
     let multisig = bs58::encode(context.get_account_from_index(instruction.accounts[0] as usize)).into_string();
     let mut signers: Vec<String> = Vec::new();
-    for i in 0..m {
-        signers.push(bs58::encode(context.get_account_from_index(instruction.accounts[(i + 2) as usize] as usize)).into_string());
+    let delta = if rent_sysvar_account { 2 } else { 1 };
+    for index in instruction.accounts[delta..].iter() {
+        signers.push(bs58::encode(context.get_account_from_index(*index as usize)).into_string())
     }
 
     Ok(InitializeMultisigEvent {
         multisig,
-        signers
+        signers,
+        m: m.into(),
     })
 }
 

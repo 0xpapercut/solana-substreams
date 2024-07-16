@@ -45,6 +45,7 @@ message InitializeAccountEvent {
 message InitializeMultisigEvent {
     string multisig = 1;
     repeated string signers = 2;
+    uint32 m = 3;
 }
 
 message TransferEvent {
