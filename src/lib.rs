@@ -117,7 +117,7 @@ fn _parse_swap_instruction(
     context: &TransactionContext,
 ) -> Result<SwapEvent, String> {
     let amm = bs58::encode(context.get_account_from_index(instruction.accounts[1] as usize)).into_string();
-    let user = bs58::encode(context.get_account_from_index(*instruction.accounts.last().unwrap() as usize)).into_string();
+    let user = bs58::encode(context.get_account_from_index(0)).into_string();
 
     let instructions_len = instruction.inner_instructions.len();
     let transfer_in = spl_token_substream::parse_transfer_instruction(&instruction.inner_instructions[instructions_len - 2], context)?;
