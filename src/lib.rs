@@ -43,26 +43,27 @@ fn raydium_block_events(block: Block) -> Result<RaydiumBlockEvents, Error> {
 pub fn parse_block(block: &Block) -> Vec<RaydiumTransactionEvents> {
     let mut block_events: Vec<RaydiumTransactionEvents> = Vec::new();
     for (i, transaction) in block.transactions.iter().enumerate() {
-        let events = parse_transaction(transaction);
-        if !events.is_empty() {
-            block_events.push(RaydiumTransactionEvents {
-                signature: bs58::encode(transaction.signature()).into_string(),
-                transaction_index: i as u32,
-                events,
-            });
+        if let Ok(events) = parse_transaction(transaction) {
+            if !events.is_empty() {
+                block_events.push(RaydiumTransactionEvents {
+                    signature: bs58::encode(transaction.signature()).into_string(),
+                    transaction_index: i as u32,
+                    events,
+                });
+            }
         }
     }
     block_events
 }
 
-pub fn parse_transaction(transaction: &ConfirmedTransaction) -> Vec<RaydiumEvent> {
+pub fn parse_transaction(transaction: &ConfirmedTransaction) -> Result<Vec<RaydiumEvent>, String> {
+    if let Some(_) = transaction.meta.as_ref().unwrap().err {
+        return Err("Cannot parse failed transaction.".to_string());
+    }
+
     let context = TransactionContext::construct(transaction);
     let mut events: Vec<RaydiumEvent> = Vec::new();
     let instructions = get_structured_instructions(transaction);
-
-    if let Some(_) = transaction.meta.as_ref().unwrap().err {
-        return Vec::new();
-    }
 
     for (i, instruction) in instructions.flattened().iter().enumerate() {
         if bs58::encode(context.get_account_from_index(instruction.program_id_index as usize)).into_string() != RAYDIUM_LIQUIDITY_POOL {
@@ -79,7 +80,7 @@ pub fn parse_transaction(transaction: &ConfirmedTransaction) -> Vec<RaydiumEvent
             Err(error) => substreams::log::println(format!("Failed to process instruction of transaction {}: {}", &context.signature, error))
         }
     }
-    events
+    Ok(events)
 }
 
 pub fn parse_instruction(
