@@ -1,4 +1,4 @@
-# raydium-substream
+# raydium-amm-substream
 Stream Raydium events with [substreams](https://substreams.streamingfast.io).
 
 ## Usage
