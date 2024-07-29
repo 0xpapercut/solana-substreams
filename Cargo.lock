@@ -408,7 +408,6 @@ dependencies = [
  "substreams-solana",
  "substreams-solana-program-instructions",
  "substreams-solana-spl-token",
- "substreams-solana-structured-instructions",
  "substreams-solana-utils",
 ]
 
@@ -507,24 +506,14 @@ dependencies = [
 ]
 
 [[package]]
-name = "substreams-solana-structured-instructions"
-version = "0.1.0"
-source = "git+https://github.com/0xpapercut/substreams-solana-structured-instructions?branch=main#620ae0302572c20d2c77ea1c04a40c40c52722fb"
-dependencies = [
- "substreams",
- "substreams-solana",
-]
-
-[[package]]
 name = "substreams-solana-utils"
 version = "0.1.0"
-source = "git+https://github.com/0xpapercut/substreams-solana-utils?branch=main#e99b0279e56bb120f11bb04ce4bcb4fc1f0f6ac7"
+source = "git+https://github.com/0xpapercut/substreams-solana-utils?branch=dev#c06de4470cddf5a7f9e4b5eac4d2c46d80d34fe0"
 dependencies = [
  "bs58 0.5.1",
  "substreams-solana",
  "substreams-solana-program-instructions",
  "substreams-solana-spl-token",
- "substreams-solana-structured-instructions",
 ]
 
 [[package]]

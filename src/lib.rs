@@ -10,15 +10,13 @@ use substreams_database_change::pb::database::TableChange;
 
 use substreams_solana_spl_token as spl_token;
 use spl_token::{TokenInstruction, TOKEN_PROGRAM};
-use substreams_solana_structured_instructions::{
-    get_structured_instructions,
-    StructuredInstruction,
-    StructuredInstructions,
-};
 
 use substreams_solana_utils::{
     TransactionContext,
     ConfirmedTransactionExt,
+    get_structured_instructions,
+    StructuredInstruction,
+    StructuredInstructions,
 };
 
 pub mod pb;
@@ -74,8 +72,8 @@ pub fn parse_transaction(transaction: &ConfirmedTransaction) -> Vec<SplTokenEven
         return Vec::new();
     }
 
-    for (i, instruction) in instructions.flattened().iter().enumerate() {
-        if bs58::encode(context.get_account_from_index(instruction.program_id_index as usize)).into_string() != TOKEN_PROGRAM {
+    for (i, instruction) in instructions.borrow().flattened().iter().enumerate() {
+        if bs58::encode(context.get_account_from_index(instruction.program_id_index() as usize)).into_string() != TOKEN_PROGRAM {
             continue;
         }
         match parse_instruction(&instruction, &context) {
@@ -95,11 +93,11 @@ pub fn parse_instruction(
     instruction: &StructuredInstruction,
     context: &TransactionContext,
 ) -> Result<Option<Event>, &'static str> {
-    if bs58::encode(context.get_account_from_index(instruction.program_id_index as usize)).into_string() != TOKEN_PROGRAM {
+    if bs58::encode(context.get_account_from_index(instruction.program_id_index() as usize)).into_string() != TOKEN_PROGRAM {
         return Err("Not a Token program instruction.");
     }
 
-    let unpacked = TokenInstruction::unpack(&instruction.data);
+    let unpacked = TokenInstruction::unpack(&instruction.data());
     if unpacked.is_err() {
         return Err("Failed to parse Token program instruction.");
     }
@@ -210,7 +208,7 @@ fn _parse_initialize_mint_instruction(
     mint_authority: Pubkey,
     freeze_authority: Option<Pubkey>,
 ) -> Result<InitializeMintEvent, &'static str> {
-    let mint = bs58::encode(context.get_account_from_index(instruction.accounts[0] as usize)).into_string();
+    let mint = bs58::encode(context.get_account_from_index(instruction.accounts()[0] as usize)).into_string();
     let mint_authority = bs58::encode(mint_authority).into_string();
     let freeze_authority = freeze_authority.map(|x| bs58::encode(x).into_string());
 
@@ -227,7 +225,7 @@ fn _parse_initialize_account_instruction(
     context: &TransactionContext,
     _owner: Option<Pubkey>,
 ) -> Result<InitializeAccountEvent, &'static str> {
-    let account = context.get_token_account_from_index(instruction.accounts[0] as usize);
+    let account = context.get_token_account_from_index(instruction.accounts()[0] as usize);
 
     Ok(InitializeAccountEvent {
         account: Some(account.into())
@@ -240,10 +238,10 @@ fn _parse_initialize_multisig_instruction(
     m: u8,
     rent_sysvar_account: bool,
 ) -> Result<InitializeMultisigEvent, &'static str> {
-    let multisig = bs58::encode(context.get_account_from_index(instruction.accounts[0] as usize)).into_string();
+    let multisig = bs58::encode(context.get_account_from_index(instruction.accounts()[0] as usize)).into_string();
     let mut signers: Vec<String> = Vec::new();
     let delta = if rent_sysvar_account { 2 } else { 1 };
-    for index in instruction.accounts[delta..].iter() {
+    for index in instruction.accounts()[delta..].iter() {
         signers.push(bs58::encode(context.get_account_from_index(*index as usize)).into_string())
     }
 
@@ -261,9 +259,9 @@ fn _parse_transfer_instruction(
     expected_decimals: Option<u8>,
 ) -> Result<TransferEvent, &'static str> {
     let delta: usize = if expected_decimals.is_none() { 0 } else { 1 };
-    let source = context.get_token_account_from_index(instruction.accounts[0] as usize);
-    let destination = context.get_token_account_from_index(instruction.accounts[1 + delta] as usize);
-    let authority = bs58::encode(context.get_account_from_index(instruction.accounts[2 + delta] as usize)).into_string();
+    let source = context.get_token_account_from_index(instruction.accounts()[0] as usize);
+    let destination = context.get_token_account_from_index(instruction.accounts()[1 + delta] as usize);
+    let authority = bs58::encode(context.get_account_from_index(instruction.accounts()[2 + delta] as usize)).into_string();
 
     Ok(TransferEvent {
         source: Some(source.into()),
@@ -280,8 +278,8 @@ fn _parse_approve_instruction(
     expected_decimals: Option<u8>,
 ) -> Result<ApproveEvent, &'static str> {
     let delta: usize = if expected_decimals.is_none() { 0 } else { 1 };
-    let source = context.get_token_account_from_index(instruction.accounts[0] as usize);
-    let delegate = bs58::encode(context.get_account_from_index(instruction.accounts[1 + delta] as usize)).into_string();
+    let source = context.get_token_account_from_index(instruction.accounts()[0] as usize);
+    let delegate = bs58::encode(context.get_account_from_index(instruction.accounts()[1 + delta] as usize)).into_string();
 
     Ok(ApproveEvent {
         source: Some(source.into()),
@@ -294,7 +292,7 @@ fn _parse_revoke_instruction(
     instruction: &StructuredInstruction,
     context: &TransactionContext,
 ) -> Result<RevokeEvent, &'static str> {
-    let source = context.get_token_account_from_index(instruction.accounts[0] as usize);
+    let source = context.get_token_account_from_index(instruction.accounts()[0] as usize);
 
     Ok(RevokeEvent {
         source: Some(source.into()),
@@ -307,8 +305,8 @@ fn _parse_set_authority_instruction(
     authority_type: spl_token::AuthorityType,
     new_authority: Option<Pubkey>,
 ) -> Result<SetAuthorityEvent, &'static str> {
-    let mint = bs58::encode(context.get_account_from_index(instruction.accounts[0] as usize)).into_string();
-    let authority = bs58::encode(context.get_account_from_index(instruction.accounts[1] as usize)).into_string();
+    let mint = bs58::encode(context.get_account_from_index(instruction.accounts()[0] as usize)).into_string();
+    let authority = bs58::encode(context.get_account_from_index(instruction.accounts()[1] as usize)).into_string();
     let authority_type: i32 = match authority_type {
         spl_token::AuthorityType::MintTokens => AuthorityType::MintTokens.into(),
         spl_token::AuthorityType::FreezeAccount => AuthorityType::FreezeAccount.into(),
@@ -330,9 +328,9 @@ fn _parse_mint_to_instruction(
     context: &TransactionContext,
     amount: u64,
 ) -> Result<MintToEvent, &'static str> {
-    let mint = bs58::encode(context.get_account_from_index(instruction.accounts[0] as usize)).into_string();
-    let destination = context.get_token_account_from_index(instruction.accounts[1] as usize);
-    let mint_authority = bs58::encode(context.get_account_from_index(instruction.accounts[2] as usize)).into_string();
+    let mint = bs58::encode(context.get_account_from_index(instruction.accounts()[0] as usize)).into_string();
+    let destination = context.get_token_account_from_index(instruction.accounts()[1] as usize);
+    let mint_authority = bs58::encode(context.get_account_from_index(instruction.accounts()[2] as usize)).into_string();
 
     Ok(MintToEvent {
         mint,
@@ -347,9 +345,9 @@ fn _parse_burn_instruction(
     context: &TransactionContext,
     amount: u64,
 ) -> Result<BurnEvent, &'static str> {
-    let source = context.get_token_account_from_index(instruction.accounts[0] as usize);
-    let _mint = bs58::encode(context.get_account_from_index(instruction.accounts[1] as usize)).into_string();
-    let authority = bs58::encode(context.get_account_from_index(instruction.accounts[2] as usize)).into_string();
+    let source = context.get_token_account_from_index(instruction.accounts()[0] as usize);
+    let _mint = bs58::encode(context.get_account_from_index(instruction.accounts()[1] as usize)).into_string();
+    let authority = bs58::encode(context.get_account_from_index(instruction.accounts()[2] as usize)).into_string();
 
     Ok(BurnEvent {
         source: Some(source.into()),
@@ -362,8 +360,8 @@ fn _parse_close_account_instruction(
     instruction: &StructuredInstruction,
     context: &TransactionContext,
 ) -> Result<CloseAccountEvent, &'static str> {
-    let source = context.get_token_account_from_index(instruction.accounts[0] as usize);
-    let destination = bs58::encode(context.get_account_from_index(instruction.accounts[1] as usize)).into_string();
+    let source = context.get_token_account_from_index(instruction.accounts()[0] as usize);
+    let destination = bs58::encode(context.get_account_from_index(instruction.accounts()[1] as usize)).into_string();
 
     Ok(CloseAccountEvent {
         source: Some(source.into()),
@@ -375,8 +373,8 @@ fn _parse_freeze_account_instruction(
     instruction: &StructuredInstruction,
     context: &TransactionContext,
 ) -> Result<FreezeAccountEvent, &'static str> {
-    let source = context.get_token_account_from_index(instruction.accounts[0] as usize);
-    let freeze_authority = bs58::encode(context.get_account_from_index(instruction.accounts[1] as usize)).into_string();
+    let source = context.get_token_account_from_index(instruction.accounts()[0] as usize);
+    let freeze_authority = bs58::encode(context.get_account_from_index(instruction.accounts()[1] as usize)).into_string();
 
     Ok(FreezeAccountEvent {
         source: Some(source.into()),
@@ -388,8 +386,8 @@ fn _parse_thaw_account_instruction(
     instruction: &StructuredInstruction,
     context: &TransactionContext,
 ) -> Result<ThawAccountEvent, &'static str> {
-    let source = context.get_token_account_from_index(instruction.accounts[0] as usize);
-    let freeze_authority = bs58::encode(context.get_account_from_index(instruction.accounts[1] as usize)).into_string();
+    let source = context.get_token_account_from_index(instruction.accounts()[0] as usize);
+    let freeze_authority = bs58::encode(context.get_account_from_index(instruction.accounts()[1] as usize)).into_string();
 
     Ok(ThawAccountEvent {
         source: Some(source.into()),
@@ -401,7 +399,7 @@ fn _parse_initialize_immutable_owner_instruction(
     instruction: &StructuredInstruction,
     context: &TransactionContext,
 ) -> Result<InitializeImmutableOwnerEvent, &'static str> {
-    let account = context.get_token_account_from_index(instruction.accounts[0] as usize);
+    let account = context.get_token_account_from_index(instruction.accounts()[0] as usize);
 
     Ok(InitializeImmutableOwnerEvent {
         account: Some(account.into()),
