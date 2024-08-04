@@ -63,16 +63,16 @@ pub fn parse_block(block: &Block) -> Vec<SplTokenTransactionEvents> {
 }
 
 pub fn parse_transaction(transaction: &ConfirmedTransaction) -> Vec<SplTokenEvent> {
-    let context = TransactionContext::construct(transaction);
-    let mut events: Vec<SplTokenEvent> = Vec::new();
-    let instructions = get_structured_instructions(&transaction);
-    let signature = bs58::encode(transaction.signature()).into_string();
-
     if let Some(_) = transaction.meta.as_ref().unwrap().err {
         return Vec::new();
     }
 
-    for (i, instruction) in instructions.borrow().flattened().iter().enumerate() {
+    let context = TransactionContext::construct(transaction);
+    let mut events: Vec<SplTokenEvent> = Vec::new();
+    let instructions = get_structured_instructions(&transaction).unwrap();
+    let signature = bs58::encode(transaction.signature()).into_string();
+
+    for (i, instruction) in instructions.flattened().iter().enumerate() {
         if bs58::encode(context.get_account_from_index(instruction.program_id_index() as usize)).into_string() != TOKEN_PROGRAM {
             continue;
         }
