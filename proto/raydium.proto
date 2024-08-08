@@ -18,8 +18,11 @@ message RaydiumEvent {
         InitializeEvent initialize = 2;
         DepositEvent deposit = 3;
         WithdrawEvent withdraw = 4;
-        SwapEvent swap = 5;
+        WithdrawPnlEvent withdraw_pnl = 5;
+        SwapEvent swap = 6;
     }
+    optional string top_instruction_program_id = 7;
+    optional string parent_instruction_program_id = 8;
 }
 
 message InitializeEvent {
@@ -46,6 +49,17 @@ message DepositEvent {
 }
 
 message WithdrawEvent {
+    string amm = 1;
+    string user = 2;
+    uint64 pcAmount = 3;
+    uint64 coinAmount = 4;
+    uint64 lpAmount = 5;
+    string pcMint = 6;
+    string coinMint = 7;
+    string lpMint = 8;
+}
+
+message WithdrawPnlEvent {
     string amm = 1;
     string user = 2;
     uint64 pcAmount = 3;
