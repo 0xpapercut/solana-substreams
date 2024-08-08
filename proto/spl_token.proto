@@ -91,6 +91,7 @@ message BurnEvent {
 message CloseAccountEvent {
     TokenAccount source = 1;
     string destination = 2;
+    // TODO: amount
 }
 
 message FreezeAccountEvent {
