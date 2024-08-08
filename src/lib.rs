@@ -593,6 +593,8 @@ pub fn tables_changes(block: &Block) -> Result<Vec<TableChange>, substreams::err
                 Some(Event::InitializeMint(initialize_mint)) => {
                     let row = tables.create_row("spl_token_initialize_mint_events", [("signature", transaction.signature.clone()), ("instruction_index", event.instruction_index.to_string())])
                         .set("transaction_index", transaction.transaction_index)
+                        .set("parent_instruction_program_id", event.parent_instruction_program_id.as_ref().unwrap())
+                        .set("top_instruction_program_id", event.top_instruction_program_id.as_ref().unwrap())
                         .set("slot", block.slot)
                         .set("mint", &initialize_mint.mint)
                         .set("decimals", initialize_mint.decimals)
@@ -605,6 +607,8 @@ pub fn tables_changes(block: &Block) -> Result<Vec<TableChange>, substreams::err
                 Some(Event::InitializeAccount(initialize_account)) => {
                     tables.create_row("spl_token_initialize_account_events", [("signature", transaction.signature.clone()), ("instruction_index", event.instruction_index.to_string())])
                         .set("transaction_index", transaction.transaction_index)
+                        .set("parent_instruction_program_id", event.parent_instruction_program_id.as_ref().unwrap())
+                        .set("top_instruction_program_id", event.top_instruction_program_id.as_ref().unwrap())
                         .set("slot", block.slot)
                         .set("account_address", &initialize_account.account.as_ref().unwrap().address)
                         .set("account_owner", &initialize_account.account.as_ref().unwrap().owner)
@@ -613,6 +617,8 @@ pub fn tables_changes(block: &Block) -> Result<Vec<TableChange>, substreams::err
                 Some(Event::InitializeMultisig(initialize_multisig)) => {
                     tables.create_row("spl_token_initialize_multisig_events", [("signature", transaction.signature.clone()), ("instruction_index", event.instruction_index.to_string())])
                         .set("transaction_index", transaction.transaction_index)
+                        .set("parent_instruction_program_id", event.parent_instruction_program_id.as_ref().unwrap())
+                        .set("top_instruction_program_id", event.top_instruction_program_id.as_ref().unwrap())
                         .set("slot", block.slot)
                         .set("multisig", &initialize_multisig.multisig)
                         .set_clickhouse_array("signers", initialize_multisig.signers.clone());
@@ -620,6 +626,8 @@ pub fn tables_changes(block: &Block) -> Result<Vec<TableChange>, substreams::err
                 Some(Event::Transfer(transfer)) => {
                     tables.create_row("spl_token_transfer_events", [("signature", transaction.signature.clone()), ("instruction_index", event.instruction_index.to_string())])
                         .set("transaction_index", transaction.transaction_index)
+                        .set("parent_instruction_program_id", event.parent_instruction_program_id.as_ref().unwrap())
+                        .set("top_instruction_program_id", event.top_instruction_program_id.as_ref().unwrap())
                         .set("slot", block.slot)
                         .set("source_address", &transfer.source.as_ref().unwrap().address)
                         .set("source_owner", &transfer.source.as_ref().unwrap().owner)
@@ -632,6 +640,8 @@ pub fn tables_changes(block: &Block) -> Result<Vec<TableChange>, substreams::err
                 Some(Event::Approve(approve)) => {
                     tables.create_row("spl_token_approve_events", [("signature", transaction.signature.clone()), ("instruction_index", event.instruction_index.to_string())])
                         .set("transaction_index", transaction.transaction_index)
+                        .set("parent_instruction_program_id", event.parent_instruction_program_id.as_ref().unwrap())
+                        .set("top_instruction_program_id", event.top_instruction_program_id.as_ref().unwrap())
                         .set("slot", block.slot)
                         .set("source_address", &approve.source.as_ref().unwrap().address)
                         .set("source_owner", &approve.source.as_ref().unwrap().owner)
@@ -650,6 +660,8 @@ pub fn tables_changes(block: &Block) -> Result<Vec<TableChange>, substreams::err
                 Some(Event::SetAuthority(set_authority)) => {
                     let row = tables.create_row("spl_token_set_authority_events", [("signature", transaction.signature.clone()), ("instruction_index", event.instruction_index.to_string())])
                         .set("transaction_index", transaction.transaction_index)
+                        .set("parent_instruction_program_id", event.parent_instruction_program_id.as_ref().unwrap())
+                        .set("top_instruction_program_id", event.top_instruction_program_id.as_ref().unwrap())
                         .set("slot", block.slot)
                         .set("mint", &set_authority.mint)
                         .set("authority_type", AuthorityType::from_i32(set_authority.authority_type).unwrap().as_str_name());
@@ -661,6 +673,8 @@ pub fn tables_changes(block: &Block) -> Result<Vec<TableChange>, substreams::err
                 Some(Event::MintTo(mint_to)) => {
                     tables.create_row("spl_token_mint_to_events", [("signature", transaction.signature.clone()), ("instruction_index", event.instruction_index.to_string())])
                         .set("transaction_index", transaction.transaction_index)
+                        .set("parent_instruction_program_id", event.parent_instruction_program_id.as_ref().unwrap())
+                        .set("top_instruction_program_id", event.top_instruction_program_id.as_ref().unwrap())
                         .set("slot", block.slot)
                         .set("destination_address", &mint_to.destination.as_ref().unwrap().address)
                         .set("destination_owner", &mint_to.destination.as_ref().unwrap().owner)
@@ -671,6 +685,8 @@ pub fn tables_changes(block: &Block) -> Result<Vec<TableChange>, substreams::err
                 Some(Event::Burn(burn)) => {
                     tables.create_row("spl_token_burn_events", [("signature", transaction.signature.clone()), ("instruction_index", event.instruction_index.to_string())])
                         .set("transaction_index", transaction.transaction_index)
+                        .set("parent_instruction_program_id", event.parent_instruction_program_id.as_ref().unwrap())
+                        .set("top_instruction_program_id", event.top_instruction_program_id.as_ref().unwrap())
                         .set("slot", block.slot)
                         .set("source_address", &burn.source.as_ref().unwrap().address)
                         .set("source_owner", &burn.source.as_ref().unwrap().owner)
@@ -681,6 +697,8 @@ pub fn tables_changes(block: &Block) -> Result<Vec<TableChange>, substreams::err
                 Some(Event::CloseAccount(close_account)) => {
                     tables.create_row("spl_token_close_account_events", [("signature", transaction.signature.clone()), ("instruction_index", event.instruction_index.to_string())])
                         .set("transaction_index", transaction.transaction_index)
+                        .set("parent_instruction_program_id", event.parent_instruction_program_id.as_ref().unwrap())
+                        .set("top_instruction_program_id", event.top_instruction_program_id.as_ref().unwrap())
                         .set("slot", block.slot)
                         .set("source_address", &close_account.source.as_ref().unwrap().address)
                         .set("source_owner", &close_account.source.as_ref().unwrap().owner)
@@ -690,6 +708,8 @@ pub fn tables_changes(block: &Block) -> Result<Vec<TableChange>, substreams::err
                 Some(Event::FreezeAccount(freeze_account)) => {
                     tables.create_row("spl_token_freeze_account_events", [("signature", transaction.signature.clone()), ("instruction_index", event.instruction_index.to_string())])
                         .set("transaction_index", transaction.transaction_index)
+                        .set("parent_instruction_program_id", event.parent_instruction_program_id.as_ref().unwrap())
+                        .set("top_instruction_program_id", event.top_instruction_program_id.as_ref().unwrap())
                         .set("slot", block.slot)
                         .set("source_address", &freeze_account.source.as_ref().unwrap().address)
                         .set("source_owner", &freeze_account.source.as_ref().unwrap().owner)
@@ -699,6 +719,8 @@ pub fn tables_changes(block: &Block) -> Result<Vec<TableChange>, substreams::err
                 Some(Event::ThawAccount(thaw_account)) => {
                     tables.create_row("spl_token_thaw_account_events", [("signature", transaction.signature.clone()), ("instruction_index", event.instruction_index.to_string())])
                         .set("transaction_index", transaction.transaction_index)
+                        .set("parent_instruction_program_id", event.parent_instruction_program_id.as_ref().unwrap())
+                        .set("top_instruction_program_id", event.top_instruction_program_id.as_ref().unwrap())
                         .set("slot", block.slot)
                         .set("source_address", &thaw_account.source.as_ref().unwrap().address)
                         .set("source_owner", &thaw_account.source.as_ref().unwrap().owner)
@@ -708,12 +730,24 @@ pub fn tables_changes(block: &Block) -> Result<Vec<TableChange>, substreams::err
                 Some(Event::InitializeImmutableOwner(initialize_immutable_owner)) => {
                     tables.create_row("spl_token_initialize_immutable_owner_events", [("signature", transaction.signature.clone()), ("instruction_index", event.instruction_index.to_string())])
                         .set("transaction_index", transaction.transaction_index)
+                        .set("parent_instruction_program_id", event.parent_instruction_program_id.as_ref().unwrap())
+                        .set("top_instruction_program_id", event.top_instruction_program_id.as_ref().unwrap())
                         .set("slot", block.slot)
                         .set("account_address", &initialize_immutable_owner.account.as_ref().unwrap().address)
                         .set("account_owner", &initialize_immutable_owner.account.as_ref().unwrap().owner)
                         .set("mint", &initialize_immutable_owner.account.as_ref().unwrap().mint);
                 },
-                _ => (),
+                Some(Event::SyncNative(sync_native)) => {
+                    tables.create_row("spl_token_initialize_immutable_owner_events", [("signature", transaction.signature.clone()), ("instruction_index", event.instruction_index.to_string())])
+                        .set("transaction_index", transaction.transaction_index)
+                        .set("parent_instruction_program_id", event.parent_instruction_program_id.as_ref().unwrap())
+                        .set("top_instruction_program_id", event.top_instruction_program_id.as_ref().unwrap())
+                        .set("slot", block.slot)
+                        .set("account_address", &sync_native.account.as_ref().unwrap().address)
+                        .set("account_owner", &sync_native.account.as_ref().unwrap().owner)
+                        .set("mint", &sync_native.account.as_ref().unwrap().mint);
+                }
+                None => (),
             }
         }
     }
