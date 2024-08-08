@@ -79,24 +79,16 @@ pub struct DepositEvent {
     pub coin_amount: u64,
     #[prost(uint64, tag="5")]
     pub lp_amount: u64,
+    #[prost(string, tag="6")]
+    pub pc_mint: ::prost::alloc::string::String,
+    #[prost(string, tag="7")]
+    pub coin_mint: ::prost::alloc::string::String,
+    #[prost(string, tag="8")]
+    pub lp_mint: ::prost::alloc::string::String,
 }
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct WithdrawEvent {
-    #[prost(string, tag="1")]
-    pub amm: ::prost::alloc::string::String,
-    #[prost(string, tag="2")]
-    pub user: ::prost::alloc::string::String,
-    #[prost(uint64, tag="3")]
-    pub pc_amount: u64,
-    #[prost(uint64, tag="4")]
-    pub coin_amount: u64,
-    #[prost(uint64, tag="5")]
-    pub lp_amount: u64,
-}
-#[allow(clippy::derive_partial_eq_without_eq)]
-#[derive(Clone, PartialEq, ::prost::Message)]
-pub struct WithdrawPnlEvent {
     #[prost(string, tag="1")]
     pub amm: ::prost::alloc::string::String,
     #[prost(string, tag="2")]
@@ -113,6 +105,22 @@ pub struct WithdrawPnlEvent {
     pub coin_mint: ::prost::alloc::string::String,
     #[prost(string, tag="8")]
     pub lp_mint: ::prost::alloc::string::String,
+}
+#[allow(clippy::derive_partial_eq_without_eq)]
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct WithdrawPnlEvent {
+    #[prost(string, tag="1")]
+    pub amm: ::prost::alloc::string::String,
+    #[prost(string, tag="2")]
+    pub user: ::prost::alloc::string::String,
+    #[prost(uint64, optional, tag="3")]
+    pub pc_amount: ::core::option::Option<u64>,
+    #[prost(uint64, optional, tag="4")]
+    pub coin_amount: ::core::option::Option<u64>,
+    #[prost(string, optional, tag="6")]
+    pub pc_mint: ::core::option::Option<::prost::alloc::string::String>,
+    #[prost(string, optional, tag="7")]
+    pub coin_mint: ::core::option::Option<::prost::alloc::string::String>,
 }
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]

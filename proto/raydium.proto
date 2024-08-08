@@ -62,12 +62,10 @@ message WithdrawEvent {
 message WithdrawPnlEvent {
     string amm = 1;
     string user = 2;
-    uint64 pcAmount = 3;
-    uint64 coinAmount = 4;
-    uint64 lpAmount = 5;
-    string pcMint = 6;
-    string coinMint = 7;
-    string lpMint = 8;
+    optional uint64 pcAmount = 3;
+    optional uint64 coinAmount = 4;
+    optional string pcMint = 6;
+    optional string coinMint = 7;
 }
 
 message SwapEvent {
