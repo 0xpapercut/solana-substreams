@@ -3,6 +3,8 @@ CREATE TABLE raydium_swap_events
     signature VARCHAR(88) CODEC(LZ4),
     instruction_index UInt32,
     transaction_index UInt32,
+    parent_instruction_program_id VARCHAR(44) CODEC(LZ4),
+    top_instruction_program_id VARCHAR(44) CODEC(LZ4),
     slot UInt64,
     amm VARCHAR(44) CODEC(LZ4),
     user VARCHAR(44) CODEC(LZ4),
@@ -19,6 +21,8 @@ CREATE TABLE raydium_initialize_events
     signature VARCHAR(88) CODEC(LZ4),
     instruction_index UInt32,
     transaction_index UInt32,
+    parent_instruction_program_id VARCHAR(44) CODEC(LZ4),
+    top_instruction_program_id VARCHAR(44) CODEC(LZ4),
     slot UInt64,
     amm VARCHAR(44) CODEC(LZ4),
     user VARCHAR(44) CODEC(LZ4),
@@ -37,6 +41,8 @@ CREATE TABLE raydium_deposit_events
     signature VARCHAR(88) CODEC(LZ4),
     instruction_index UInt32,
     transaction_index UInt32,
+    parent_instruction_program_id VARCHAR(44) CODEC(LZ4),
+    top_instruction_program_id VARCHAR(44) CODEC(LZ4),
     slot UInt64,
     amm VARCHAR(44) CODEC(LZ4),
     user VARCHAR(44) CODEC(LZ4),
@@ -55,6 +61,8 @@ CREATE TABLE raydium_withdraw_events
     signature VARCHAR(88) CODEC(LZ4),
     instruction_index UInt32,
     transaction_index UInt32,
+    parent_instruction_program_id VARCHAR(44) CODEC(LZ4),
+    top_instruction_program_id VARCHAR(44) CODEC(LZ4),
     slot UInt64,
     amm VARCHAR(44) CODEC(LZ4),
     user VARCHAR(44) CODEC(LZ4),
@@ -67,3 +75,19 @@ CREATE TABLE raydium_withdraw_events
 )
 ENGINE = MergeTree
 PRIMARY KEY (signature, instruction_index);
+
+CREATE TABLE raydium_withdraw_pnl_events
+(
+    signature VARCHAR(88) CODEC(LZ4),
+    instruction_index UInt32,
+    transaction_index UInt32,
+    parent_instruction_program_id VARCHAR(44) CODEC(LZ4),
+    top_instruction_program_id VARCHAR(44) CODEC(LZ4),
+    slot UInt64,
+    amm VARCHAR(44) CODEC(LZ4),
+    user VARCHAR(44) CODEC(LZ4),
+    pc_amount UInt64,
+    coin_amount UInt64,
+    pc_mint VARCHAR(44) CODEC(LZ4),
+    coin_mint VARCHAR(44) CODEC(LZ4),
+)
