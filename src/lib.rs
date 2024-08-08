@@ -11,13 +11,9 @@ use substreams_database_change::pb::database::TableChange;
 use substreams_solana_spl_token as spl_token;
 use spl_token::{TokenInstruction, TOKEN_PROGRAM};
 
-use substreams_solana_utils::{
-    TransactionContext,
-    ConfirmedTransactionExt,
-    get_structured_instructions,
-    StructuredInstruction,
-    StructuredInstructions,
-};
+use substreams_solana_utils as utils;
+pub use utils::instruction::{StructuredInstruction, StructuredInstructions};
+pub use utils::transaction::TransactionContext;
 
 pub mod pb;
 use pb::spl_token::{
@@ -37,6 +33,7 @@ use pb::spl_token::{
     FreezeAccountEvent,
     ThawAccountEvent,
     InitializeImmutableOwnerEvent,
+    SyncNativeEvent,
     TokenAccount,
     AuthorityType,
 };
@@ -53,7 +50,7 @@ pub fn parse_block(block: &Block) -> Vec<SplTokenTransactionEvents> {
         let events = parse_transaction(transaction);
         if !events.is_empty() {
             transactions_events.push(SplTokenTransactionEvents {
-                signature: bs58::encode(transaction.signature()).into_string(),
+                signature: utils::transaction::get_signature(&transaction),
                 transaction_index: i as u32,
                 events
             })
@@ -67,10 +64,10 @@ pub fn parse_transaction(transaction: &ConfirmedTransaction) -> Vec<SplTokenEven
         return Vec::new();
     }
 
-    let context = TransactionContext::construct(transaction);
     let mut events: Vec<SplTokenEvent> = Vec::new();
-    let instructions = get_structured_instructions(&transaction).unwrap();
-    let signature = bs58::encode(transaction.signature()).into_string();
+
+    let context = utils::transaction::get_context(transaction);
+    let instructions = utils::instruction::get_structured_instructions(transaction).unwrap();
 
     for (i, instruction) in instructions.flattened().iter().enumerate() {
         if bs58::encode(context.get_account_from_index(instruction.program_id_index() as usize)).into_string() != TOKEN_PROGRAM {
@@ -78,12 +75,16 @@ pub fn parse_transaction(transaction: &ConfirmedTransaction) -> Vec<SplTokenEven
         }
         match parse_instruction(&instruction, &context) {
             Ok(event) => {
+                let parent_instruction_program_id = instruction.parent_instruction().map(|x| bs58::encode(context.get_account_from_index(x.program_id_index() as usize)).into_string());
+                let top_instruction_program_id = instruction.top_instruction().map(|x| bs58::encode(context.get_account_from_index(x.program_id_index() as usize)).into_string());
                 events.push(SplTokenEvent {
                     instruction_index: i as u32,
-                    event
+                    event,
+                    parent_instruction_program_id,
+                    top_instruction_program_id,
                 });
             }
-            Err(e) => panic!("Transaction {}: {}", signature, e),
+            Err(e) => panic!("Transaction {}: {}", context.signature, e),
         }
     }
     events
@@ -194,7 +195,11 @@ pub fn parse_instruction(
             Ok(Some(Event::InitializeImmutableOwner(event)))
         },
 
-        TokenInstruction::SyncNative => Ok(None),
+        TokenInstruction::SyncNative => {
+            let event = _parse_sync_native_instruction(instruction, context)?;
+            Ok(Some(Event::SyncNative(event)))
+        },
+
         TokenInstruction::AmountToUiAmount { amount: _ } => Ok(None),
         TokenInstruction::GetAccountDataSize => Ok(None),
         TokenInstruction::UiAmountToAmount { ui_amount: _ } => Ok(None),
@@ -406,6 +411,17 @@ fn _parse_initialize_immutable_owner_instruction(
     })
 }
 
+fn _parse_sync_native_instruction(
+    instruction: &StructuredInstruction,
+    context: &TransactionContext,
+) -> Result<SyncNativeEvent, &'static str> {
+    let account = context.get_token_account_from_index(instruction.accounts()[0] as usize);
+
+    Ok(SyncNativeEvent {
+        account: Some(account.into())
+    })
+}
+
 pub fn parse_initialize_mint_instruction(
     instruction: &StructuredInstruction,
     context: &TransactionContext,
@@ -538,8 +554,8 @@ pub fn parse_initialize_immutable_owner_instruction(
     }
 }
 
-impl From<&substreams_solana_utils::TokenAccount> for TokenAccount {
-    fn from(value: &substreams_solana_utils::TokenAccount) -> Self {
+impl From<&utils::token::TokenAccount> for TokenAccount {
+    fn from(value: &utils::token::TokenAccount) -> Self {
         Self {
             address: bs58::encode(value.address.clone()).into_string(),
             owner: bs58::encode(value.owner.clone()).into_string(),
@@ -564,6 +580,7 @@ impl Event {
             Event::FreezeAccount(event) => (event as &dyn Any).downcast_ref::<T>(),
             Event::ThawAccount(event) => (event as &dyn Any).downcast_ref::<T>(),
             Event::InitializeImmutableOwner(event) => (event as &dyn Any).downcast_ref::<T>(),
+            Event::SyncNative(event) => (event as &dyn Any).downcast_ref::<T>(),
         }
     }
 }

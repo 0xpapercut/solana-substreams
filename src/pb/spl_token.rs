@@ -20,7 +20,11 @@ pub struct SplTokenTransactionEvents {
 pub struct SplTokenEvent {
     #[prost(uint32, tag="1")]
     pub instruction_index: u32,
-    #[prost(oneof="spl_token_event::Event", tags="2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14")]
+    #[prost(string, optional, tag="16")]
+    pub parent_instruction_program_id: ::core::option::Option<::prost::alloc::string::String>,
+    #[prost(string, optional, tag="17")]
+    pub top_instruction_program_id: ::core::option::Option<::prost::alloc::string::String>,
+    #[prost(oneof="spl_token_event::Event", tags="2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15")]
     pub event: ::core::option::Option<spl_token_event::Event>,
 }
 /// Nested message and enum types in `SplTokenEvent`.
@@ -54,6 +58,8 @@ pub mod spl_token_event {
         FreezeAccount(super::FreezeAccountEvent),
         #[prost(message, tag="14")]
         ThawAccount(super::ThawAccountEvent),
+        #[prost(message, tag="15")]
+        SyncNative(super::SyncNativeEvent),
     }
 }
 #[allow(clippy::derive_partial_eq_without_eq)]
@@ -173,6 +179,13 @@ pub struct ThawAccountEvent {
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct InitializeImmutableOwnerEvent {
+    #[prost(message, optional, tag="1")]
+    pub account: ::core::option::Option<TokenAccount>,
+}
+#[allow(clippy::derive_partial_eq_without_eq)]
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct SyncNativeEvent {
+    /// TODO: amount
     #[prost(message, optional, tag="1")]
     pub account: ::core::option::Option<TokenAccount>,
 }
