@@ -28,6 +28,7 @@ message SplTokenEvent {
         CloseAccountEvent close_account = 12;
         FreezeAccountEvent freeze_account = 13;
         ThawAccountEvent thaw_account = 14;
+        SyncNativeEvent sync_native = 15;
     }
 }
 
@@ -102,6 +103,11 @@ message ThawAccountEvent {
 
 message InitializeImmutableOwnerEvent {
     TokenAccount account = 1;
+}
+
+message SyncNativeEvent {
+    TokenAccount account = 1;
+    // TODO: amount
 }
 
 message TokenAccount {
