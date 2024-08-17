@@ -1,3 +1,5 @@
+use std::collections::HashMap;
+use std::rc::Rc;
 use bs58;
 
 use substreams::errors::Error;
@@ -60,20 +62,30 @@ pub fn parse_transaction(transaction: &ConfirmedTransaction) -> Result<Vec<Raydi
 
     let context = utils::transaction::get_context(transaction);
     let instructions = utils::instruction::get_structured_instructions(transaction).unwrap();
+    let flattened_instructions = instructions.flattened();
+    let instruction_index: HashMap<_, _> = flattened_instructions.iter().enumerate().map(|(x, y)| (Rc::as_ptr(y), x)).collect();
 
-    for (i, instruction) in instructions.flattened().iter().enumerate() {
+    for (i, instruction) in flattened_instructions.iter().enumerate() {
         if bs58::encode(context.get_account_from_index(instruction.program_id_index() as usize)).into_string() != RAYDIUM_LIQUIDITY_POOL {
             continue;
         }
+
         match parse_instruction(&instruction, &context) {
             Ok(Some(event)) => {
-                let parent_instruction_program_id = instruction.parent_instruction().map(|x| bs58::encode(context.get_account_from_index(x.program_id_index() as usize)).into_string());
-                let top_instruction_program_id = instruction.top_instruction().map(|x| bs58::encode(context.get_account_from_index(x.program_id_index() as usize)).into_string());
+                let parent_instruction = instruction.parent_instruction();
+                let top_instruction = instruction.top_instruction();
+                let parent_instruction_program_id = parent_instruction.as_ref().map(|x| bs58::encode(context.get_account_from_index(x.program_id_index() as usize)).into_string());
+                let top_instruction_program_id = top_instruction.as_ref().map(|x| bs58::encode(context.get_account_from_index(x.program_id_index() as usize)).into_string());
+                let parent_instruction_index = parent_instruction.as_ref().map(|x| instruction_index[&Rc::as_ptr(x)] as u32);
+                let top_instruction_index = top_instruction.as_ref().map(|x| instruction_index[&Rc::as_ptr(x)] as u32);
+
                 events.push(RaydiumEvent {
                     instruction_index: i as u32,
                     event: Some(event),
                     top_instruction_program_id,
                     parent_instruction_program_id,
+                    top_instruction_index,
+                    parent_instruction_index,
                 })
             }
             Ok(None) => (),
