@@ -13,6 +13,7 @@ CREATE TABLE spl_token_initialize_mint_events
 )
 ENGINE = MergeTree
 PRIMARY KEY (signature, instruction_index);
+ORDER BY (slot, transaction_index, instruction_index);
 
 CREATE TABLE spl_token_initialize_account_events
 (
@@ -28,6 +29,7 @@ CREATE TABLE spl_token_initialize_account_events
 )
 ENGINE = MergeTree
 PRIMARY KEY (signature, instruction_index);
+ORDER BY (slot, transaction_index, instruction_index);
 
 CREATE TABLE spl_token_initialize_multisig_events
 (
@@ -41,6 +43,7 @@ CREATE TABLE spl_token_initialize_multisig_events
 )
 ENGINE = MergeTree
 PRIMARY KEY (signature, instruction_index);
+ORDER BY (slot, transaction_index, instruction_index);
 
 CREATE TABLE spl_token_transfer_events
 (
@@ -60,6 +63,7 @@ CREATE TABLE spl_token_transfer_events
 )
 ENGINE = MergeTree
 PRIMARY KEY (signature, instruction_index);
+ORDER BY (slot, transaction_index, instruction_index);
 
 CREATE TABLE spl_token_approve_events
 (
@@ -77,6 +81,7 @@ CREATE TABLE spl_token_approve_events
 )
 ENGINE = MergeTree
 PRIMARY KEY (signature, instruction_index);
+ORDER BY (slot, transaction_index, instruction_index);
 
 CREATE TABLE spl_token_revoke_events
 (
@@ -92,6 +97,7 @@ CREATE TABLE spl_token_revoke_events
 )
 ENGINE = MergeTree
 PRIMARY KEY (signature, instruction_index);
+ORDER BY (slot, transaction_index, instruction_index);
 
 CREATE TABLE spl_token_set_authority_events
 (
@@ -107,6 +113,7 @@ CREATE TABLE spl_token_set_authority_events
 )
 ENGINE = MergeTree
 PRIMARY KEY (signature, instruction_index);
+ORDER BY (slot, transaction_index, instruction_index);
 
 CREATE TABLE spl_token_mint_to_events
 (
@@ -124,6 +131,7 @@ CREATE TABLE spl_token_mint_to_events
 )
 ENGINE = MergeTree
 PRIMARY KEY (signature, instruction_index);
+ORDER BY (slot, transaction_index, instruction_index);
 
 CREATE TABLE spl_token_burn_events
 (
@@ -141,6 +149,7 @@ CREATE TABLE spl_token_burn_events
 )
 ENGINE = MergeTree
 PRIMARY KEY (signature, instruction_index);
+ORDER BY (slot, transaction_index, instruction_index);
 
 CREATE TABLE spl_token_close_account_events
 (
@@ -157,6 +166,7 @@ CREATE TABLE spl_token_close_account_events
 )
 ENGINE = MergeTree
 PRIMARY KEY (signature, instruction_index);
+ORDER BY (slot, transaction_index, instruction_index);
 
 CREATE TABLE spl_token_freeze_account_events
 (
@@ -173,6 +183,7 @@ CREATE TABLE spl_token_freeze_account_events
 )
 ENGINE = MergeTree
 PRIMARY KEY (signature, instruction_index);
+ORDER BY (slot, transaction_index, instruction_index);
 
 CREATE TABLE spl_token_thaw_account_events
 (
@@ -189,6 +200,7 @@ CREATE TABLE spl_token_thaw_account_events
 )
 ENGINE = MergeTree
 PRIMARY KEY (signature, instruction_index);
+ORDER BY (slot, transaction_index, instruction_index);
 
 CREATE TABLE spl_token_initialize_immutable_owner_events
 (
@@ -204,3 +216,4 @@ CREATE TABLE spl_token_initialize_immutable_owner_events
 )
 ENGINE = MergeTree
 PRIMARY KEY (signature, instruction_index);
+ORDER BY (slot, transaction_index, instruction_index);
