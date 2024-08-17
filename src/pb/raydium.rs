@@ -24,6 +24,10 @@ pub struct RaydiumEvent {
     pub top_instruction_program_id: ::core::option::Option<::prost::alloc::string::String>,
     #[prost(string, optional, tag="8")]
     pub parent_instruction_program_id: ::core::option::Option<::prost::alloc::string::String>,
+    #[prost(uint32, optional, tag="9")]
+    pub top_instruction_index: ::core::option::Option<u32>,
+    #[prost(uint32, optional, tag="10")]
+    pub parent_instruction_index: ::core::option::Option<u32>,
     #[prost(oneof="raydium_event::Event", tags="2, 3, 4, 5, 6")]
     pub event: ::core::option::Option<raydium_event::Event>,
 }

@@ -23,6 +23,8 @@ message RaydiumEvent {
     }
     optional string top_instruction_program_id = 7;
     optional string parent_instruction_program_id = 8;
+    optional uint32 top_instruction_index = 9;
+    optional uint32 parent_instruction_index = 10;
 }
 
 message InitializeEvent {
