@@ -12,9 +12,8 @@ substreams = "^0.5.0"
 substreams-solana = { git = "https://github.com/streamingfast/substreams-solana", branch = "master" }
 substreams-database-change = "1.0.0"
 substreams-solana-raydium-amm = { git = "https://github.com/0xpapercut/substreams-solana-raydium-amm", branch = "main" }
-substreams-solana-structured-instructions = { git = "https://github.com/0xpapercut/substreams-solana-structured-instructions", branch = "main" }
 substreams-solana-utils = { git = "https://github.com/0xpapercut/substreams-solana-utils", branch = "main" }
-spl-token-substream = { git = "https://github.com/0xpapercut/spl-token-substream", tag = "v0.1.1" }
+spl-token-substream = { git = "https://github.com/0xpapercut/spl-token-substream", branch = "main" }
 prost = "0.11"
 bs58 = "0.5.0"
 
