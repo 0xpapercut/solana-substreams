@@ -1,6 +1,3 @@
-use bs58;
-
-// use pb::system_program;
 use substreams::errors::Error;
 use substreams_solana::pb::sf::solana::r#type::v1::ConfirmedTransaction;
 use substreams_solana::pb::sf::solana::r#type::v1::Block;
@@ -8,13 +5,8 @@ use substreams_solana::pb::sf::solana::r#type::v1::Block;
 use substreams_solana_utils as utils;
 use utils::transaction::{get_context, TransactionContext};
 use utils::instruction::{get_structured_instructions, StructuredInstructions, StructuredInstruction};
-
-pub mod pubkey;
-pub use pubkey::Pubkey;
-
-pub mod system_program;
-use system_program::SystemInstruction;
-use system_program::SYSTEM_PROGRAM_ID;
+use utils::system_program::{self, SystemInstruction, SYSTEM_PROGRAM_ID};
+use utils::pubkey::Pubkey;
 
 pub mod pb;
 use pb::system_program::{
@@ -70,7 +62,7 @@ pub fn parse_transaction(transaction: &ConfirmedTransaction) -> Result<Vec<Syste
     let instructions = get_structured_instructions(transaction)?;
 
     for (i, instruction) in instructions.flattened().iter().enumerate() {
-        if bs58::encode(context.get_account_from_index(instruction.program_id_index() as usize)).into_string() == SYSTEM_PROGRAM_ID {
+        if *instruction.program_id() == *SYSTEM_PROGRAM_ID {
             match parse_instruction(instruction, &context) {
                 Ok(event) => {
                     events.push(SystemProgramEvent { instruction_index: i as u32, event });
@@ -80,15 +72,14 @@ pub fn parse_transaction(transaction: &ConfirmedTransaction) -> Result<Vec<Syste
         }
     }
 
-
     Ok(events)
 }
 
-pub fn parse_instruction(
-    instruction: &StructuredInstruction,
+pub fn parse_instruction<'a>(
+    instruction: &'a StructuredInstruction<'a>,
     context: &TransactionContext
 ) -> Result<Option<Event>, String> {
-    if bs58::encode(context.get_account_from_index(instruction.program_id_index() as usize)).into_string() != SYSTEM_PROGRAM_ID {
+    if *instruction.program_id() != *SYSTEM_PROGRAM_ID {
         return Err("Not a System Program instruction.".to_string());
     }
     let unpacked = SystemInstruction::unpack(&instruction.data())?;
@@ -137,13 +128,13 @@ pub fn parse_instruction(
 
 fn _parse_create_account_instruction(
     instruction: &StructuredInstruction,
-    context: &TransactionContext,
+    _context: &TransactionContext,
     create_account: &system_program::CreateAccount,
 ) -> Result<CreateAccountEvent, String> {
-    let funding_account = bs58::encode(context.get_account_from_index(instruction.accounts()[0] as usize)).into_string();
-    let new_account = bs58::encode(context.get_account_from_index(instruction.accounts()[1] as usize)).into_string();
+    let funding_account = instruction.accounts()[0].to_string();
+    let new_account = instruction.accounts()[1].to_string();
     let lamports = create_account.lamports;
-    let owner = bs58::encode(create_account.owner.0).into_string();
+    let owner = create_account.owner.to_string();
     let space = create_account.space;
 
     Ok(CreateAccountEvent {
@@ -157,11 +148,11 @@ fn _parse_create_account_instruction(
 
 fn _parse_assign_instruction(
     instruction: &StructuredInstruction,
-    context: &TransactionContext,
+    _context: &TransactionContext,
     assign: &system_program::Assign,
 ) -> Result<AssignEvent, String> {
-    let assigned_account = bs58::encode(context.get_account_from_index(instruction.accounts()[0] as usize)).into_string();
-    let owner = bs58::encode(assign.owner.0).into_string();
+    let assigned_account = instruction.accounts()[0].to_string();
+    let owner = assign.owner.to_string();
 
     Ok(AssignEvent {
         assigned_account,
@@ -171,11 +162,11 @@ fn _parse_assign_instruction(
 
 fn _parse_transfer_instruction(
     instruction: &StructuredInstruction,
-    context: &TransactionContext,
+    _context: &TransactionContext,
     transfer: &system_program::Transfer,
 ) -> Result<TransferEvent, String> {
-    let funding_account = bs58::encode(context.get_account_from_index(instruction.accounts()[0] as usize)).into_string();
-    let recipient_account = bs58::encode(context.get_account_from_index(instruction.accounts()[1] as usize)).into_string();
+    let funding_account = instruction.accounts()[0].to_string();
+    let recipient_account = instruction.accounts()[1].to_string();
     let lamports = transfer.lamports;
 
     Ok(TransferEvent {
@@ -187,14 +178,14 @@ fn _parse_transfer_instruction(
 
 fn _parse_create_account_with_seed_instruction(
     instruction: &StructuredInstruction,
-    context: &TransactionContext,
+    _context: &TransactionContext,
     create_account_with_seed: &system_program::CreateAccountWithSeed,
 ) -> Result<CreateAccountWithSeedEvent, String> {
-    let funding_account = bs58::encode(context.get_account_from_index(instruction.accounts()[0] as usize)).into_string();
-    let created_account = bs58::encode(context.get_account_from_index(instruction.accounts()[1] as usize)).into_string();
-    let base_account = bs58::encode(create_account_with_seed.base.0).into_string();
+    let funding_account = instruction.accounts()[0].to_string();
+    let created_account = instruction.accounts()[1].to_string();
+    let base_account = create_account_with_seed.base.to_string();
     let lamports = create_account_with_seed.lamports;
-    let owner = bs58::encode(create_account_with_seed.owner.0).into_string();
+    let owner = create_account_with_seed.owner.to_string();
     let seed = create_account_with_seed.seed.0.clone();
     let space = create_account_with_seed.space;
 
@@ -211,10 +202,10 @@ fn _parse_create_account_with_seed_instruction(
 
 fn _parse_advance_nonce_account_instruction(
     instruction: &StructuredInstruction,
-    context: &TransactionContext,
+    _context: &TransactionContext,
 ) -> Result<AdvanceNonceAccountEvent, String> {
-    let nonce_account = bs58::encode(context.get_account_from_index(instruction.accounts()[0] as usize)).into_string();
-    let nonce_authority = bs58::encode(context.get_account_from_index(instruction.accounts()[2] as usize)).into_string();
+    let nonce_account = instruction.accounts()[0].to_string();
+    let nonce_authority = instruction.accounts()[2].to_string();
 
     Ok(AdvanceNonceAccountEvent {
         nonce_account,
@@ -224,12 +215,12 @@ fn _parse_advance_nonce_account_instruction(
 
 fn _parse_withdraw_nonce_account_instruction(
     instruction: &StructuredInstruction,
-    context: &TransactionContext,
+    _context: &TransactionContext,
     lamports: u64,
 ) -> Result<WithdrawNonceAccountEvent, String> {
-    let nonce_account = bs58::encode(context.get_account_from_index(instruction.accounts()[0] as usize)).into_string();
-    let recipient_account = bs58::encode(context.get_account_from_index(instruction.accounts()[1] as usize)).into_string();
-    let nonce_authority = bs58::encode(context.get_account_from_index(instruction.accounts()[4] as usize)).into_string();
+    let nonce_account = instruction.accounts()[0].to_string();
+    let recipient_account = instruction.accounts()[1].to_string();
+    let nonce_authority = instruction.accounts()[4].to_string();
 
     Ok(WithdrawNonceAccountEvent {
         nonce_account,
@@ -241,11 +232,11 @@ fn _parse_withdraw_nonce_account_instruction(
 
 fn _parse_initialize_nonce_account_instruction(
     instruction: &StructuredInstruction,
-    context: &TransactionContext,
+    _context: &TransactionContext,
     authority: Pubkey,
 ) -> Result<InitializeNonceAccountEvent, String> {
-    let nonce_account = bs58::encode(context.get_account_from_index(instruction.accounts()[0] as usize)).into_string();
-    let nonce_authority = bs58::encode(authority.0).into_string();
+    let nonce_account = instruction.accounts()[0].to_string();
+    let nonce_authority = authority.to_string();
 
     Ok(InitializeNonceAccountEvent {
         nonce_account,
@@ -255,12 +246,12 @@ fn _parse_initialize_nonce_account_instruction(
 
 fn _parse_authorize_nonce_account_instruction(
     instruction: &StructuredInstruction,
-    context: &TransactionContext,
+    _context: &TransactionContext,
     pubkey: Pubkey,
 ) -> Result<AuthorizeNonceAccountEvent, String> {
-    let nonce_account = bs58::encode(context.get_account_from_index(instruction.accounts()[0] as usize)).into_string();
-    let nonce_authority = bs58::encode(context.get_account_from_index(instruction.accounts()[1] as usize)).into_string();
-    let new_nonce_authority = bs58::encode(pubkey.0).into_string();
+    let nonce_account = instruction.accounts()[0].to_string();
+    let nonce_authority = instruction.accounts()[1].to_string();
+    let new_nonce_authority = pubkey.to_string();
 
     Ok(AuthorizeNonceAccountEvent {
         nonce_account,
@@ -271,10 +262,10 @@ fn _parse_authorize_nonce_account_instruction(
 
 fn _parse_allocate_instruction(
     instruction: &StructuredInstruction,
-    context: &TransactionContext,
+    _context: &TransactionContext,
     allocate: &system_program::Allocate,
 ) -> Result<AllocateEvent, String> {
-    let account = bs58::encode(context.get_account_from_index(instruction.accounts()[0] as usize)).into_string();
+    let account = instruction.accounts()[0].to_string();
     let space = allocate.space;
 
     Ok(AllocateEvent {
@@ -285,14 +276,14 @@ fn _parse_allocate_instruction(
 
 fn _parse_allocate_with_seed_instruction(
     instruction: &StructuredInstruction,
-    context: &TransactionContext,
+    _context: &TransactionContext,
     allocate_with_seed: &system_program::AllocateWithSeed,
 ) -> Result<AllocateWithSeedEvent, String> {
-    let allocated_account = bs58::encode(context.get_account_from_index(instruction.accounts()[0] as usize)).into_string();
+    let allocated_account = instruction.accounts()[0].to_string();
     let space = allocate_with_seed.space;
-    let base_account = bs58::encode(allocate_with_seed.base.0).into_string();
-    let owner = bs58::encode(allocate_with_seed.owner.0).into_string();
-    let seed = bs58::encode(&allocate_with_seed.seed.0).into_string();
+    let base_account = allocate_with_seed.base.to_string();
+    let owner = allocate_with_seed.owner.to_string();
+    let seed = allocate_with_seed.seed.0.clone();
 
     Ok(AllocateWithSeedEvent {
         allocated_account,
@@ -305,13 +296,14 @@ fn _parse_allocate_with_seed_instruction(
 
 fn _parse_assign_with_seed_instruction(
     instruction: &StructuredInstruction,
-    context: &TransactionContext,
+    _context: &TransactionContext,
     assign_with_seed: &system_program::AssignWithSeed,
 ) -> Result<AssignWithSeedEvent, String> {
-    let assigned_account = bs58::encode(context.get_account_from_index(instruction.accounts()[0] as usize)).into_string();
-    let base_account = bs58::encode(assign_with_seed.base.0).into_string();
-    let owner = bs58::encode(assign_with_seed.owner.0).into_string();
-    let seed = bs58::encode(&assign_with_seed.seed.0).into_string();
+    let assigned_account = instruction.accounts()[0].to_string();
+    let base_account = assign_with_seed.base.to_string();
+    let owner = assign_with_seed.owner.to_string();
+    let seed = assign_with_seed.seed.0.clone();
+
     Ok(AssignWithSeedEvent {
         assigned_account,
         base_account,
@@ -322,14 +314,14 @@ fn _parse_assign_with_seed_instruction(
 
 fn _parse_transfer_with_seed_instruction(
     instruction: &StructuredInstruction,
-    context: &TransactionContext,
+    _context: &TransactionContext,
     transfer_with_seed: system_program::TransferWithSeed
 ) -> Result<TransferWithSeedEvent, String> {
-    let funding_account = bs58::encode(context.get_account_from_index(instruction.accounts()[0] as usize)).into_string();
-    let base_account = bs58::encode(context.get_account_from_index(instruction.accounts()[1] as usize)).into_string();
-    let recipient_account = bs58::encode(context.get_account_from_index(instruction.accounts()[2] as usize)).into_string();
-    let from_owner = bs58::encode(transfer_with_seed.from_owner.0).into_string();
-    let from_seed = bs58::encode(transfer_with_seed.from_seed.0).into_string();
+    let funding_account = instruction.accounts()[0].to_string();
+    let base_account = instruction.accounts()[1].to_string();
+    let recipient_account = instruction.accounts()[2].to_string();
+    let from_owner = transfer_with_seed.from_owner.to_string();
+    let from_seed = transfer_with_seed.from_seed.0.clone();
     let lamports = transfer_with_seed.lamports;
 
     Ok(TransferWithSeedEvent {
@@ -344,9 +336,9 @@ fn _parse_transfer_with_seed_instruction(
 
 fn _parse_upgrade_nonce_account_instruction(
     instruction: &StructuredInstruction,
-    context: &TransactionContext,
+    _context: &TransactionContext,
 ) -> Result<UpgradeNonceAccountEvent, String> {
-    let nonce_account = bs58::encode(context.get_account_from_index(instruction.accounts()[0] as usize)).into_string();
+    let nonce_account = instruction.accounts()[0].to_string();
 
     Ok(UpgradeNonceAccountEvent {
         nonce_account,
