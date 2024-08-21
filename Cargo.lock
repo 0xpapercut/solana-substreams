@@ -658,10 +658,12 @@ dependencies = [
 [[package]]
 name = "substreams-solana-utils"
 version = "0.1.0"
-source = "git+https://github.com/0xpapercut/substreams-solana-utils?branch=main#bba8a394f400707c6ef058d97bd80b6313e3b824"
+source = "git+https://github.com/0xpapercut/substreams-solana-utils?branch=main#35a764f054d1b9135f177c949e7050b54b2f82fe"
 dependencies = [
  "base64",
+ "borsh",
  "bs58 0.5.1",
+ "lazy_static",
  "regex",
  "substreams",
  "substreams-solana",
@@ -709,6 +711,7 @@ version = "0.1.1"
 dependencies = [
  "borsh",
  "bs58 0.5.1",
+ "lazy_static",
  "prost",
  "substreams",
  "substreams-database-change",
