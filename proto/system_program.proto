@@ -1,0 +1,117 @@
+syntax = "proto3";
+
+package system_program;
+
+message SystemProgramBlockEvents {
+    repeated SystemProgramTransactionEvents transactions = 1;
+}
+
+message SystemProgramTransactionEvents {
+    string signature = 1;
+    uint32 transaction_index = 2;
+    repeated SystemProgramEvent events = 3;
+}
+
+message SystemProgramEvent {
+    uint32 instruction_index = 1;
+    oneof event {
+        CreateAccountEvent create_account = 2;
+        AssignEvent assign = 3;
+        TransferEvent transfer = 4;
+        CreateAccountWithSeedEvent create_account_with_seed = 5;
+        AdvanceNonceAccountEvent advance_nonce_account = 6;
+        WithdrawNonceAccountEvent withdraw_nonce_account = 7;
+        InitializeNonceAccountEvent initialize_nonce_account = 8;
+        AuthorizeNonceAccountEvent authorize_nonce_account = 9;
+        AllocateEvent allocate = 10;
+        AllocateWithSeedEvent allocate_with_seed = 11;
+        AssignWithSeedEvent assign_with_seed = 12;
+        TransferWithSeedEvent transfer_with_seed = 13;
+        UpgradeNonceAccountEvent upgrade_nonce_account = 14;
+    }
+}
+
+message CreateAccountEvent {
+    string funding_account = 1;
+    string new_account = 2;
+    uint64 lamports = 3;
+    uint64 space = 4;
+    string owner = 5;
+}
+
+message AssignEvent {
+    string assigned_account = 1;
+    string owner = 2;
+}
+
+message TransferEvent {
+    string funding_account = 1;
+    string recipient_account = 2;
+    uint64 lamports = 3;
+}
+
+message CreateAccountWithSeedEvent {
+    string funding_account = 1;
+    string created_account = 2;
+    string base_account = 3;
+    string seed = 4;
+    uint64 lamports = 5;
+    uint64 space = 6;
+    string owner = 7;
+}
+
+message AdvanceNonceAccountEvent {
+    string nonce_account = 1;
+    string nonce_authority = 2;
+}
+
+message WithdrawNonceAccountEvent {
+    string nonce_account = 1;
+    string recipient_account = 2;
+    string nonce_authority = 3;
+    uint64 lamports = 4;
+}
+
+message InitializeNonceAccountEvent {
+    string nonce_account = 1;
+    string nonce_authority = 2;
+}
+
+message AuthorizeNonceAccountEvent {
+    string nonce_account = 1;
+    string nonce_authority = 2;
+    string new_nonce_authority = 3;
+}
+
+message AllocateEvent {
+    string account = 1;
+    uint64 space = 2;
+}
+
+message AllocateWithSeedEvent {
+    string allocated_account = 1;
+    string base_account = 2;
+    string seed = 3;
+    uint64 space = 4;
+    string owner = 5;
+}
+
+message AssignWithSeedEvent {
+    string assigned_account = 1;
+    string base_account = 2;
+    string seed = 3;
+    string owner = 4;
+}
+
+message TransferWithSeedEvent {
+    string funding_account = 1;
+    string base_account = 2;
+    string recipient_account = 3;
+    uint64 lamports = 4;
+    string from_seed = 5;
+    string from_owner = 6;
+}
+
+message UpgradeNonceAccountEvent {
+    string nonce_account = 1;
+}

@@ -1,0 +1,25 @@
+specVersion: v0.1.0
+package:
+  name: 'system_program_events'
+  version: v0.1.0
+
+protobuf:
+  files:
+    - system_program.proto
+  importPaths:
+    - ./proto
+
+binaries:
+  default:
+    type: wasm/rust-v1
+    file: target/wasm32-unknown-unknown/release/system_program_substream.wasm
+
+modules:
+  - name: system_program_events
+    kind: map
+    inputs:
+      - source: sf.solana.type.v1.Block
+    output:
+      type: proto:system_program.SystemProgramBlockEvents
+
+network: solana
