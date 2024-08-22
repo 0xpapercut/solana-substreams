@@ -19,12 +19,11 @@ fn spl_token_block_events(block: Block) -> Result<SplTokenBlockEvents, Error> {
 
 pub fn parse_block(block: &Block) -> Vec<SplTokenTransactionEvents> {
     let mut transactions_events: Vec<SplTokenTransactionEvents> = Vec::new();
-    for (i, transaction) in block.transactions().enumerate() {
+    for transaction in block.transactions() {
         let events = parse_transaction(transaction);
         if !events.is_empty() {
             transactions_events.push(SplTokenTransactionEvents {
                 signature: utils::transaction::get_signature(&transaction),
-                transaction_index: i as u32,
                 events
             })
         }
@@ -42,28 +41,27 @@ pub fn parse_transaction(transaction: &ConfirmedTransaction) -> Vec<SplTokenEven
     let context = get_context(transaction);
     let instructions = get_structured_instructions(transaction).unwrap();
 
-    for (i, instruction) in instructions.flattened().iter().enumerate() {
-        if *instruction.program_id() != *TOKEN_PROGRAM_ID {
+    for instruction in instructions.flattened().iter() {
+        if instruction.program_id() != *TOKEN_PROGRAM_ID {
             continue;
         }
         match parse_instruction(&instruction, &context) {
             Ok(event) => {
                 events.push(SplTokenEvent {
-                    instruction_index: i as u32,
                     event,
                 });
             }
-            Err(e) => panic!("Transaction {}: {}", context.signature, e),
+            Err(e) => panic!("Transaction {} error: {}", context.signature, e),
         }
     }
     events
 }
 
 pub fn parse_instruction<'a>(
-    instruction: &'a StructuredInstruction<'a>,
+    instruction: &StructuredInstruction<'a>,
     context: &TransactionContext,
 ) -> Result<Option<Event>, &'static str> {
-    if *instruction.program_id() != *TOKEN_PROGRAM_ID {
+    if instruction.program_id() != *TOKEN_PROGRAM_ID {
         return Err("Not a Token program instruction.");
     }
 
@@ -392,7 +390,7 @@ fn _parse_sync_native_instruction(
 }
 
 pub fn parse_initialize_mint_instruction<'a>(
-    instruction: &'a StructuredInstruction<'a>,
+    instruction: &StructuredInstruction<'a>,
     context: &TransactionContext,
 ) -> Result<InitializeMintEvent, &'static str> {
     match parse_instruction(instruction, context) {
@@ -402,7 +400,7 @@ pub fn parse_initialize_mint_instruction<'a>(
 }
 
 pub fn parse_initialize_account_instruction<'a>(
-    instruction: &'a StructuredInstruction<'a>,
+    instruction: &StructuredInstruction<'a>,
     context: &TransactionContext,
 ) -> Result<InitializeAccountEvent, &'static str> {
     match parse_instruction(instruction, context) {
@@ -412,7 +410,7 @@ pub fn parse_initialize_account_instruction<'a>(
 }
 
 pub fn parse_initialize_multisig_instruction<'a>(
-    instruction: &'a StructuredInstruction<'a>,
+    instruction: &StructuredInstruction<'a>,
     context: &TransactionContext,
 ) -> Result<InitializeMultisigEvent, &'static str> {
     match parse_instruction(instruction, context) {
@@ -423,7 +421,7 @@ pub fn parse_initialize_multisig_instruction<'a>(
 
 
 pub fn parse_transfer_instruction<'a>(
-    instruction: &'a StructuredInstruction<'a>,
+    instruction: &StructuredInstruction<'a>,
     context: &TransactionContext,
 ) -> Result<TransferEvent, &'static str> {
     match parse_instruction(instruction, context) {
@@ -433,7 +431,7 @@ pub fn parse_transfer_instruction<'a>(
 }
 
 pub fn parse_approve_instruction<'a>(
-    instruction: &'a StructuredInstruction<'a>,
+    instruction: &StructuredInstruction<'a>,
     context: &TransactionContext,
 ) -> Result<ApproveEvent, &'static str> {
     match parse_instruction(instruction, context) {
@@ -443,7 +441,7 @@ pub fn parse_approve_instruction<'a>(
 }
 
 pub fn parse_revoke_instruction<'a>(
-    instruction: &'a StructuredInstruction<'a>,
+    instruction: &StructuredInstruction<'a>,
     context: &TransactionContext,
 ) -> Result<RevokeEvent, &'static str> {
     match parse_instruction(instruction, context) {
@@ -453,7 +451,7 @@ pub fn parse_revoke_instruction<'a>(
 }
 
 pub fn parse_set_authority_instruction<'a>(
-    instruction: &'a StructuredInstruction<'a>,
+    instruction: &StructuredInstruction<'a>,
     context: &TransactionContext,
 ) -> Result<SetAuthorityEvent, &'static str> {
     match parse_instruction(instruction, context) {
@@ -463,7 +461,7 @@ pub fn parse_set_authority_instruction<'a>(
 }
 
 pub fn parse_mint_to_instruction<'a>(
-    instruction: &'a StructuredInstruction<'a>,
+    instruction: &StructuredInstruction<'a>,
     context: &TransactionContext,
 ) -> Result<MintToEvent, &'static str> {
     match parse_instruction(instruction, context) {
@@ -473,7 +471,7 @@ pub fn parse_mint_to_instruction<'a>(
 }
 
 pub fn parse_burn_instruction<'a>(
-    instruction: &'a StructuredInstruction<'a>,
+    instruction: &StructuredInstruction<'a>,
     context: &TransactionContext,
 ) -> Result<BurnEvent, &'static str> {
     match parse_instruction(instruction, context) {
@@ -484,7 +482,7 @@ pub fn parse_burn_instruction<'a>(
 
 
 pub fn parse_close_account_instruction<'a>(
-    instruction: &'a StructuredInstruction<'a>,
+    instruction: &StructuredInstruction<'a>,
     context: &TransactionContext,
 ) -> Result<CloseAccountEvent, &'static str> {
     match parse_instruction(instruction, context) {
@@ -494,7 +492,7 @@ pub fn parse_close_account_instruction<'a>(
 }
 
 pub fn parse_freeze_account_instruction<'a>(
-    instruction: &'a StructuredInstruction<'a>,
+    instruction: &StructuredInstruction<'a>,
     context: &TransactionContext,
 ) -> Result<FreezeAccountEvent, &'static str> {
     match parse_instruction(instruction, context) {
@@ -504,7 +502,7 @@ pub fn parse_freeze_account_instruction<'a>(
 }
 
 pub fn parse_thaw_account_instruction<'a>(
-    instruction: &'a StructuredInstruction<'a>,
+    instruction: &StructuredInstruction<'a>,
     context: &TransactionContext,
 ) -> Result<ThawAccountEvent, &'static str> {
     match parse_instruction(instruction, context) {
@@ -514,7 +512,7 @@ pub fn parse_thaw_account_instruction<'a>(
 }
 
 pub fn parse_initialize_immutable_owner_instruction<'a>(
-    instruction: &'a StructuredInstruction<'a>,
+    instruction: &StructuredInstruction<'a>,
     context: &TransactionContext,
 ) -> Result<InitializeImmutableOwnerEvent, &'static str> {
     match parse_instruction(instruction, context) {
