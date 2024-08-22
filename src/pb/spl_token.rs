@@ -10,17 +10,13 @@ pub struct SplTokenBlockEvents {
 pub struct SplTokenTransactionEvents {
     #[prost(string, tag="1")]
     pub signature: ::prost::alloc::string::String,
-    #[prost(uint32, tag="2")]
-    pub transaction_index: u32,
     #[prost(message, repeated, tag="3")]
     pub events: ::prost::alloc::vec::Vec<SplTokenEvent>,
 }
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct SplTokenEvent {
-    #[prost(uint32, tag="1")]
-    pub instruction_index: u32,
-    #[prost(oneof="spl_token_event::Event", tags="2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15")]
+    #[prost(oneof="spl_token_event::Event", tags="1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14")]
     pub event: ::core::option::Option<spl_token_event::Event>,
 }
 /// Nested message and enum types in `SplTokenEvent`.
@@ -28,33 +24,33 @@ pub mod spl_token_event {
     #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Oneof)]
     pub enum Event {
-        #[prost(message, tag="2")]
+        #[prost(message, tag="1")]
         Transfer(super::TransferEvent),
-        #[prost(message, tag="3")]
+        #[prost(message, tag="2")]
         InitializeMint(super::InitializeMintEvent),
-        #[prost(message, tag="4")]
+        #[prost(message, tag="3")]
         InitializeImmutableOwner(super::InitializeImmutableOwnerEvent),
-        #[prost(message, tag="5")]
+        #[prost(message, tag="4")]
         InitializeAccount(super::InitializeAccountEvent),
-        #[prost(message, tag="6")]
+        #[prost(message, tag="5")]
         InitializeMultisig(super::InitializeMultisigEvent),
-        #[prost(message, tag="7")]
+        #[prost(message, tag="6")]
         Approve(super::ApproveEvent),
-        #[prost(message, tag="8")]
+        #[prost(message, tag="7")]
         MintTo(super::MintToEvent),
-        #[prost(message, tag="9")]
+        #[prost(message, tag="8")]
         Revoke(super::RevokeEvent),
-        #[prost(message, tag="10")]
+        #[prost(message, tag="9")]
         SetAuthority(super::SetAuthorityEvent),
-        #[prost(message, tag="11")]
+        #[prost(message, tag="10")]
         Burn(super::BurnEvent),
-        #[prost(message, tag="12")]
+        #[prost(message, tag="11")]
         CloseAccount(super::CloseAccountEvent),
-        #[prost(message, tag="13")]
+        #[prost(message, tag="12")]
         FreezeAccount(super::FreezeAccountEvent),
-        #[prost(message, tag="14")]
+        #[prost(message, tag="13")]
         ThawAccount(super::ThawAccountEvent),
-        #[prost(message, tag="15")]
+        #[prost(message, tag="14")]
         SyncNative(super::SyncNativeEvent),
     }
 }
