@@ -1,0 +1,24 @@
+[package]
+name = "pumpfun-substream"
+version = "0.1.0"
+edition = "2021"
+
+[lib]
+name = "pumpfun_substream"
+crate-type = ["lib", "cdylib"]
+
+[dependencies]
+substreams = "^0.5.0"
+substreams-solana = { git = "https://github.com/streamingfast/substreams-solana", branch = "master" }
+substreams-solana-utils = { git = "https://github.com/0xpapercut/substreams-solana-utils", branch = "main" }
+spl-token-substream = { git = "https://github.com/0xpapercut/spl-token-substream", branch = "main" }
+system-program-substream = { git = "https://github.com/0xpapercut/system-program-substream", branch = "main" }
+prost = "0.11"
+bs58 = "0.5.0"
+borsh = { version = "1.5.1", features = ["derive"] }
+lazy_static = "1.5.0"
+
+[profile.release]
+lto = true
+opt-level = 's'
+strip = "debuginfo"
