@@ -1,15 +1,5 @@
 use borsh::BorshDeserialize;
-
-#[derive(BorshDeserialize)]
-pub struct Pubkey(pub [u8; 32]);
-
-use std::fmt::{self, Display};
-
-impl Display for Pubkey {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "{}", bs58::encode(self.0).into_string())
-    }
-}
+use substreams_solana_utils::pubkey::Pubkey;
 
 #[derive(Debug, BorshDeserialize)]
 pub enum PumpfunInstruction {
@@ -87,13 +77,5 @@ pub struct SellInstruction {
 impl SellInstruction {
     fn unpack(data: &[u8]) -> Result<Self, &'static str> {
         Self::try_from_slice(data).map_err(|_| "Failed to deserialize SellInstruction.")
-    }
-}
-
-impl fmt::Debug for Pubkey {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        f.debug_tuple("Pubkey")
-            .field(&bs58::encode(self.0).into_string())
-            .finish()
     }
 }

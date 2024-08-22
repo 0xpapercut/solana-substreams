@@ -1,5 +1,3 @@
-use bs58;
-
 use substreams::errors::Error;
 use substreams_solana::pb::sf::solana::r#type::v1::ConfirmedTransaction;
 use substreams_solana::pb::sf::solana::r#type::v1::Block;
@@ -116,7 +114,7 @@ fn _parse_set_params_instruction(
     set_params: pumpfun::instruction::SetParamsInstruction,
 ) -> Result<SetParamsEvent, &'static str> {
     let user = instruction.accounts()[0].to_string();
-    let fee_recipient = bs58::encode(set_params.fee_recipient.0).into_string();
+    let fee_recipient = set_params.fee_recipient.to_string();
     let initial_virtual_token_reserves = set_params.initial_virtual_token_reserves;
     let initial_virtual_sol_reserves = set_params.initial_virtual_sol_reserves;
     let initial_real_token_reserves = set_params.initial_real_token_reserves;
