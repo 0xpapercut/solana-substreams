@@ -463,9 +463,7 @@ dependencies = [
  "bs58 0.5.1",
  "prost",
  "substreams",
- "substreams-database-change",
  "substreams-solana",
- "substreams-solana-program-instructions",
  "substreams-solana-utils",
 ]
 
@@ -488,17 +486,6 @@ dependencies = [
  "prost-types",
  "substreams-macro",
  "thiserror",
-]
-
-[[package]]
-name = "substreams-database-change"
-version = "1.3.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "ed32ca6fc7fa4b7a684d3abd5bb0545aadd2df82402e7336443cdbb6f8b350c3"
-dependencies = [
- "prost",
- "prost-types",
- "substreams",
 ]
 
 [[package]]
@@ -566,6 +553,7 @@ dependencies = [
 [[package]]
 name = "substreams-solana-utils"
 version = "0.1.0"
+source = "git+https://github.com/0xpapercut/substreams-solana-utils?branch=main#35a764f054d1b9135f177c949e7050b54b2f82fe"
 dependencies = [
  "base64",
  "borsh",
