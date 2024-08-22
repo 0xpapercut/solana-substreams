@@ -327,3 +327,133 @@ fn _parse_upgrade_nonce_account_instruction(
         nonce_account,
     })
 }
+
+pub fn parse_create_account_instruction<'a>(
+    instruction: &'a StructuredInstruction<'a>,
+    context: &TransactionContext,
+) -> Result<CreateAccountEvent, String> {
+    match parse_instruction(instruction, context) {
+        Ok(Some(Event::CreateAccount(event))) => Ok(event),
+        _ => Err("Not a CreateAccountInstruction.".to_string())
+    }
+}
+
+pub fn parse_assign_instruction<'a>(
+    instruction: &'a StructuredInstruction<'a>,
+    context: &TransactionContext,
+) -> Result<AssignEvent, String> {
+    match parse_instruction(instruction, context) {
+        Ok(Some(Event::Assign(event))) => Ok(event),
+        _ => Err("Not an AssignInstruction.".to_string())
+    }
+}
+
+pub fn parse_transfer_instruction<'a>(
+    instruction: &'a StructuredInstruction<'a>,
+    context: &TransactionContext,
+) -> Result<TransferEvent, String> {
+    match parse_instruction(instruction, context) {
+        Ok(Some(Event::Transfer(event))) => Ok(event),
+        _ => Err("Not a TransferInstruction.".to_string())
+    }
+}
+
+pub fn parse_create_account_with_seed_instruction<'a>(
+    instruction: &'a StructuredInstruction<'a>,
+    context: &TransactionContext,
+) -> Result<CreateAccountWithSeedEvent, String> {
+    match parse_instruction(instruction, context) {
+        Ok(Some(Event::CreateAccountWithSeed(event))) => Ok(event),
+        _ => Err("Not a CreateAccountWithSeedInstruction.".to_string())
+    }
+}
+
+pub fn parse_advance_nonce_account_instruction<'a>(
+    instruction: &'a StructuredInstruction<'a>,
+    context: &TransactionContext,
+) -> Result<AdvanceNonceAccountEvent, String> {
+    match parse_instruction(instruction, context) {
+        Ok(Some(Event::AdvanceNonceAccount(event))) => Ok(event),
+        _ => Err("Not an AdvanceNonceAccountInstruction.".to_string())
+    }
+}
+
+pub fn parse_withdraw_nonce_account_instruction<'a>(
+    instruction: &'a StructuredInstruction<'a>,
+    context: &TransactionContext,
+) -> Result<WithdrawNonceAccountEvent, String> {
+    match parse_instruction(instruction, context) {
+        Ok(Some(Event::WithdrawNonceAccount(event))) => Ok(event),
+        _ => Err("Not a WithdrawNonceAccountInstruction.".to_string())
+    }
+}
+
+pub fn parse_initialize_nonce_account_instruction<'a>(
+    instruction: &'a StructuredInstruction<'a>,
+    context: &TransactionContext,
+) -> Result<InitializeNonceAccountEvent, String> {
+    match parse_instruction(instruction, context) {
+        Ok(Some(Event::InitializeNonceAccount(event))) => Ok(event),
+        _ => Err("Not an InitializeNonceAccountInstruction.".to_string())
+    }
+}
+
+pub fn parse_authorize_nonce_account_instruction<'a>(
+    instruction: &'a StructuredInstruction<'a>,
+    context: &TransactionContext,
+) -> Result<AuthorizeNonceAccountEvent, String> {
+    match parse_instruction(instruction, context) {
+        Ok(Some(Event::AuthorizeNonceAccount(event))) => Ok(event),
+        _ => Err("Not an AuthorizeNonceAccountInstruction.".to_string())
+    }
+}
+
+pub fn parse_allocate_instruction<'a>(
+    instruction: &'a StructuredInstruction<'a>,
+    context: &TransactionContext,
+) -> Result<AllocateEvent, String> {
+    match parse_instruction(instruction, context) {
+        Ok(Some(Event::Allocate(event))) => Ok(event),
+        _ => Err("Not an AllocateInstruction.".to_string())
+    }
+}
+
+pub fn parse_allocate_with_seed_instruction<'a>(
+    instruction: &'a StructuredInstruction<'a>,
+    context: &TransactionContext,
+) -> Result<AllocateWithSeedEvent, String> {
+    match parse_instruction(instruction, context) {
+        Ok(Some(Event::AllocateWithSeed(event))) => Ok(event),
+        _ => Err("Not an AllocateWithSeedInstruction.".to_string())
+    }
+}
+
+pub fn parse_assign_with_seed_instruction<'a>(
+    instruction: &'a StructuredInstruction<'a>,
+    context: &TransactionContext,
+) -> Result<AssignWithSeedEvent, String> {
+    match parse_instruction(instruction, context) {
+        Ok(Some(Event::AssignWithSeed(event))) => Ok(event),
+        _ => Err("Not an AssignWithSeedInstruction.".to_string())
+    }
+}
+
+pub fn parse_transfer_with_seed_instruction<'a>(
+    instruction: &'a StructuredInstruction<'a>,
+    context: &TransactionContext,
+) -> Result<TransferWithSeedEvent, String> {
+    match parse_instruction(instruction, context) {
+        Ok(Some(Event::TransferWithSeed(event))) => Ok(event),
+        _ => Err("Not a TransferWithSeedInstruction.".to_string())
+    }
+}
+
+pub fn parse_upgrade_nonce_account_instruction<'a>(
+    instruction: &'a StructuredInstruction<'a>,
+    context: &TransactionContext,
+) -> Result<UpgradeNonceAccountEvent, String> {
+    match parse_instruction(instruction, context) {
+        Ok(Some(Event::UpgradeNonceAccount(event))) => Ok(event),
+        _ => Err("Not an UpgradeNonceAccountInstruction.".to_string())
+    }
+}
