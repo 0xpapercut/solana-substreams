@@ -20,10 +20,6 @@ pub struct SplTokenTransactionEvents {
 pub struct SplTokenEvent {
     #[prost(uint32, tag="1")]
     pub instruction_index: u32,
-    #[prost(string, optional, tag="16")]
-    pub parent_instruction_program_id: ::core::option::Option<::prost::alloc::string::String>,
-    #[prost(string, optional, tag="17")]
-    pub top_instruction_program_id: ::core::option::Option<::prost::alloc::string::String>,
     #[prost(oneof="spl_token_event::Event", tags="2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15")]
     pub event: ::core::option::Option<spl_token_event::Event>,
 }
@@ -157,6 +153,7 @@ pub struct BurnEvent {
 pub struct CloseAccountEvent {
     #[prost(message, optional, tag="1")]
     pub source: ::core::option::Option<TokenAccount>,
+    /// TODO: amount
     #[prost(string, tag="2")]
     pub destination: ::prost::alloc::string::String,
 }

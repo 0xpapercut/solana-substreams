@@ -30,8 +30,6 @@ message SplTokenEvent {
         ThawAccountEvent thaw_account = 14;
         SyncNativeEvent sync_native = 15;
     }
-    optional string parent_instruction_program_id = 16;
-    optional string top_instruction_program_id = 17;
 }
 
 message InitializeMintEvent {
