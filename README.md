@@ -8,4 +8,4 @@ Stream SPL Token Program events with [substreams](https://substreams.streamingfa
 
 This substream provides a complete description of SPL Token Program events, as per [spl_token.proto](proto/spl_token.proto).
 
-For storing these events in a database, a [schema](schema.sql) is provided along with a corresponding `table_changes` function. [Find here an example of usage](https://github.com/0xpapercut/substream-sinks/tree/main/solana-clickhouse).
+If you're looking to index these events in a database, check out [solana-clickhouse](https://github.com/0xpapercut/substream-sinks/tree/main/solana-clickhouse).
