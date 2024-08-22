@@ -62,7 +62,7 @@ pub fn parse_transaction(transaction: &ConfirmedTransaction) -> Result<Vec<Raydi
     let instructions = utils::instruction::get_structured_instructions(transaction).unwrap();
 
     for instruction in instructions.flattened().iter() {
-        if *instruction.program_id() != *RAYDIUM_AMM_PROGRAM_ID {
+        if instruction.program_id() != *RAYDIUM_AMM_PROGRAM_ID {
             continue;
         }
 
@@ -83,7 +83,7 @@ pub fn parse_instruction<'a>(
     instruction: &StructuredInstruction<'a>,
     context: &TransactionContext
 ) -> Result<Option<Event>, String> {
-    if *instruction.program_id() != *RAYDIUM_AMM_PROGRAM_ID {
+    if instruction.program_id() != *RAYDIUM_AMM_PROGRAM_ID {
         return Err("Instruction does not originate from Raydium.".into());
     }
     let unpacked = AmmInstruction::unpack(&instruction.data())?;
