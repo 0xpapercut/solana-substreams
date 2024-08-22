@@ -1,20 +1,19 @@
-use std::collections::HashMap;
-use std::rc::Rc;
-use bs58;
+use regex;
 
 use substreams::errors::Error;
 use substreams_solana::pb::sf::solana::r#type::v1::ConfirmedTransaction;
 use substreams_solana::pb::sf::solana::r#type::v1::Block;
-use substreams_database_change::tables::Tables;
-use substreams_database_change::pb::database::TableChange;
 
-use substreams_solana_raydium_amm as raydium_amm;
+pub mod raydium_amm;
 use raydium_amm::instruction::AmmInstruction;
-use raydium_amm::RAYDIUM_LIQUIDITY_POOL;
+use raydium_amm::constants::RAYDIUM_AMM_PROGRAM_ID;
+use raydium_amm::log::{decode_ray_log, RayLog};
 
 use substreams_solana_utils as utils;
-pub use utils::instruction::{StructuredInstruction, StructuredInstructions};
-pub use utils::transaction::TransactionContext;
+pub use utils::instruction::{get_structured_instructions, StructuredInstruction, StructuredInstructions};
+pub use utils::transaction::{get_context, TransactionContext};
+pub use utils::pubkey::Pubkey;
+pub use utils::log::Log;
 
 use spl_token_substream;
 
@@ -39,12 +38,11 @@ fn raydium_block_events(block: Block) -> Result<RaydiumBlockEvents, Error> {
 
 pub fn parse_block(block: &Block) -> Vec<RaydiumTransactionEvents> {
     let mut block_events: Vec<RaydiumTransactionEvents> = Vec::new();
-    for (i, transaction) in block.transactions.iter().enumerate() {
+    for transaction in block.transactions.iter() {
         if let Ok(events) = parse_transaction(transaction) {
             if !events.is_empty() {
                 block_events.push(RaydiumTransactionEvents {
                     signature: utils::transaction::get_signature(&transaction),
-                    transaction_index: i as u32,
                     events,
                 });
             }
@@ -62,30 +60,16 @@ pub fn parse_transaction(transaction: &ConfirmedTransaction) -> Result<Vec<Raydi
 
     let context = utils::transaction::get_context(transaction);
     let instructions = utils::instruction::get_structured_instructions(transaction).unwrap();
-    let flattened_instructions = instructions.flattened();
-    let instruction_index: HashMap<_, _> = flattened_instructions.iter().enumerate().map(|(x, y)| (Rc::as_ptr(y), x)).collect();
 
-    for (i, instruction) in flattened_instructions.iter().enumerate() {
-        if bs58::encode(context.get_account_from_index(instruction.program_id_index() as usize)).into_string() != RAYDIUM_LIQUIDITY_POOL {
+    for instruction in instructions.flattened().iter() {
+        if *instruction.program_id() != *RAYDIUM_AMM_PROGRAM_ID {
             continue;
         }
 
         match parse_instruction(&instruction, &context) {
             Ok(Some(event)) => {
-                let parent_instruction = instruction.parent_instruction();
-                let top_instruction = instruction.top_instruction();
-                let parent_instruction_program_id = parent_instruction.as_ref().map(|x| bs58::encode(context.get_account_from_index(x.program_id_index() as usize)).into_string());
-                let top_instruction_program_id = top_instruction.as_ref().map(|x| bs58::encode(context.get_account_from_index(x.program_id_index() as usize)).into_string());
-                let parent_instruction_index = parent_instruction.as_ref().map(|x| instruction_index[&Rc::as_ptr(x)] as u32);
-                let top_instruction_index = top_instruction.as_ref().map(|x| instruction_index[&Rc::as_ptr(x)] as u32);
-
                 events.push(RaydiumEvent {
-                    instruction_index: i as u32,
                     event: Some(event),
-                    top_instruction_program_id,
-                    parent_instruction_program_id,
-                    top_instruction_index,
-                    parent_instruction_index,
                 })
             }
             Ok(None) => (),
@@ -95,12 +79,12 @@ pub fn parse_transaction(transaction: &ConfirmedTransaction) -> Result<Vec<Raydi
     Ok(events)
 }
 
-pub fn parse_instruction(
-    instruction: &StructuredInstruction,
+pub fn parse_instruction<'a>(
+    instruction: &StructuredInstruction<'a>,
     context: &TransactionContext
 ) -> Result<Option<Event>, String> {
-    if bs58::encode(context.get_account_from_index(instruction.program_id_index() as usize)).into_string() != RAYDIUM_LIQUIDITY_POOL {
-        return Err("Not a Raydium instruction.".to_string());
+    if *instruction.program_id() != *RAYDIUM_AMM_PROGRAM_ID {
+        return Err("Instruction does not originate from Raydium.".into());
     }
     let unpacked = AmmInstruction::unpack(&instruction.data())?;
     match unpacked {
@@ -129,12 +113,12 @@ pub fn parse_instruction(
     }
 }
 
-fn _parse_swap_instruction(
-    instruction: &StructuredInstruction,
+fn _parse_swap_instruction<'a>(
+    instruction: &StructuredInstruction<'a>,
     context: &TransactionContext,
 ) -> Result<SwapEvent, String> {
-    let amm = bs58::encode(context.get_account_from_index(instruction.accounts()[1] as usize)).into_string();
-    let user = bs58::encode(context.get_account_from_index(*instruction.accounts().last().unwrap() as usize)).into_string();
+    let amm = instruction.accounts()[1].to_string();
+    let user = instruction.accounts().last().unwrap().to_string();
 
     let instructions_len = instruction.inner_instructions().len();
     let transfer_in = spl_token_substream::parse_transfer_instruction(&instruction.inner_instructions()[instructions_len - 2], context)?;
@@ -145,6 +129,29 @@ fn _parse_swap_instruction(
     let mint_in = transfer_in.source.unwrap().mint;
     let mint_out = transfer_out.source.unwrap().mint;
 
+    // let coin_mint = context.get_token_account(&instruction.accounts()[5]).unwrap().mint.to_string();
+    // let pc_mint = context.get_token_account(&instruction.accounts()[6]).unwrap().mint.to_string();
+
+    let (pool_coin_amount, pool_pc_amount, _direction) = match parse_log(instruction) {
+        Ok(RayLog::SwapBaseIn(swap_base_in)) => {
+            let direction = match swap_base_in.direction {
+                1 => "pc_to_coin",
+                2 => "coin_to_pc",
+                _ => panic!(),
+            };
+            (Some(swap_base_in.pool_coin), Some(swap_base_in.pool_pc), Some(direction.to_string()))
+        },
+        Ok(RayLog::SwapBaseOut(swap_base_out)) => {
+            let direction = match swap_base_out.direction {
+                1 => "pc_to_coin",
+                2 => "coin_to_pc",
+                _ => panic!(),
+            };
+            (Some(swap_base_out.pool_coin), Some(swap_base_out.pool_pc), Some(direction.to_string()))
+        },
+        _ => (None, None, None),
+    };
+
     Ok(SwapEvent {
         amm,
         user,
@@ -152,16 +159,18 @@ fn _parse_swap_instruction(
         mint_out,
         amount_in,
         amount_out,
+        pool_coin_amount,
+        pool_pc_amount,
     })
 }
 
-fn _parse_initialize_instruction(
-    instruction: &StructuredInstruction,
+fn _parse_initialize_instruction<'a>(
+    instruction: &StructuredInstruction<'a>,
     context: &TransactionContext,
     nonce: u8,
 ) -> Result<InitializeEvent, String> {
-    let amm = bs58::encode(context.get_account_from_index(instruction.accounts()[4] as usize)).into_string();
-    let user = bs58::encode(context.get_account_from_index(instruction.accounts()[17] as usize)).into_string();
+    let amm = instruction.accounts()[4].to_string();
+    let user = instruction.accounts()[17].to_string();
 
     let instructions_len = instruction.inner_instructions().len();
     let coin_transfer = spl_token_substream::parse_transfer_instruction(&instruction.inner_instructions()[instructions_len - 3], context)?;
@@ -175,6 +184,11 @@ fn _parse_initialize_instruction(
     let coin_mint = coin_transfer.source.unwrap().mint;
     let lp_mint = lp_mint_to.mint;
 
+    let market = match parse_log(instruction) {
+        Ok(RayLog::Init(init)) => Some(Pubkey(init.market).to_string()),
+        _ => None,
+    };
+
     Ok(InitializeEvent {
         amm,
         user,
@@ -185,15 +199,16 @@ fn _parse_initialize_instruction(
         coin_mint,
         lp_mint,
         nonce: nonce as u32,
+        market,
     })
 }
 
-fn _parse_deposit_instruction(
-    instruction: &StructuredInstruction,
+fn _parse_deposit_instruction<'a>(
+    instruction: &StructuredInstruction<'a>,
     context: &TransactionContext
 ) -> Result<DepositEvent, String> {
-    let amm = bs58::encode(context.get_account_from_index(instruction.accounts()[1] as usize)).into_string();
-    let user = bs58::encode(context.get_account_from_index(instruction.accounts()[12] as usize)).into_string();
+    let amm = instruction.accounts()[1].to_string();
+    let user = instruction.accounts()[12].to_string();
 
     let instructions_len = instruction.inner_instructions().len();
     let pc_transfer = spl_token_substream::parse_transfer_instruction(&instruction.inner_instructions()[instructions_len - 2], context)?;
@@ -207,6 +222,13 @@ fn _parse_deposit_instruction(
     let coin_mint = coin_transfer.source.unwrap().mint;
     let lp_mint = lp_mint_to.mint;
 
+    let (pool_pc_amount, pool_coin_amount, pool_lp_amount) = match parse_log(instruction) {
+        Ok(RayLog::Deposit(deposit)) => {
+            (Some(deposit.pool_pc), Some(deposit.pool_coin), Some(deposit.pool_lp))
+        },
+        _ => (None, None, None)
+    };
+
     Ok(DepositEvent {
         amm,
         user,
@@ -216,15 +238,18 @@ fn _parse_deposit_instruction(
         pc_mint,
         coin_mint,
         lp_mint,
+        pool_pc_amount,
+        pool_coin_amount,
+        pool_lp_amount,
     })
 }
 
-fn _parse_withdraw_instruction(
-    instruction: &StructuredInstruction,
+fn _parse_withdraw_instruction<'a>(
+    instruction: &StructuredInstruction<'a>,
     context: &TransactionContext,
 ) -> Result<WithdrawEvent, String> {
-    let amm = bs58::encode(context.get_account_from_index(instruction.accounts()[1] as usize)).into_string();
-    let user = bs58::encode(context.get_account_from_index(instruction.accounts()[16] as usize)).into_string();
+    let amm = instruction.accounts()[1].to_string();
+    let user = instruction.accounts()[16].to_string();
 
     let instructions_len = instruction.inner_instructions().len();
     let pc_transfer = spl_token_substream::parse_transfer_instruction(&instruction.inner_instructions()[instructions_len - 2], context)?;
@@ -238,6 +263,13 @@ fn _parse_withdraw_instruction(
     let coin_mint = coin_transfer.source.unwrap().mint;
     let lp_mint = lp_burn.source.unwrap().mint;
 
+    let (pool_pc_amount, pool_coin_amount, pool_lp_amount) = match parse_log(instruction) {
+        Ok(RayLog::Withdraw(withdraw)) => {
+            (Some(withdraw.pool_pc), Some(withdraw.pool_coin), Some(withdraw.pool_lp))
+        },
+        _ => (None, None, None)
+    };
+
     Ok(WithdrawEvent {
         amm,
         user,
@@ -247,6 +279,9 @@ fn _parse_withdraw_instruction(
         pc_mint,
         coin_mint,
         lp_mint,
+        pool_pc_amount,
+        pool_coin_amount,
+        pool_lp_amount,
     })
 }
 
@@ -254,8 +289,8 @@ fn _parse_withdraw_pnl_instruction(
     instruction: &StructuredInstruction,
     context: &TransactionContext,
 ) -> Result<WithdrawPnlEvent, String> {
-    let amm = bs58::encode(context.get_account_from_index(instruction.accounts()[1] as usize)).into_string();
-    let user = bs58::encode(context.get_account_from_index(instruction.accounts()[9] as usize)).into_string();
+    let amm = instruction.accounts()[1].to_string();
+    let user = instruction.accounts()[9].to_string();
 
     let instructions_len = instruction.inner_instructions().len();
     if instructions_len == 2 || instructions_len == 3 {
@@ -287,85 +322,20 @@ fn _parse_withdraw_pnl_instruction(
     }
 }
 
-pub fn tables_changes(block: &Block) -> Result<Vec<TableChange>, substreams::errors::Error> {
-    let mut tables = Tables::new();
-    for transaction in parse_block(block) {
-        for event in transaction.events.iter() {
-            match &event.event {
-                Some(Event::Swap(swap)) => {
-                    tables.create_row("raydium_swap_events", [("signature", transaction.signature.clone()), ("instruction_index", event.instruction_index.to_string())])
-                        .set("transaction_index", transaction.transaction_index)
-                        .set("parent_instruction_program_id", event.parent_instruction_program_id.as_ref().unwrap())
-                        .set("top_instruction_program_id", event.top_instruction_program_id.as_ref().unwrap())
-                        .set("slot", block.slot)
-                        .set("amm", &swap.amm)
-                        .set("user", &swap.user)
-                        .set("amount_in", swap.amount_in)
-                        .set("amount_out", swap.amount_out)
-                        .set("mint_in", &swap.mint_in)
-                        .set("mint_out", &swap.mint_out);
-                }
-                Some(Event::Initialize(initialize)) => {
-                    tables.create_row("raydium_initialize_events", [("signature", transaction.signature.clone()), ("instruction_index", event.instruction_index.to_string())])
-                        .set("transaction_index", transaction.transaction_index)
-                        .set("parent_instruction_program_id", event.parent_instruction_program_id.as_ref().unwrap())
-                        .set("top_instruction_program_id", event.top_instruction_program_id.as_ref().unwrap())
-                        .set("slot", block.slot)
-                        .set("amm", &initialize.amm)
-                        .set("user", &initialize.user)
-                        .set("pc_init_amount", initialize.pc_init_amount)
-                        .set("coin_init_amount", initialize.coin_init_amount)
-                        .set("lp_init_amount", initialize.lp_init_amount)
-                        .set("pc_mint", &initialize.pc_mint)
-                        .set("coin_mint", &initialize.coin_mint)
-                        .set("lp_mint", &initialize.lp_mint);
-                },
-                Some(Event::Deposit(deposit)) => {
-                    tables.create_row("raydium_deposit_events", [("signature", transaction.signature.clone()), ("instruction_index", event.instruction_index.to_string())])
-                        .set("transaction_index", transaction.transaction_index)
-                        .set("parent_instruction_program_id", event.parent_instruction_program_id.as_ref().unwrap())
-                        .set("top_instruction_program_id", event.top_instruction_program_id.as_ref().unwrap())
-                        .set("slot", block.slot)
-                        .set("amm", &deposit.amm)
-                        .set("user", &deposit.user)
-                        .set("pc_amount", deposit.pc_amount)
-                        .set("coin_amount", deposit.coin_amount)
-                        .set("lp_amount", deposit.lp_amount)
-                        .set("pc_mint", &deposit.pc_mint)
-                        .set("coin_mint", &deposit.coin_mint)
-                        .set("lp_mint", &deposit.lp_mint);
-                },
-                Some(Event::Withdraw(withdraw)) => {
-                    tables.create_row("raydium_withdraw_events", [("signature", transaction.signature.clone()), ("instruction_index", event.instruction_index.to_string())])
-                        .set("transaction_index", transaction.transaction_index)
-                        .set("parent_instruction_program_id", event.parent_instruction_program_id.as_ref().unwrap())
-                        .set("top_instruction_program_id", event.top_instruction_program_id.as_ref().unwrap())
-                        .set("slot", block.slot)
-                        .set("amm", &withdraw.amm)
-                        .set("user", &withdraw.user)
-                        .set("pc_amount", withdraw.pc_amount)
-                        .set("coin_amount", withdraw.coin_amount)
-                        .set("lp_amount", withdraw.lp_amount)
-                        .set("pc_mint", &withdraw.pc_mint)
-                        .set("coin_mint", &withdraw.coin_mint)
-                        .set("lp_mint", &withdraw.lp_mint);
-                }
-                Some(Event::WithdrawPnl(withdraw_pnl)) => {
-                    tables.create_row("raydium_withdraw_pnl_events", [("signature", transaction.signature.clone()), ("instruction_index", event.instruction_index.to_string())])
-                        .set("transaction_index", transaction.transaction_index)
-                        .set("parent_instruction_program_id", event.parent_instruction_program_id.as_ref().unwrap())
-                        .set("top_instruction_program_id", event.top_instruction_program_id.as_ref().unwrap())
-                        .set("slot", block.slot)
-                        .set("amm", &withdraw_pnl.amm)
-                        .set("user", &withdraw_pnl.user)
-                        .set("pc_amount", withdraw_pnl.pc_amount.unwrap_or(0))
-                        .set("coin_amount", withdraw_pnl.coin_amount.unwrap_or(0))
-                        .set("pc_mint", withdraw_pnl.pc_mint.as_deref().unwrap_or(""))
-                        .set("coin_mint", withdraw_pnl.coin_mint.as_deref().unwrap_or(""));
-                }
-                None => ()
-            }
+fn parse_log(instruction: &StructuredInstruction) -> Result<RayLog, String> {
+    let re = regex::Regex::new(r"ray_log: (.+)").unwrap();
+    let log_message = instruction.logs().iter().rev().find_map(|log| {
+        if let Log::Program(program_log) = log {
+            Some(program_log.message().unwrap())
+        } else {
+            None
         }
+    });
+    match log_message {
+        Some(message) => match re.captures(message.as_str()) {
+            Some(captures) => Ok(decode_ray_log(&captures[1])),
+            None => return Err("Failed to capture log message".to_string()),
+        },
+        None => return Err("Log message not found".to_string()),
     }
-    Ok(tables.to_database_changes().table_changes)
 }

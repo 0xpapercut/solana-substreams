@@ -10,25 +10,13 @@ pub struct RaydiumBlockEvents {
 pub struct RaydiumTransactionEvents {
     #[prost(string, tag="1")]
     pub signature: ::prost::alloc::string::String,
-    #[prost(uint32, tag="2")]
-    pub transaction_index: u32,
-    #[prost(message, repeated, tag="3")]
+    #[prost(message, repeated, tag="2")]
     pub events: ::prost::alloc::vec::Vec<RaydiumEvent>,
 }
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct RaydiumEvent {
-    #[prost(uint32, tag="1")]
-    pub instruction_index: u32,
-    #[prost(string, optional, tag="7")]
-    pub top_instruction_program_id: ::core::option::Option<::prost::alloc::string::String>,
-    #[prost(string, optional, tag="8")]
-    pub parent_instruction_program_id: ::core::option::Option<::prost::alloc::string::String>,
-    #[prost(uint32, optional, tag="9")]
-    pub top_instruction_index: ::core::option::Option<u32>,
-    #[prost(uint32, optional, tag="10")]
-    pub parent_instruction_index: ::core::option::Option<u32>,
-    #[prost(oneof="raydium_event::Event", tags="2, 3, 4, 5, 6")]
+    #[prost(oneof="raydium_event::Event", tags="1, 2, 3, 4, 5")]
     pub event: ::core::option::Option<raydium_event::Event>,
 }
 /// Nested message and enum types in `RaydiumEvent`.
@@ -36,15 +24,15 @@ pub mod raydium_event {
     #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Oneof)]
     pub enum Event {
-        #[prost(message, tag="2")]
+        #[prost(message, tag="1")]
         Initialize(super::InitializeEvent),
-        #[prost(message, tag="3")]
+        #[prost(message, tag="2")]
         Deposit(super::DepositEvent),
-        #[prost(message, tag="4")]
+        #[prost(message, tag="3")]
         Withdraw(super::WithdrawEvent),
-        #[prost(message, tag="5")]
+        #[prost(message, tag="4")]
         WithdrawPnl(super::WithdrawPnlEvent),
-        #[prost(message, tag="6")]
+        #[prost(message, tag="5")]
         Swap(super::SwapEvent),
     }
 }
@@ -69,6 +57,8 @@ pub struct InitializeEvent {
     pub lp_mint: ::prost::alloc::string::String,
     #[prost(uint32, tag="9")]
     pub nonce: u32,
+    #[prost(string, optional, tag="10")]
+    pub market: ::core::option::Option<::prost::alloc::string::String>,
 }
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
@@ -89,6 +79,12 @@ pub struct DepositEvent {
     pub coin_mint: ::prost::alloc::string::String,
     #[prost(string, tag="8")]
     pub lp_mint: ::prost::alloc::string::String,
+    #[prost(uint64, optional, tag="9")]
+    pub pool_pc_amount: ::core::option::Option<u64>,
+    #[prost(uint64, optional, tag="10")]
+    pub pool_coin_amount: ::core::option::Option<u64>,
+    #[prost(uint64, optional, tag="11")]
+    pub pool_lp_amount: ::core::option::Option<u64>,
 }
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
@@ -109,6 +105,12 @@ pub struct WithdrawEvent {
     pub coin_mint: ::prost::alloc::string::String,
     #[prost(string, tag="8")]
     pub lp_mint: ::prost::alloc::string::String,
+    #[prost(uint64, optional, tag="9")]
+    pub pool_pc_amount: ::core::option::Option<u64>,
+    #[prost(uint64, optional, tag="10")]
+    pub pool_coin_amount: ::core::option::Option<u64>,
+    #[prost(uint64, optional, tag="11")]
+    pub pool_lp_amount: ::core::option::Option<u64>,
 }
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
@@ -141,5 +143,9 @@ pub struct SwapEvent {
     pub amount_in: u64,
     #[prost(uint64, tag="6")]
     pub amount_out: u64,
+    #[prost(uint64, optional, tag="7")]
+    pub pool_pc_amount: ::core::option::Option<u64>,
+    #[prost(uint64, optional, tag="8")]
+    pub pool_coin_amount: ::core::option::Option<u64>,
 }
 // @@protoc_insertion_point(module)
