@@ -8,23 +8,17 @@ message RaydiumBlockEvents {
 
 message RaydiumTransactionEvents {
     string signature = 1;
-    uint32 transaction_index = 2;
-    repeated RaydiumEvent events = 3;
+    repeated RaydiumEvent events = 2;
 }
 
 message RaydiumEvent {
-    uint32 instruction_index = 1;
     oneof event {
-        InitializeEvent initialize = 2;
-        DepositEvent deposit = 3;
-        WithdrawEvent withdraw = 4;
-        WithdrawPnlEvent withdraw_pnl = 5;
-        SwapEvent swap = 6;
+        InitializeEvent initialize = 1;
+        DepositEvent deposit = 2;
+        WithdrawEvent withdraw = 3;
+        WithdrawPnlEvent withdraw_pnl = 4;
+        SwapEvent swap = 5;
     }
-    optional string top_instruction_program_id = 7;
-    optional string parent_instruction_program_id = 8;
-    optional uint32 top_instruction_index = 9;
-    optional uint32 parent_instruction_index = 10;
 }
 
 message InitializeEvent {
@@ -37,6 +31,7 @@ message InitializeEvent {
     string coinMint = 7;
     string lpMint = 8;
     uint32 nonce = 9;
+    optional string market = 10;
 }
 
 message DepositEvent {
@@ -48,6 +43,9 @@ message DepositEvent {
     string pcMint = 6;
     string coinMint = 7;
     string lpMint = 8;
+    optional uint64 poolPcAmount = 9;
+    optional uint64 poolCoinAmount = 10;
+    optional uint64 poolLpAmount = 11;
 }
 
 message WithdrawEvent {
@@ -59,6 +57,9 @@ message WithdrawEvent {
     string pcMint = 6;
     string coinMint = 7;
     string lpMint = 8;
+    optional uint64 poolPcAmount = 9;
+    optional uint64 poolCoinAmount = 10;
+    optional uint64 poolLpAmount = 11;
 }
 
 message WithdrawPnlEvent {
@@ -77,4 +78,6 @@ message SwapEvent {
     string mintOut = 4;
     uint64 amountIn = 5;
     uint64 amountOut = 6;
+    optional uint64 poolPcAmount = 7;
+    optional uint64 poolCoinAmount = 8;
 }
