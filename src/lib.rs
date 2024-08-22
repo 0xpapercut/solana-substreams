@@ -9,24 +9,7 @@ use utils::system_program::{self, SystemInstruction, SYSTEM_PROGRAM_ID};
 use utils::pubkey::Pubkey;
 
 pub mod pb;
-use pb::system_program::{
-    SystemProgramBlockEvents,
-    SystemProgramTransactionEvents,
-    SystemProgramEvent,
-    CreateAccountEvent,
-    AssignEvent,
-    TransferEvent,
-    CreateAccountWithSeedEvent,
-    AdvanceNonceAccountEvent,
-    WithdrawNonceAccountEvent,
-    InitializeNonceAccountEvent,
-    AuthorizeNonceAccountEvent,
-    AllocateEvent,
-    AllocateWithSeedEvent,
-    AssignWithSeedEvent,
-    TransferWithSeedEvent,
-    UpgradeNonceAccountEvent,
-};
+use pb::system_program::*;
 use pb::system_program::system_program_event::Event;
 
 #[substreams::handlers::map]
