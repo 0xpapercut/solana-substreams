@@ -16,7 +16,7 @@ pub struct MplTokenMetadataTransactionEvents {
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct MplTokenMetadataEvent {
-    #[prost(oneof="mpl_token_metadata_event::Event", tags="1")]
+    #[prost(oneof="mpl_token_metadata_event::Event", tags="1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56")]
     pub event: ::core::option::Option<mpl_token_metadata_event::Event>,
 }
 /// Nested message and enum types in `MplTokenMetadataEvent`.
@@ -26,7 +26,337 @@ pub mod mpl_token_metadata_event {
     pub enum Event {
         #[prost(message, tag="1")]
         CreateMetadataAccountV3(super::CreateMetadataAccountV3Event),
+        #[prost(message, tag="2")]
+        ApproveCollectionAuthority(super::ApproveCollectionAuthorityEvent),
+        #[prost(message, tag="3")]
+        ApproveUseAuthority(super::ApproveUseAuthorityEvent),
+        #[prost(message, tag="4")]
+        BubblegumSetCollectionSize(super::BubblegumSetCollectionSizeEvent),
+        #[prost(message, tag="5")]
+        Burn(super::BurnEvent),
+        #[prost(message, tag="6")]
+        BurnEditionNft(super::BurnEditionNftEvent),
+        #[prost(message, tag="7")]
+        BurnNft(super::BurnNftEvent),
+        #[prost(message, tag="8")]
+        CloseEscrowAccount(super::CloseEscrowAccountEvent),
+        #[prost(message, tag="9")]
+        ConvertMasterEditionV1ToV2(super::ConvertMasterEditionV1ToV2Event),
+        #[prost(message, tag="10")]
+        Create(super::CreateEvent),
+        #[prost(message, tag="11")]
+        CreateEscrowAccount(super::CreateEscrowAccountEvent),
+        #[prost(message, tag="12")]
+        CreateMasterEdition(super::CreateMasterEditionEvent),
+        #[prost(message, tag="13")]
+        CreateMasterEditionV3(super::CreateMasterEditionV3Event),
+        #[prost(message, tag="14")]
+        CreateMetadataAccount(super::CreateMetadataAccountEvent),
+        #[prost(message, tag="15")]
+        CreateMetadataAccountV2(super::CreateMetadataAccountV2Event),
+        #[prost(message, tag="16")]
+        Delegate(super::DelegateEvent),
+        #[prost(message, tag="17")]
+        DeprecatedCreateMasterEdition(super::DeprecatedCreateMasterEditionEvent),
+        #[prost(message, tag="18")]
+        DeprecatedCreateReservationList(super::DeprecatedCreateReservationListEvent),
+        #[prost(message, tag="19")]
+        DeprecatedMintNewEditionFromMasterEditionViaPrintingToken(super::DeprecatedMintNewEditionFromMasterEditionViaPrintingTokenEvent),
+        #[prost(message, tag="20")]
+        DeprecatedMintPrintingTokens(super::DeprecatedMintPrintingTokensEvent),
+        #[prost(message, tag="21")]
+        DeprecatedMintPrintingTokensViaToken(super::DeprecatedMintPrintingTokensViaTokenEvent),
+        #[prost(message, tag="22")]
+        DeprecatedSetReservationList(super::DeprecatedSetReservationListEvent),
+        #[prost(message, tag="23")]
+        FreezeDelegatedAccount(super::FreezeDelegatedAccountEvent),
+        #[prost(message, tag="24")]
+        Lock(super::LockEvent),
+        #[prost(message, tag="25")]
+        Migrate(super::MigrateEvent),
+        #[prost(message, tag="26")]
+        MintNewEditionFromMasterEditionViaToken(super::MintNewEditionFromMasterEditionViaTokenEvent),
+        #[prost(message, tag="27")]
+        MintNewEditionFromMasterEditionViaVaultProxy(super::MintNewEditionFromMasterEditionViaVaultProxyEvent),
+        #[prost(message, tag="28")]
+        PuffMetadata(super::PuffMetadataEvent),
+        #[prost(message, tag="29")]
+        RemoveCreatorVerification(super::RemoveCreatorVerificationEvent),
+        #[prost(message, tag="30")]
+        Revoke(super::RevokeEvent),
+        #[prost(message, tag="31")]
+        RevokeCollectionAuthority(super::RevokeCollectionAuthorityEvent),
+        #[prost(message, tag="32")]
+        RevokeUseAuthority(super::RevokeUseAuthorityEvent),
+        #[prost(message, tag="33")]
+        SetAndVerifyCollection(super::SetAndVerifyCollectionEvent),
+        #[prost(message, tag="34")]
+        SetAndVerifySizedCollectionItem(super::SetAndVerifySizedCollectionItemEvent),
+        #[prost(message, tag="35")]
+        SetTokenStandard(super::SetTokenStandardEvent),
+        #[prost(message, tag="36")]
+        SignMetadata(super::SignMetadataEvent),
+        #[prost(message, tag="37")]
+        ThawDelegatedAccount(super::ThawDelegatedAccountEvent),
+        #[prost(message, tag="38")]
+        Transfer(super::TransferEvent),
+        #[prost(message, tag="39")]
+        TransferOutOfEscrow(super::TransferOutOfEscrowEvent),
+        #[prost(message, tag="40")]
+        Unlock(super::UnlockEvent),
+        #[prost(message, tag="41")]
+        Unverify(super::UnverifyEvent),
+        #[prost(message, tag="42")]
+        UnverifyCollection(super::UnverifyCollectionEvent),
+        #[prost(message, tag="43")]
+        UnverifySizedCollectionItem(super::UnverifySizedCollectionItemEvent),
+        #[prost(message, tag="44")]
+        Update(super::UpdateEvent),
+        #[prost(message, tag="45")]
+        UpdateMetadataAccount(super::UpdateMetadataAccountEvent),
+        #[prost(message, tag="46")]
+        UpdateMetadataAccountV2(super::UpdateMetadataAccountV2Event),
+        #[prost(message, tag="47")]
+        UpdatePrimarySaleHappenedViaToken(super::UpdatePrimarySaleHappenedViaTokenEvent),
+        #[prost(message, tag="48")]
+        Utilize(super::UtilizeEvent),
+        #[prost(message, tag="49")]
+        Print(super::PrintEvent),
+        #[prost(message, tag="50")]
+        Verify(super::VerifyEvent),
+        #[prost(message, tag="51")]
+        Mint(super::MintEvent),
+        #[prost(message, tag="52")]
+        SetCollectionSize(super::SetCollectionSizeEvent),
+        #[prost(message, tag="53")]
+        Collect(super::CollectEvent),
+        #[prost(message, tag="54")]
+        Use(super::UseEvent),
+        #[prost(message, tag="55")]
+        VerifySizedCollectionItem(super::VerifySizedCollectionItemEvent),
+        #[prost(message, tag="56")]
+        VerifyCollection(super::VerifyCollectionEvent),
     }
+}
+#[allow(clippy::derive_partial_eq_without_eq)]
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct ApproveCollectionAuthorityEvent {
+}
+#[allow(clippy::derive_partial_eq_without_eq)]
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct ApproveUseAuthorityEvent {
+}
+#[allow(clippy::derive_partial_eq_without_eq)]
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct BubblegumSetCollectionSizeEvent {
+}
+#[allow(clippy::derive_partial_eq_without_eq)]
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct BurnEvent {
+}
+#[allow(clippy::derive_partial_eq_without_eq)]
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct BurnEditionNftEvent {
+}
+#[allow(clippy::derive_partial_eq_without_eq)]
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct BurnNftEvent {
+}
+#[allow(clippy::derive_partial_eq_without_eq)]
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct CloseEscrowAccountEvent {
+}
+#[allow(clippy::derive_partial_eq_without_eq)]
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct ConvertMasterEditionV1ToV2Event {
+}
+#[allow(clippy::derive_partial_eq_without_eq)]
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct CreateEvent {
+}
+#[allow(clippy::derive_partial_eq_without_eq)]
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct CreateEscrowAccountEvent {
+}
+#[allow(clippy::derive_partial_eq_without_eq)]
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct CreateMasterEditionEvent {
+}
+#[allow(clippy::derive_partial_eq_without_eq)]
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct CreateMasterEditionV3Event {
+}
+#[allow(clippy::derive_partial_eq_without_eq)]
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct CreateMetadataAccountEvent {
+}
+#[allow(clippy::derive_partial_eq_without_eq)]
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct CreateMetadataAccountV2Event {
+}
+#[allow(clippy::derive_partial_eq_without_eq)]
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct DelegateEvent {
+}
+#[allow(clippy::derive_partial_eq_without_eq)]
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct DeprecatedCreateMasterEditionEvent {
+}
+#[allow(clippy::derive_partial_eq_without_eq)]
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct DeprecatedCreateReservationListEvent {
+}
+#[allow(clippy::derive_partial_eq_without_eq)]
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct DeprecatedMintNewEditionFromMasterEditionViaPrintingTokenEvent {
+}
+#[allow(clippy::derive_partial_eq_without_eq)]
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct DeprecatedMintPrintingTokensEvent {
+}
+#[allow(clippy::derive_partial_eq_without_eq)]
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct DeprecatedMintPrintingTokensViaTokenEvent {
+}
+#[allow(clippy::derive_partial_eq_without_eq)]
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct DeprecatedSetReservationListEvent {
+}
+#[allow(clippy::derive_partial_eq_without_eq)]
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct FreezeDelegatedAccountEvent {
+}
+#[allow(clippy::derive_partial_eq_without_eq)]
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct LockEvent {
+}
+#[allow(clippy::derive_partial_eq_without_eq)]
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct MigrateEvent {
+}
+#[allow(clippy::derive_partial_eq_without_eq)]
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct MintNewEditionFromMasterEditionViaTokenEvent {
+}
+#[allow(clippy::derive_partial_eq_without_eq)]
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct MintNewEditionFromMasterEditionViaVaultProxyEvent {
+}
+#[allow(clippy::derive_partial_eq_without_eq)]
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct PuffMetadataEvent {
+}
+#[allow(clippy::derive_partial_eq_without_eq)]
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct RemoveCreatorVerificationEvent {
+}
+#[allow(clippy::derive_partial_eq_without_eq)]
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct RevokeEvent {
+}
+#[allow(clippy::derive_partial_eq_without_eq)]
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct RevokeCollectionAuthorityEvent {
+}
+#[allow(clippy::derive_partial_eq_without_eq)]
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct RevokeUseAuthorityEvent {
+}
+#[allow(clippy::derive_partial_eq_without_eq)]
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct SetAndVerifyCollectionEvent {
+}
+#[allow(clippy::derive_partial_eq_without_eq)]
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct SetAndVerifySizedCollectionItemEvent {
+}
+#[allow(clippy::derive_partial_eq_without_eq)]
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct SetTokenStandardEvent {
+}
+#[allow(clippy::derive_partial_eq_without_eq)]
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct SignMetadataEvent {
+}
+#[allow(clippy::derive_partial_eq_without_eq)]
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct ThawDelegatedAccountEvent {
+}
+#[allow(clippy::derive_partial_eq_without_eq)]
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct TransferEvent {
+}
+#[allow(clippy::derive_partial_eq_without_eq)]
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct TransferOutOfEscrowEvent {
+}
+#[allow(clippy::derive_partial_eq_without_eq)]
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct UnlockEvent {
+}
+#[allow(clippy::derive_partial_eq_without_eq)]
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct UnverifyEvent {
+}
+#[allow(clippy::derive_partial_eq_without_eq)]
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct UnverifyCollectionEvent {
+}
+#[allow(clippy::derive_partial_eq_without_eq)]
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct UnverifySizedCollectionItemEvent {
+}
+#[allow(clippy::derive_partial_eq_without_eq)]
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct UpdateEvent {
+}
+#[allow(clippy::derive_partial_eq_without_eq)]
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct UpdateMetadataAccountEvent {
+}
+#[allow(clippy::derive_partial_eq_without_eq)]
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct UpdateMetadataAccountV2Event {
+}
+#[allow(clippy::derive_partial_eq_without_eq)]
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct UpdatePrimarySaleHappenedViaTokenEvent {
+}
+#[allow(clippy::derive_partial_eq_without_eq)]
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct UtilizeEvent {
+}
+#[allow(clippy::derive_partial_eq_without_eq)]
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct PrintEvent {
+}
+#[allow(clippy::derive_partial_eq_without_eq)]
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct VerifyEvent {
+}
+#[allow(clippy::derive_partial_eq_without_eq)]
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct MintEvent {
+}
+#[allow(clippy::derive_partial_eq_without_eq)]
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct SetCollectionSizeEvent {
+}
+#[allow(clippy::derive_partial_eq_without_eq)]
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct CollectEvent {
+}
+#[allow(clippy::derive_partial_eq_without_eq)]
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct UseEvent {
+}
+#[allow(clippy::derive_partial_eq_without_eq)]
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct VerifySizedCollectionItemEvent {
+}
+#[allow(clippy::derive_partial_eq_without_eq)]
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct VerifyCollectionEvent {
 }
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]

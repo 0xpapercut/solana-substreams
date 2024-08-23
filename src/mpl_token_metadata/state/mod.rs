@@ -16,8 +16,6 @@ pub(crate) mod migrate;
 pub(crate) mod token_auth_payload;
 pub(crate) mod uses;
 
-use std::io::ErrorKind;
-
 pub use asset_data::*;
 use borsh::{BorshDeserialize, BorshSerialize};
 pub use collection::*;
@@ -40,7 +38,6 @@ pub use uses::*;
 use super::error::{ProgramError, MetadataError};
 
 pub(crate) use substreams_solana_utils::pubkey::Pubkey;
-pub(crate) use metadata::Metadata;
 
 // Re-export constants to maintain compatibility.
 // pub use crate::pda::{BURN, COLLECTION_AUTHORITY, EDITION, PREFIX, USER};
