@@ -1,0 +1,162 @@
+use borsh::BorshDeserialize;
+use substreams::errors::Error;
+use substreams_solana::pb::sf::solana::r#type::v1::ConfirmedTransaction;
+use substreams_solana::pb::sf::solana::r#type::v1::Block;
+
+use substreams_solana_utils as utils;
+use utils::instruction::{get_structured_instructions, StructuredInstruction, StructuredInstructions};
+use utils::transaction::{get_context, TransactionContext};
+
+pub mod mpl_token_metadata;
+use mpl_token_metadata::constants::MPL_TOKEN_METADATA_PROGRAM_ID;
+use mpl_token_metadata::instruction::MetadataInstruction;
+
+pub mod pb;
+use pb::mpl_token_metadata::*;
+use pb::mpl_token_metadata::mpl_token_metadata_event::Event;
+
+#[substreams::handlers::map]
+fn mpl_token_metadata_block_events(block: Block) -> Result<MplTokenMetadataBlockEvents, Error> {
+    let transactions = parse_block(&block);
+    Ok(MplTokenMetadataBlockEvents { transactions })
+}
+
+pub fn parse_block(block: &Block) -> Vec<MplTokenMetadataTransactionEvents> {
+    let mut block_events: Vec<MplTokenMetadataTransactionEvents> = Vec::new();
+
+    for transaction in block.transactions() {
+        if let Ok(events) = parse_transaction(transaction) {
+            if !events.is_empty() {
+                block_events.push(MplTokenMetadataTransactionEvents {
+                    signature: utils::transaction::get_signature(&transaction),
+                    events,
+                });
+            }
+        }
+    }
+    block_events
+}
+
+pub fn parse_transaction(transaction: &ConfirmedTransaction) -> Result<Vec<MplTokenMetadataEvent>, String> {
+    let mut events: Vec<MplTokenMetadataEvent> = Vec::new();
+
+    let context = get_context(transaction);
+    let instructions = get_structured_instructions(transaction).unwrap();
+
+    for instruction in instructions.flattened().iter() {
+        if instruction.program_id() != *MPL_TOKEN_METADATA_PROGRAM_ID {
+            continue;
+        }
+        match parse_instruction(instruction, &context) {
+            Ok(event) => events.push(MplTokenMetadataEvent { event } ),
+            _ => (),
+        }
+    }
+    Ok(events)
+}
+
+pub fn parse_instruction(
+    instruction: &StructuredInstruction,
+    context: &TransactionContext
+) -> Result<Option<Event>, String> {
+    if instruction.program_id() != *MPL_TOKEN_METADATA_PROGRAM_ID {
+        return Err("Not a Metaplex Token Metadata instruction.".into());
+    }
+    let unpacked = MetadataInstruction::try_from_slice(instruction.data()).map_err(|_| "Failed to parse MetadataInstruction.")?;
+    match unpacked {
+        MetadataInstruction::CreateMetadataAccountV3(create_metadata_account_v3) => {
+            _parse_create_metadata_account_v3_instruction(instruction, context, create_metadata_account_v3).map(|x| Some(Event::CreateMetadataAccountV3(x)))
+        },
+        _ => Err("Non supported event.".into())
+    }
+}
+
+fn _parse_create_metadata_account_v3_instruction<'a>(
+    instruction: &StructuredInstruction<'a>,
+    context: &TransactionContext,
+    create_metadata_account_v3: mpl_token_metadata::instruction::CreateMetadataAccountArgsV3,
+) -> Result<CreateMetadataAccountV3Event, String> {
+    let metadata = instruction.accounts()[0].to_string();
+    let mint = instruction.accounts()[1].to_string();
+    let update_authority = instruction.accounts()[4].to_string();
+    let data = Some(create_metadata_account_v3.data.into());
+    let is_mutable = create_metadata_account_v3.is_mutable;
+    let collection_details = create_metadata_account_v3.collection_details.map(|x| x.into());
+
+    Ok(CreateMetadataAccountV3Event {
+        metadata,
+        mint,
+        update_authority,
+        data,
+        is_mutable,
+        collection_details,
+    })
+}
+
+impl From<mpl_token_metadata::state::DataV2> for DataV2 {
+    fn from(value: mpl_token_metadata::state::DataV2) -> Self {
+        DataV2 {
+            collection: value.collection.map(|x| x.into()),
+            creators: value.creators.unwrap_or_else(Vec::new).iter().map(|x| x.into()).collect(),
+            name: value.name,
+            seller_fee_basis_points: value.seller_fee_basis_points.into(),
+            symbol: value.symbol,
+            uri: value.uri,
+            uses: value.uses.map(|x| x.into())
+        }
+    }
+}
+
+impl From<mpl_token_metadata::state::Collection> for Collection {
+    fn from(value: mpl_token_metadata::state::Collection) -> Self {
+        Collection {
+            key: value.key.to_string(),
+            verified: value.verified,
+        }
+    }
+}
+
+impl From<&mpl_token_metadata::state::Creator> for Creator {
+    fn from(value: &mpl_token_metadata::state::Creator) -> Self {
+        Creator {
+            address: value.address.to_string(),
+            verified: value.verified,
+            share: value.share.into(),
+        }
+    }
+}
+
+impl From<mpl_token_metadata::state::Uses> for Uses {
+    fn from(value: mpl_token_metadata::state::Uses) -> Self {
+        Uses {
+            remaining: value.remaining,
+            use_method: UseMethod::from(value.use_method).into(),
+            total: value.total,
+        }
+    }
+}
+
+impl From<mpl_token_metadata::state::UseMethod> for UseMethod {
+    fn from(value: mpl_token_metadata::state::UseMethod) -> Self {
+        match value {
+            mpl_token_metadata::state::UseMethod::Burn => Self::Burn,
+            mpl_token_metadata::state::UseMethod::Multiple => Self::Multiple,
+            mpl_token_metadata::state::UseMethod::Single => Self::Single,
+        }
+    }
+}
+
+impl From<mpl_token_metadata::state::CollectionDetails> for CollectionDetails {
+    fn from(value: mpl_token_metadata::state::CollectionDetails) -> Self {
+        match value {
+            mpl_token_metadata::state::CollectionDetails::V1 { size } => {
+                let v1 = CollectionDetailsV1 { size };
+                Self { version: Some(collection_details::Version::V1(v1)) }
+            },
+            mpl_token_metadata::state::CollectionDetails::V2 { padding } => {
+                let v2 = CollectionDetailsV2 { padding: padding.iter().map(|x| *x as u64).collect() };
+                Self { version: Some(collection_details::Version::V2(v2)) }
+            },
+        }
+    }
+}
