@@ -1,14 +1,10 @@
 [package]
-name = "raydium-substream"
+name = "raydium-amm-substream"
 version = "0.1.1"
 edition = "2021"
 
-[[bin]]
-name = "main"
-path = "src/main.rs"
-
 [lib]
-name = "raydium_substream"
+name = "raydium_amm_substream"
 crate-type = ["lib", "cdylib"]
 
 [dependencies]
