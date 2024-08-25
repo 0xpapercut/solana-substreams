@@ -7,7 +7,7 @@ use utils::instruction::{get_structured_instructions, StructuredInstruction, Str
 use utils::transaction::{get_context, TransactionContext};
 use utils::log::Log;
 
-mod pumpfun;
+pub mod pumpfun;
 use pumpfun::PUMPFUN_PROGRAM_ID;
 use pumpfun::log::PumpfunLog;
 use pumpfun::instruction::PumpfunInstruction;
@@ -45,7 +45,7 @@ pub fn parse_transaction(transaction: &ConfirmedTransaction) -> Result<Vec<Pumpf
 
     let mut events: Vec<PumpfunEvent> = Vec::new();
 
-    let context = get_context(transaction);
+    let context = get_context(transaction).unwrap();
     let instructions = get_structured_instructions(transaction).unwrap();
 
     for instruction in instructions.flattened().iter() {
