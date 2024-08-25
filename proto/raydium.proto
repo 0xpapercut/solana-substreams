@@ -1,17 +1,17 @@
 syntax = "proto3";
 
-package raydium;
+package raydium_amm;
 
-message RaydiumBlockEvents {
-    repeated RaydiumTransactionEvents transactions = 1;
+message RaydiumAmmBlockEvents {
+    repeated RaydiumAmmTransactionEvents transactions = 1;
 }
 
-message RaydiumTransactionEvents {
+message RaydiumAmmTransactionEvents {
     string signature = 1;
-    repeated RaydiumEvent events = 2;
+    repeated RaydiumAmmEvent events = 2;
 }
 
-message RaydiumEvent {
+message RaydiumAmmEvent {
     oneof event {
         InitializeEvent initialize = 1;
         DepositEvent deposit = 2;
@@ -78,6 +78,9 @@ message SwapEvent {
     string mintOut = 4;
     uint64 amountIn = 5;
     uint64 amountOut = 6;
-    optional uint64 poolPcAmount = 7;
-    optional uint64 poolCoinAmount = 8;
+    string direction = 7;
+    optional uint64 poolPcAmount = 8;
+    optional uint64 poolCoinAmount = 9;
+    string pcMint = 10;
+    string coinMint = 11;
 }

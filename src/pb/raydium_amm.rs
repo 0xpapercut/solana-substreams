@@ -1,26 +1,26 @@
 // @generated
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
-pub struct RaydiumBlockEvents {
+pub struct RaydiumAmmBlockEvents {
     #[prost(message, repeated, tag="1")]
-    pub transactions: ::prost::alloc::vec::Vec<RaydiumTransactionEvents>,
+    pub transactions: ::prost::alloc::vec::Vec<RaydiumAmmTransactionEvents>,
 }
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
-pub struct RaydiumTransactionEvents {
+pub struct RaydiumAmmTransactionEvents {
     #[prost(string, tag="1")]
     pub signature: ::prost::alloc::string::String,
     #[prost(message, repeated, tag="2")]
-    pub events: ::prost::alloc::vec::Vec<RaydiumEvent>,
+    pub events: ::prost::alloc::vec::Vec<RaydiumAmmEvent>,
 }
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
-pub struct RaydiumEvent {
-    #[prost(oneof="raydium_event::Event", tags="1, 2, 3, 4, 5")]
-    pub event: ::core::option::Option<raydium_event::Event>,
+pub struct RaydiumAmmEvent {
+    #[prost(oneof="raydium_amm_event::Event", tags="1, 2, 3, 4, 5")]
+    pub event: ::core::option::Option<raydium_amm_event::Event>,
 }
-/// Nested message and enum types in `RaydiumEvent`.
-pub mod raydium_event {
+/// Nested message and enum types in `RaydiumAmmEvent`.
+pub mod raydium_amm_event {
     #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Oneof)]
     pub enum Event {

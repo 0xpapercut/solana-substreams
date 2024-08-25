@@ -1,6 +1,6 @@
 // @generated
-// @@protoc_insertion_point(attribute:raydium)
-pub mod raydium {
-    include!("raydium.rs");
-    // @@protoc_insertion_point(raydium)
+// @@protoc_insertion_point(attribute:raydium_amm)
+pub mod raydium_amm {
+    include!("raydium_amm.rs");
+    // @@protoc_insertion_point(raydium_amm)
 }
