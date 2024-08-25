@@ -10,38 +10,29 @@ use raydium_amm::constants::RAYDIUM_AMM_PROGRAM_ID;
 use raydium_amm::log::{decode_ray_log, RayLog};
 
 use substreams_solana_utils as utils;
-pub use utils::instruction::{get_structured_instructions, StructuredInstruction, StructuredInstructions};
-pub use utils::transaction::{get_context, TransactionContext};
-pub use utils::pubkey::Pubkey;
-pub use utils::log::Log;
+use utils::instruction::{get_structured_instructions, StructuredInstruction, StructuredInstructions};
+use utils::transaction::{get_context, TransactionContext};
+use utils::pubkey::Pubkey;
+use utils::log::Log;
 
 use spl_token_substream;
 
 pub mod pb;
-use pb::raydium::{
-    RaydiumBlockEvents,
-    RaydiumTransactionEvents,
-    RaydiumEvent,
-    InitializeEvent,
-    SwapEvent,
-    WithdrawEvent,
-    WithdrawPnlEvent,
-    DepositEvent,
-};
-use pb::raydium::raydium_event::Event;
+use pb::raydium_amm::*;
+use pb::raydium_amm::raydium_amm_event::Event;
 
 #[substreams::handlers::map]
-fn raydium_block_events(block: Block) -> Result<RaydiumBlockEvents, Error> {
+fn raydium_amm_block_events(block: Block) -> Result<RaydiumAmmBlockEvents, Error> {
     let transactions = parse_block(&block);
-    Ok(RaydiumBlockEvents { transactions })
+    Ok(RaydiumAmmBlockEvents { transactions })
 }
 
-pub fn parse_block(block: &Block) -> Vec<RaydiumTransactionEvents> {
-    let mut block_events: Vec<RaydiumTransactionEvents> = Vec::new();
+pub fn parse_block(block: &Block) -> Vec<RaydiumAmmTransactionEvents> {
+    let mut block_events: Vec<RaydiumAmmTransactionEvents> = Vec::new();
     for transaction in block.transactions.iter() {
         if let Ok(events) = parse_transaction(transaction) {
             if !events.is_empty() {
-                block_events.push(RaydiumTransactionEvents {
+                block_events.push(RaydiumAmmTransactionEvents {
                     signature: utils::transaction::get_signature(&transaction),
                     events,
                 });
@@ -51,15 +42,15 @@ pub fn parse_block(block: &Block) -> Vec<RaydiumTransactionEvents> {
     block_events
 }
 
-pub fn parse_transaction(transaction: &ConfirmedTransaction) -> Result<Vec<RaydiumEvent>, String> {
+pub fn parse_transaction(transaction: &ConfirmedTransaction) -> Result<Vec<RaydiumAmmEvent>, String> {
     if let Some(_) = transaction.meta.as_ref().unwrap().err {
         return Err("Cannot parse failed transaction.".to_string());
     }
 
-    let mut events: Vec<RaydiumEvent> = Vec::new();
+    let mut events: Vec<RaydiumAmmEvent> = Vec::new();
 
-    let context = utils::transaction::get_context(transaction);
-    let instructions = utils::instruction::get_structured_instructions(transaction).unwrap();
+    let context = get_context(transaction).unwrap();
+    let instructions = get_structured_instructions(transaction).unwrap();
 
     for instruction in instructions.flattened().iter() {
         if instruction.program_id() != *RAYDIUM_AMM_PROGRAM_ID {
@@ -68,7 +59,7 @@ pub fn parse_transaction(transaction: &ConfirmedTransaction) -> Result<Vec<Raydi
 
         match parse_instruction(&instruction, &context) {
             Ok(Some(event)) => {
-                events.push(RaydiumEvent {
+                events.push(RaydiumAmmEvent {
                     event: Some(event),
                 })
             }
@@ -129,27 +120,20 @@ fn _parse_swap_instruction<'a>(
     let mint_in = transfer_in.source.unwrap().mint;
     let mint_out = transfer_out.source.unwrap().mint;
 
-    // let coin_mint = context.get_token_account(&instruction.accounts()[5]).unwrap().mint.to_string();
-    // let pc_mint = context.get_token_account(&instruction.accounts()[6]).unwrap().mint.to_string();
+    let delta = if instruction.accounts().len() == 17 { 0 } else { 1 };
+    let coin_mint = context.get_token_account(&instruction.accounts()[4 + delta]).unwrap().mint.to_string();
+    let pc_mint = context.get_token_account(&instruction.accounts()[5 + delta]).unwrap().mint.to_string();
 
-    let (pool_coin_amount, pool_pc_amount, _direction) = match parse_log(instruction) {
+    let direction = (if mint_out == coin_mint { "coin" } else { "pc" }).to_string();
+
+    let (pool_coin_amount, pool_pc_amount) = match parse_log(instruction) {
         Ok(RayLog::SwapBaseIn(swap_base_in)) => {
-            let direction = match swap_base_in.direction {
-                1 => "pc_to_coin",
-                2 => "coin_to_pc",
-                _ => panic!(),
-            };
-            (Some(swap_base_in.pool_coin), Some(swap_base_in.pool_pc), Some(direction.to_string()))
+            (Some(swap_base_in.pool_coin), Some(swap_base_in.pool_pc))
         },
         Ok(RayLog::SwapBaseOut(swap_base_out)) => {
-            let direction = match swap_base_out.direction {
-                1 => "pc_to_coin",
-                2 => "coin_to_pc",
-                _ => panic!(),
-            };
-            (Some(swap_base_out.pool_coin), Some(swap_base_out.pool_pc), Some(direction.to_string()))
+            (Some(swap_base_out.pool_coin), Some(swap_base_out.pool_pc))
         },
-        _ => (None, None, None),
+        _ => (None, None),
     };
 
     Ok(SwapEvent {
@@ -159,8 +143,11 @@ fn _parse_swap_instruction<'a>(
         mint_out,
         amount_in,
         amount_out,
+        direction,
         pool_coin_amount,
         pool_pc_amount,
+        coin_mint,
+        pc_mint,
     })
 }
 
