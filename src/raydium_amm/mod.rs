@@ -1,3 +1,5 @@
+#![allow(deprecated)]
+
 pub mod state;
 pub mod log;
 pub mod instruction;
