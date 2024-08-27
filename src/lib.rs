@@ -3,10 +3,10 @@ use substreams_solana::pb::sf::solana::r#type::v1::ConfirmedTransaction;
 use substreams_solana::pb::sf::solana::r#type::v1::Block;
 
 use substreams_solana_utils as utils;
-pub use utils::instruction::{get_structured_instructions, StructuredInstruction, StructuredInstructions};
-pub use utils::transaction::{get_context, TransactionContext};
-pub use utils::spl_token::{TokenInstruction, TOKEN_PROGRAM_ID};
-pub use utils::pubkey::Pubkey;
+use utils::instruction::{get_structured_instructions, StructuredInstruction, StructuredInstructions};
+use utils::transaction::{get_context, TransactionContext};
+use utils::spl_token::{TokenInstruction, TOKEN_PROGRAM_ID};
+use utils::pubkey::Pubkey;
 
 pub mod pb;
 use pb::spl_token::*;
