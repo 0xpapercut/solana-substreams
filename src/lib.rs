@@ -1,9 +1,11 @@
-use substreams::errors::Error;
+use anyhow::{anyhow, Error, Context, bail};
+
 use substreams_solana::pb::sf::solana::r#type::v1::ConfirmedTransaction;
 use substreams_solana::pb::sf::solana::r#type::v1::Block;
 
 use substreams_solana_utils as utils;
 use utils::instruction::{get_structured_instructions, StructuredInstruction, StructuredInstructions};
+use utils::system_program::SYSTEM_PROGRAM_ID;
 use utils::transaction::{get_context, TransactionContext};
 use utils::log::Log;
 
@@ -18,11 +20,11 @@ use pb::pumpfun::pumpfun_event::Event;
 
 #[substreams::handlers::map]
 fn pumpfun_block_events(block: Block) -> Result<PumpfunBlockEvents, Error> {
-    let transactions = parse_block(&block);
+    let transactions = parse_block(&block)?;
     Ok(PumpfunBlockEvents { transactions })
 }
 
-pub fn parse_block(block: &Block) -> Vec<PumpfunTransactionEvents> {
+pub fn parse_block(block: &Block) -> Result<Vec<PumpfunTransactionEvents>, Error> {
     substreams::log::println(format!("{:?}", block.block_time.as_ref().unwrap()));
     let mut block_events: Vec<PumpfunTransactionEvents> = Vec::new();
     for transaction in block.transactions() {
@@ -35,12 +37,12 @@ pub fn parse_block(block: &Block) -> Vec<PumpfunTransactionEvents> {
             }
         }
     }
-    block_events
+    Ok(block_events)
 }
 
-pub fn parse_transaction(transaction: &ConfirmedTransaction) -> Result<Vec<PumpfunEvent>, String> {
+pub fn parse_transaction(transaction: &ConfirmedTransaction) -> Result<Vec<PumpfunEvent>, Error> {
     if let Some(_) = transaction.meta.as_ref().unwrap().err {
-        return Err("Cannot parse failed transaction.".to_string());
+        return Ok(Vec::new())
     }
 
     let mut events: Vec<PumpfunEvent> = Vec::new();
@@ -49,7 +51,7 @@ pub fn parse_transaction(transaction: &ConfirmedTransaction) -> Result<Vec<Pumpf
     let instructions = get_structured_instructions(transaction).unwrap();
 
     for instruction in instructions.flattened().iter() {
-        if instruction.program_id() != *PUMPFUN_PROGRAM_ID {
+        if instruction.program_id() != PUMPFUN_PROGRAM_ID {
             continue;
         }
 
@@ -69,11 +71,11 @@ pub fn parse_transaction(transaction: &ConfirmedTransaction) -> Result<Vec<Pumpf
 pub fn parse_instruction(
     instruction: &StructuredInstruction,
     context: &TransactionContext
-) -> Result<Option<Event>, String> {
-    if instruction.program_id() != *PUMPFUN_PROGRAM_ID {
-        return Err("Not a Pumpfun instruction.".into());
+) -> Result<Option<Event>, Error> {
+    if instruction.program_id() != PUMPFUN_PROGRAM_ID {
+        return Err(anyhow!("Not a Pumpfun instruction."));
     }
-    let unpacked = PumpfunInstruction::unpack(instruction.data())?;
+    let unpacked = PumpfunInstruction::unpack(instruction.data()).map_err(|x| anyhow!(x))?;
     match unpacked {
         PumpfunInstruction::Initialize => {
             Ok(Some(Event::Initialize(_parse_initialize_instruction(instruction, context)?)))
@@ -100,7 +102,7 @@ pub fn parse_instruction(
 fn _parse_initialize_instruction(
     instruction: &StructuredInstruction,
     _context: &TransactionContext,
-) -> Result<InitializeEvent, &'static str> {
+) -> Result<InitializeEvent, Error> {
     let user = instruction.accounts()[0].to_string();
 
     Ok(InitializeEvent {
@@ -112,7 +114,7 @@ fn _parse_set_params_instruction(
     instruction: &StructuredInstruction,
     _context: &TransactionContext,
     set_params: pumpfun::instruction::SetParamsInstruction,
-) -> Result<SetParamsEvent, &'static str> {
+) -> Result<SetParamsEvent, Error> {
     let user = instruction.accounts()[0].to_string();
     let fee_recipient = set_params.fee_recipient.to_string();
     let initial_virtual_token_reserves = set_params.initial_virtual_token_reserves;
@@ -136,7 +138,7 @@ fn _parse_create_instruction(
     instruction: &StructuredInstruction,
     _context: &TransactionContext,
     create: pumpfun::instruction::CreateInstruction,
-) -> Result<CreateEvent, &'static str> {
+) -> Result<CreateEvent, Error> {
     let user = instruction.accounts()[7].to_string();
     let name = create.name;
     let symbol = create.symbol;
@@ -162,13 +164,14 @@ fn _parse_buy_instruction<'a>(
     instruction: &StructuredInstruction<'a>,
     context: &TransactionContext,
     buy: pumpfun::instruction::BuyInstruction,
-) -> Result<SwapEvent, &'static str> {
+) -> Result<SwapEvent, Error> {
     let mint = instruction.accounts()[2].to_string();
     let bonding_curve = instruction.accounts()[3].to_string();
     let user = instruction.accounts()[6].to_string();
     let token_amount = buy.amount;
 
-    let system_transfer = system_program_substream::parse_transfer_instruction(&instruction.inner_instructions()[1], context).unwrap();
+    let system_transfer_instruction = instruction.inner_instructions().iter().find(|x| x.program_id() == SYSTEM_PROGRAM_ID).unwrap().clone();
+    let system_transfer = system_program_substream::parse_transfer_instruction(system_transfer_instruction.as_ref(), context)?;
     let sol_amount = Some(system_transfer.lamports);
 
     let trade = match parse_pumpfun_log(instruction) {
@@ -200,7 +203,7 @@ fn _parse_sell_instruction(
     instruction: &StructuredInstruction,
     _context: &TransactionContext,
     sell: pumpfun::instruction::SellInstruction,
-) -> Result<SwapEvent, &'static str> {
+) -> Result<SwapEvent, Error> {
     let mint = instruction.accounts()[2].to_string();
     let user = instruction.accounts()[6].to_string();
     let bonding_curve = instruction.accounts()[3].to_string();
@@ -235,7 +238,7 @@ fn _parse_sell_instruction(
 fn _parse_withdraw_instruction(
     instruction: &StructuredInstruction,
     _context: &TransactionContext,
-) -> Result<WithdrawEvent, &'static str> {
+) -> Result<WithdrawEvent, Error> {
     let mint = instruction.accounts()[2].to_string();
 
     Ok(WithdrawEvent {
@@ -243,10 +246,10 @@ fn _parse_withdraw_instruction(
     })
 }
 
-fn parse_pumpfun_log(instruction: &StructuredInstruction) -> Result<PumpfunLog, &'static str> {
+fn parse_pumpfun_log(instruction: &StructuredInstruction) -> Result<PumpfunLog, Error> {
     let data = instruction.logs().iter().find_map(|log| match log {
         Log::Data(data_log) => data_log.data().ok(),
         _ => None,
-    }).ok_or("Couldn't find data log.")?;
-    PumpfunLog::unpack(data.as_slice())
+    }).ok_or(anyhow!("Couldn't find data log."))?;
+    PumpfunLog::unpack(data.as_slice()).map_err(|x| anyhow!(x))
 }
