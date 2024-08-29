@@ -42,15 +42,15 @@ pub fn parse_block(block: &Block) -> Vec<RaydiumAmmTransactionEvents> {
     block_events
 }
 
-pub fn parse_transaction(transaction: &ConfirmedTransaction) -> Result<Vec<RaydiumAmmEvent>, String> {
+pub fn parse_transaction(transaction: &ConfirmedTransaction) -> Result<Vec<RaydiumAmmEvent>, Error> {
     if let Some(_) = transaction.meta.as_ref().unwrap().err {
-        return Err("Cannot parse failed transaction.".to_string());
+        return Ok(Vec::new());
     }
 
     let mut events: Vec<RaydiumAmmEvent> = Vec::new();
 
-    let context = get_context(transaction).unwrap();
-    let instructions = get_structured_instructions(transaction).unwrap();
+    let context = get_context(transaction)?;
+    let instructions = get_structured_instructions(transaction)?;
 
     for instruction in instructions.flattened().iter() {
         if instruction.program_id() != *RAYDIUM_AMM_PROGRAM_ID {
