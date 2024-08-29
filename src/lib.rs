@@ -1,4 +1,5 @@
-use substreams::errors::Error;
+use anyhow::{anyhow, Context, Error};
+
 use substreams_solana::pb::sf::solana::r#type::v1::ConfirmedTransaction;
 use substreams_solana::pb::sf::solana::r#type::v1::Block;
 
@@ -14,13 +15,13 @@ use pb::spl_token::spl_token_event::Event;
 
 #[substreams::handlers::map]
 fn spl_token_block_events(block: Block) -> Result<SplTokenBlockEvents, Error> {
-    Ok(SplTokenBlockEvents { transactions: parse_block(&block) })
+    Ok(SplTokenBlockEvents { transactions: parse_block(&block)? })
 }
 
-pub fn parse_block(block: &Block) -> Vec<SplTokenTransactionEvents> {
+pub fn parse_block(block: &Block) -> Result<Vec<SplTokenTransactionEvents>, Error> {
     let mut transactions_events: Vec<SplTokenTransactionEvents> = Vec::new();
     for transaction in block.transactions() {
-        let events = parse_transaction(transaction);
+        let events = parse_transaction(transaction)?;
         if !events.is_empty() {
             transactions_events.push(SplTokenTransactionEvents {
                 signature: utils::transaction::get_signature(&transaction),
@@ -28,149 +29,140 @@ pub fn parse_block(block: &Block) -> Vec<SplTokenTransactionEvents> {
             })
         }
     }
-    transactions_events
+    Ok(transactions_events)
 }
 
-pub fn parse_transaction(transaction: &ConfirmedTransaction) -> Vec<SplTokenEvent> {
+pub fn parse_transaction(transaction: &ConfirmedTransaction) -> Result<Vec<SplTokenEvent>, Error> {
     if let Some(_) = transaction.meta.as_ref().unwrap().err {
-        return Vec::new();
+        return Ok(Vec::new())
     }
 
     let mut events: Vec<SplTokenEvent> = Vec::new();
 
-    let context = get_context(transaction);
-    let instructions = get_structured_instructions(transaction).unwrap();
+    let context = get_context(transaction)?;
+    let instructions = get_structured_instructions(transaction)?;
 
     for instruction in instructions.flattened().iter() {
-        if instruction.program_id() != *TOKEN_PROGRAM_ID {
+        if instruction.program_id() != TOKEN_PROGRAM_ID {
             continue;
         }
-        match parse_instruction(&instruction, &context) {
-            Ok(event) => {
-                events.push(SplTokenEvent {
-                    event,
-                });
-            }
-            Err(e) => panic!("Transaction {} error: {}", context.signature, e),
-        }
+        let event = parse_instruction(instruction, &context)?;
+        events.push(SplTokenEvent { event });
     }
-    events
+
+    Ok(events)
 }
 
 pub fn parse_instruction<'a>(
     instruction: &StructuredInstruction<'a>,
     context: &TransactionContext,
-) -> Result<Option<Event>, &'static str> {
-    if instruction.program_id() != *TOKEN_PROGRAM_ID {
-        return Err("Not a Token program instruction.");
+) -> Result<Option<Event>, Error> {
+    if instruction.program_id() != TOKEN_PROGRAM_ID {
+        return Err(anyhow!("Not a Token program instruction"));
     }
 
-    let unpacked = TokenInstruction::unpack(&instruction.data());
-    if unpacked.is_err() {
-        return Err("Failed to parse Token program instruction.");
-    }
-
-    match unpacked.unwrap() {
+    let unpacked = TokenInstruction::unpack(&instruction.data())
+        .map_err(|x| anyhow!(x).context("Failed to unpack Token instruction"))?;
+    match unpacked {
         TokenInstruction::InitializeMint { decimals, mint_authority, freeze_authority } |
         TokenInstruction::InitializeMint2 { decimals, mint_authority, freeze_authority } => {
-            let event = _parse_initialize_mint_instruction(instruction, context, decimals as u32, mint_authority, freeze_authority)?;
-            Ok(Some(Event::InitializeMint(event)))
+            let event = _parse_initialize_mint_instruction(instruction, context, decimals as u32, mint_authority, freeze_authority);
+            event.map(|x| Some(Event::InitializeMint(x))).map_err(|x| anyhow!(x))
         },
 
         TokenInstruction::InitializeAccount => {
-            let event = _parse_initialize_account_instruction(instruction, context, None)?;
-            Ok(Some(Event::InitializeAccount(event)))
+            let event = _parse_initialize_account_instruction(instruction, context, None);
+            event.map(|x| Some(Event::InitializeAccount(x))).map_err(|x| anyhow!(x))
         },
         TokenInstruction::InitializeAccount2 { owner } |
         TokenInstruction::InitializeAccount3 { owner } => {
-            let event = _parse_initialize_account_instruction(instruction, context, Some(owner))?;
-            Ok(Some(Event::InitializeAccount(event)))
+            let event = _parse_initialize_account_instruction(instruction, context, Some(owner));
+            event.map(|x| Some(Event::InitializeAccount(x))).map_err(|x| anyhow!(x))
         },
 
         TokenInstruction::InitializeMultisig { m } => {
-            let event = _parse_initialize_multisig_instruction(instruction, context, m, true)?;
-            Ok(Some(Event::InitializeMultisig(event)))
+            let event = _parse_initialize_multisig_instruction(instruction, context, m, true);
+            event.map(|x| Some(Event::InitializeMultisig(x))).map_err(|x| anyhow!(x))
         }
         TokenInstruction::InitializeMultisig2 { m } => {
-            let event = _parse_initialize_multisig_instruction(instruction, context, m, false)?;
-            Ok(Some(Event::InitializeMultisig(event)))
+            let event = _parse_initialize_multisig_instruction(instruction, context, m, false);
+            event.map(|x| Some(Event::InitializeMultisig(x))).map_err(|x| anyhow!(x))
         },
 
         TokenInstruction::Transfer { amount } => {
-            let event = _parse_transfer_instruction(instruction, context, amount, None)?;
-            Ok(Some(Event::Transfer(event)))
+            let event = _parse_transfer_instruction(instruction, context, amount, None);
+            event.map(|x| Some(Event::Transfer(x))).map_err(|x| anyhow!(x))
         },
         TokenInstruction::TransferChecked { amount, decimals } => {
-            let event = _parse_transfer_instruction(instruction, context, amount, Some(decimals))?;
-            Ok(Some(Event::Transfer(event)))
+            let event = _parse_transfer_instruction(instruction, context, amount, Some(decimals));
+            event.map(|x| Some(Event::Transfer(x))).map_err(|x| anyhow!(x))
         },
 
         TokenInstruction::Approve { amount } => {
-            let event = _parse_approve_instruction(instruction, context, amount, None)?;
-            Ok(Some(Event::Approve(event)))
+            let event = _parse_approve_instruction(instruction, context, amount, None);
+            event.map(|x| Some(Event::Approve(x))).map_err(|x| anyhow!(x))
         },
         TokenInstruction::ApproveChecked { amount, decimals } => {
-            let event = _parse_approve_instruction(instruction, context, amount, Some(decimals))?;
-            Ok(Some(Event::Approve(event)))
+            let event = _parse_approve_instruction(instruction, context, amount, Some(decimals));
+            event.map(|x| Some(Event::Approve(x))).map_err(|x| anyhow!(x))
         },
 
         TokenInstruction::Revoke => {
-            let event = _parse_revoke_instruction(instruction, context)?;
-            Ok(Some(Event::Revoke(event)))
+            let event = _parse_revoke_instruction(instruction, context);
+            event.map(|x| Some(Event::Revoke(x))).map_err(|x| anyhow!(x))
         },
 
         TokenInstruction::SetAuthority { authority_type, new_authority } => {
-            let event = _parse_set_authority_instruction(instruction, context, authority_type, new_authority)?;
-            Ok(Some(Event::SetAuthority(event)))
+            let event = _parse_set_authority_instruction(instruction, context, authority_type, new_authority);
+            event.map(|x| Some(Event::SetAuthority(x))).map_err(|x| anyhow!(x))
         },
 
         TokenInstruction::MintTo { amount } => {
-            let event = _parse_mint_to_instruction(instruction, context, amount)?;
-            Ok(Some(Event::MintTo(event)))
+            let event = _parse_mint_to_instruction(instruction, context, amount);
+            event.map(|x| Some(Event::MintTo(x))).map_err(|x| anyhow!(x))
         },
         TokenInstruction::MintToChecked { amount, decimals: _ } => {
-            let event = _parse_mint_to_instruction(instruction, context, amount)?;
-            Ok(Some(Event::MintTo(event)))
+            let event = _parse_mint_to_instruction(instruction, context, amount);
+            event.map(|x| Some(Event::MintTo(x))).map_err(|x| anyhow!(x))
         },
 
         TokenInstruction::Burn { amount } => {
-            let event = _parse_burn_instruction(instruction, context, amount)?;
-            Ok(Some(Event::Burn(event)))
+            let event = _parse_burn_instruction(instruction, context, amount);
+            event.map(|x| Some(Event::Burn(x))).map_err(|x| anyhow!(x))
         },
         TokenInstruction::BurnChecked { amount, decimals: _ } => {
-            let event = _parse_burn_instruction(instruction, context, amount)?;
-            Ok(Some(Event::Burn(event)))
+            let event = _parse_burn_instruction(instruction, context, amount);
+            event.map(|x| Some(Event::Burn(x))).map_err(|x| anyhow!(x))
         },
 
         TokenInstruction::CloseAccount => {
-            let event = _parse_close_account_instruction(instruction, context)?;
-            Ok(Some(Event::CloseAccount(event)))
+            let event = _parse_close_account_instruction(instruction, context);
+            event.map(|x| Some(Event::CloseAccount(x))).map_err(|x| anyhow!(x))
         },
 
         TokenInstruction::FreezeAccount => {
-            let event = _parse_freeze_account_instruction(instruction, context)?;
-            Ok(Some(Event::FreezeAccount(event)))
+            let event = _parse_freeze_account_instruction(instruction, context);
+            event.map(|x| Some(Event::FreezeAccount(x))).map_err(|x| anyhow!(x))
         },
 
         TokenInstruction::ThawAccount => {
-            let event = _parse_thaw_account_instruction(instruction, context)?;
-            Ok(Some(Event::ThawAccount(event)))
+            let event = _parse_thaw_account_instruction(instruction, context);
+            event.map(|x| Some(Event::ThawAccount(x))).map_err(|x| anyhow!(x))
         },
 
         TokenInstruction::InitializeImmutableOwner => {
-            let event = _parse_initialize_immutable_owner_instruction(instruction, context)?;
-            Ok(Some(Event::InitializeImmutableOwner(event)))
+            let event = _parse_initialize_immutable_owner_instruction(instruction, context);
+            event.map(|x| Some(Event::InitializeImmutableOwner(x))).map_err(|x| anyhow!(x))
         },
 
         TokenInstruction::SyncNative => {
-            let event = _parse_sync_native_instruction(instruction, context)?;
-            Ok(Some(Event::SyncNative(event)))
+            let event = _parse_sync_native_instruction(instruction, context);
+            event.map(|x| Some(Event::SyncNative(x))).map_err(|x| anyhow!(x))
         },
-
         TokenInstruction::AmountToUiAmount { amount: _ } => Ok(None),
         TokenInstruction::GetAccountDataSize => Ok(None),
         TokenInstruction::UiAmountToAmount { ui_amount: _ } => Ok(None),
-    }
+    }.context("Failed to parse Token instruction")
 }
 
 fn _parse_initialize_mint_instruction(
