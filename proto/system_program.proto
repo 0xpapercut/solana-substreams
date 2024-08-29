@@ -3,7 +3,8 @@ syntax = "proto3";
 package system_program;
 
 message SystemProgramBlockEvents {
-    repeated SystemProgramTransactionEvents transactions = 1;
+    uint64 slot = 1;
+    repeated SystemProgramTransactionEvents transactions = 2;
 }
 
 message SystemProgramTransactionEvents {

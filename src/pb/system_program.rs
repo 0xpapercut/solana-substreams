@@ -2,7 +2,9 @@
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct SystemProgramBlockEvents {
-    #[prost(message, repeated, tag="1")]
+    #[prost(uint64, tag="1")]
+    pub slot: u64,
+    #[prost(message, repeated, tag="2")]
     pub transactions: ::prost::alloc::vec::Vec<SystemProgramTransactionEvents>,
 }
 #[allow(clippy::derive_partial_eq_without_eq)]
