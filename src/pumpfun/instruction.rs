@@ -39,7 +39,7 @@ pub struct SetParamsInstruction {
 
 impl SetParamsInstruction {
     fn unpack(data: &[u8]) -> Result<Self, &'static str> {
-        Self::try_from_slice(data).map_err(|_| "Failed to deserialize SetParamsInstruction.")
+        Self::deserialize(&mut &data[..]).map_err(|_| "Failed to deserialize SetParamsInstruction.")
     }
 }
 
@@ -52,7 +52,7 @@ pub struct CreateInstruction {
 
 impl CreateInstruction {
     fn unpack(data: &[u8]) -> Result<Self, &'static str> {
-        Self::try_from_slice(data).map_err(|_| "Failed to deserialize CreateInstruction.")
+        Self::deserialize(&mut &data[..]).map_err(|_| "Failed to deserialize CreateInstruction.")
     }
 }
 
@@ -64,7 +64,7 @@ pub struct BuyInstruction {
 
 impl BuyInstruction {
     fn unpack(data: &[u8]) -> Result<Self, &'static str> {
-        Self::try_from_slice(data).map_err(|_| "Failed to deserialize BuyInstruction.")
+        Self::deserialize(&mut &data[..]).map_err(|_| "Failed to deserialize BuyInstruction.")
     }
 }
 
@@ -76,6 +76,7 @@ pub struct SellInstruction {
 
 impl SellInstruction {
     fn unpack(data: &[u8]) -> Result<Self, &'static str> {
-        Self::try_from_slice(data).map_err(|_| "Failed to deserialize SellInstruction.")
+        substreams::log::println(format!("{:?}", data));
+        Self::deserialize(&mut &data[..]).map_err(|_| "Failed to deserialize SellInstruction.")
     }
 }
