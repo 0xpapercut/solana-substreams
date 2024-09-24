@@ -24,7 +24,7 @@ use pb::raydium_amm::raydium_amm_event::Event;
 #[substreams::handlers::map]
 fn raydium_amm_block_events(block: Block) -> Result<RaydiumAmmBlockEvents, Error> {
     let transactions = parse_block(&block);
-    Ok(RaydiumAmmBlockEvents { transactions })
+    Ok(RaydiumAmmBlockEvents { transactions})
 }
 
 pub fn parse_block(block: &Block) -> Vec<RaydiumAmmTransactionEvents> {
@@ -53,7 +53,7 @@ pub fn parse_transaction(transaction: &ConfirmedTransaction) -> Result<Vec<Raydi
     let instructions = get_structured_instructions(transaction)?;
 
     for instruction in instructions.flattened().iter() {
-        if instruction.program_id() != *RAYDIUM_AMM_PROGRAM_ID {
+        if instruction.program_id() != RAYDIUM_AMM_PROGRAM_ID {
             continue;
         }
 
@@ -74,8 +74,8 @@ pub fn parse_instruction<'a>(
     instruction: &StructuredInstruction<'a>,
     context: &TransactionContext
 ) -> Result<Option<Event>, String> {
-    if instruction.program_id() != *RAYDIUM_AMM_PROGRAM_ID {
-        return Err("Instruction does not originate from Raydium.".into());
+    if instruction.program_id() != RAYDIUM_AMM_PROGRAM_ID {
+        return Err("Instruction does not originate from Raydium AMM Program.".into());
     }
     let unpacked = AmmInstruction::unpack(&instruction.data())?;
     match unpacked {
