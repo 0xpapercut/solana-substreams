@@ -42,11 +42,11 @@ pub fn parse_block(block: &Block) -> Vec<MplTokenMetadataTransactionEvents> {
 pub fn parse_transaction(transaction: &ConfirmedTransaction) -> Result<Vec<MplTokenMetadataEvent>, String> {
     let mut events: Vec<MplTokenMetadataEvent> = Vec::new();
 
-    let context = get_context(transaction);
+    let context = get_context(transaction).unwrap();
     let instructions = get_structured_instructions(transaction).unwrap();
 
     for instruction in instructions.flattened().iter() {
-        if instruction.program_id() != *MPL_TOKEN_METADATA_PROGRAM_ID {
+        if instruction.program_id() != MPL_TOKEN_METADATA_PROGRAM_ID {
             continue;
         }
         match parse_instruction(instruction, &context) {
@@ -61,7 +61,7 @@ pub fn parse_instruction(
     instruction: &StructuredInstruction,
     context: &TransactionContext
 ) -> Result<Option<Event>, String> {
-    if instruction.program_id() != *MPL_TOKEN_METADATA_PROGRAM_ID {
+    if instruction.program_id() != MPL_TOKEN_METADATA_PROGRAM_ID {
         return Err("Not a Metaplex Token Metadata instruction.".into());
     }
     let unpacked = MetadataInstruction::try_from_slice(instruction.data()).map_err(|_| "Failed to parse MetadataInstruction.")?;
