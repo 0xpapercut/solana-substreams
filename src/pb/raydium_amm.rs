@@ -2,7 +2,7 @@
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct RaydiumAmmBlockEvents {
-    #[prost(message, repeated, tag="1")]
+    #[prost(message, repeated, tag="2")]
     pub transactions: ::prost::alloc::vec::Vec<RaydiumAmmTransactionEvents>,
 }
 #[allow(clippy::derive_partial_eq_without_eq)]
