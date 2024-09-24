@@ -28,13 +28,12 @@ pub fn parse_block(block: &Block) -> Result<Vec<PumpfunTransactionEvents>, Error
     substreams::log::println(format!("{:?}", block.block_time.as_ref().unwrap()));
     let mut block_events: Vec<PumpfunTransactionEvents> = Vec::new();
     for transaction in block.transactions() {
-        if let Ok(events) = parse_transaction(transaction) {
-            if !events.is_empty() {
-                block_events.push(PumpfunTransactionEvents {
-                    signature: utils::transaction::get_signature(&transaction),
-                    events,
-                });
-            }
+        let events = parse_transaction(transaction)?;
+        if !events.is_empty() {
+            block_events.push(PumpfunTransactionEvents {
+                signature: utils::transaction::get_signature(&transaction),
+                events,
+            });
         }
     }
     Ok(block_events)
@@ -62,7 +61,7 @@ pub fn parse_transaction(transaction: &ConfirmedTransaction) -> Result<Vec<Pumpf
                 })
             }
             Ok(None) => (),
-            Err(error) => substreams::log::println(format!("Transaction {} error: {}", &context.signature, error))
+            Err(error) => return Err(anyhow!("Transaction {} error: {}", &context.signature, error)),
         }
     }
     Ok(events)
