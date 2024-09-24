@@ -1,10 +1,10 @@
 [package]
-name = "metaplex-substream"
+name = "mpl-token-metadata-substream"
 version = "0.1.1"
 edition = "2021"
 
 [lib]
-name = "metaplex_substream"
+name = "mpl_token_metadata_substream"
 crate-type = ["lib", "cdylib"]
 
 [dependencies]
