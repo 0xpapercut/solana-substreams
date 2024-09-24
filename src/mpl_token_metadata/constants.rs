@@ -1,6 +1,4 @@
-use lazy_static::lazy_static;
 use substreams_solana_utils::pubkey::Pubkey;
+use substreams_solana::b58;
 
-lazy_static! {
-    pub static ref MPL_TOKEN_METADATA_PROGRAM_ID: Pubkey = Pubkey::from_string("metaqbxxUerdq28cj1RbAWkYQm3ybzjb6a8bt518x1s");
-}
+pub const MPL_TOKEN_METADATA_PROGRAM_ID: Pubkey = Pubkey(b58!("metaqbxxUerdq28cj1RbAWkYQm3ybzjb6a8bt518x1s"));
