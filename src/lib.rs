@@ -1,4 +1,4 @@
-use anyhow::{anyhow, Error, Context, bail};
+use anyhow::{anyhow, Error};
 
 use substreams_solana::pb::sf::solana::r#type::v1::ConfirmedTransaction;
 use substreams_solana::pb::sf::solana::r#type::v1::Block;
