@@ -15,7 +15,7 @@ use pb::system_program::*;
 use pb::system_program::system_program_event::Event;
 
 #[substreams::handlers::map]
-fn system_program_events(block: Block) -> Result<SystemProgramBlockEvents, Error> {
+fn system_program_block_events(block: Block) -> Result<SystemProgramBlockEvents, Error> {
     let transactions = parse_block(&block)?;
     Ok(SystemProgramBlockEvents { slot: block.slot, transactions })
 }

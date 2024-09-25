@@ -15,7 +15,7 @@ binaries:
     file: target/wasm32-unknown-unknown/release/system_program_substream.wasm
 
 modules:
-  - name: system_program_events
+  - name: system_program_block_events
     kind: map
     inputs:
       - source: sf.solana.type.v1.Block
