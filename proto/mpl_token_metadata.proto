@@ -1,0 +1,187 @@
+syntax = "proto3";
+
+package mpl_token_metadata;
+
+message MplTokenMetadataBlockEvents {
+    repeated MplTokenMetadataTransactionEvents transactions = 1;
+}
+
+message MplTokenMetadataTransactionEvents {
+    string signature = 1;
+    repeated MplTokenMetadataEvent events = 2;
+}
+
+message MplTokenMetadataEvent {
+    oneof event {
+        CreateMetadataAccountV3Event create_metadata_account_v3 = 1;
+        ApproveCollectionAuthorityEvent approve_collection_authority = 2;
+        ApproveUseAuthorityEvent approve_use_authority = 3;
+        BubblegumSetCollectionSizeEvent bubblegum_set_collection_size = 4;
+        BurnEvent burn = 5;
+        BurnEditionNftEvent burn_edition_nft = 6;
+        BurnNftEvent burn_nft = 7;
+        CloseEscrowAccountEvent close_escrow_account = 8;
+        ConvertMasterEditionV1ToV2Event convert_master_edition_v1_to_v2 = 9;
+        CreateEvent create = 10;
+        CreateEscrowAccountEvent create_escrow_account = 11;
+        CreateMasterEditionEvent create_master_edition = 12;
+        CreateMasterEditionV3Event create_master_edition_v3 = 13;
+        CreateMetadataAccountEvent create_metadata_account = 14;
+        CreateMetadataAccountV2Event create_metadata_account_v2 = 15;
+        DelegateEvent delegate = 16;
+        DeprecatedCreateMasterEditionEvent deprecated_create_master_edition = 17;
+        DeprecatedCreateReservationListEvent deprecated_create_reservation_list = 18;
+        DeprecatedMintNewEditionFromMasterEditionViaPrintingTokenEvent deprecated_mint_new_edition_from_master_edition_via_printing_token = 19;
+        DeprecatedMintPrintingTokensEvent deprecated_mint_printing_tokens = 20;
+        DeprecatedMintPrintingTokensViaTokenEvent deprecated_mint_printing_tokens_via_token = 21;
+        DeprecatedSetReservationListEvent deprecated_set_reservation_list = 22;
+        FreezeDelegatedAccountEvent freeze_delegated_account = 23;
+        LockEvent lock = 24;
+        MigrateEvent migrate = 25;
+        MintNewEditionFromMasterEditionViaTokenEvent mint_new_edition_from_master_edition_via_token = 26;
+        MintNewEditionFromMasterEditionViaVaultProxyEvent mint_new_edition_from_master_edition_via_vault_proxy = 27;
+        PuffMetadataEvent puff_metadata = 28;
+        RemoveCreatorVerificationEvent remove_creator_verification = 29;
+        RevokeEvent revoke = 30;
+        RevokeCollectionAuthorityEvent revoke_collection_authority = 31;
+        RevokeUseAuthorityEvent revoke_use_authority = 32;
+        SetAndVerifyCollectionEvent set_and_verify_collection = 33;
+        SetAndVerifySizedCollectionItemEvent set_and_verify_sized_collection_item = 34;
+        SetTokenStandardEvent set_token_standard = 35;
+        SignMetadataEvent sign_metadata = 36;
+        ThawDelegatedAccountEvent thaw_delegated_account = 37;
+        TransferEvent transfer = 38;
+        TransferOutOfEscrowEvent transfer_out_of_escrow = 39;
+        UnlockEvent unlock = 40;
+        UnverifyEvent unverify = 41;
+        UnverifyCollectionEvent unverify_collection = 42;
+        UnverifySizedCollectionItemEvent unverify_sized_collection_item = 43;
+        UpdateEvent update = 44;
+        UpdateMetadataAccountEvent update_metadata_account = 45;
+        UpdateMetadataAccountV2Event update_metadata_account_v2 = 46;
+        UpdatePrimarySaleHappenedViaTokenEvent update_primary_sale_happened_via_token = 47;
+        UtilizeEvent utilize = 48;
+        PrintEvent print = 49;
+        VerifyEvent verify = 50;
+        MintEvent mint = 51;
+        SetCollectionSizeEvent set_collection_size = 52;
+        CollectEvent collect = 53;
+        UseEvent use = 54;
+        VerifySizedCollectionItemEvent verify_sized_collection_item = 55;
+        VerifyCollectionEvent verify_collection = 56;
+    }
+}
+
+message ApproveCollectionAuthorityEvent {}
+message ApproveUseAuthorityEvent {}
+message BubblegumSetCollectionSizeEvent {}
+message BurnEvent {}
+message BurnEditionNftEvent {}
+message BurnNftEvent {}
+message CloseEscrowAccountEvent {}
+message ConvertMasterEditionV1ToV2Event {}
+message CreateEvent {}
+message CreateEscrowAccountEvent {}
+message CreateMasterEditionEvent {}
+message CreateMasterEditionV3Event {}
+message CreateMetadataAccountEvent {}
+message CreateMetadataAccountV2Event {}
+message DelegateEvent {}
+message DeprecatedCreateMasterEditionEvent {}
+message DeprecatedCreateReservationListEvent {}
+message DeprecatedMintNewEditionFromMasterEditionViaPrintingTokenEvent {}
+message DeprecatedMintPrintingTokensEvent {}
+message DeprecatedMintPrintingTokensViaTokenEvent {}
+message DeprecatedSetReservationListEvent {}
+message FreezeDelegatedAccountEvent {}
+message LockEvent {}
+message MigrateEvent {}
+message MintNewEditionFromMasterEditionViaTokenEvent {}
+message MintNewEditionFromMasterEditionViaVaultProxyEvent {}
+message PuffMetadataEvent {}
+message RemoveCreatorVerificationEvent {}
+message RevokeEvent {}
+message RevokeCollectionAuthorityEvent {}
+message RevokeUseAuthorityEvent {}
+message SetAndVerifyCollectionEvent {}
+message SetAndVerifySizedCollectionItemEvent {}
+message SetTokenStandardEvent {}
+message SignMetadataEvent {}
+message ThawDelegatedAccountEvent {}
+message TransferEvent {}
+message TransferOutOfEscrowEvent {}
+message UnlockEvent {}
+message UnverifyEvent {}
+message UnverifyCollectionEvent {}
+message UnverifySizedCollectionItemEvent {}
+message UpdateEvent {}
+message UpdateMetadataAccountEvent {}
+message UpdateMetadataAccountV2Event {}
+message UpdatePrimarySaleHappenedViaTokenEvent {}
+message UtilizeEvent {}
+message PrintEvent {}
+message VerifyEvent {}
+message MintEvent {}
+message SetCollectionSizeEvent {}
+message CollectEvent {}
+message UseEvent {}
+message VerifySizedCollectionItemEvent {}
+message VerifyCollectionEvent {}
+
+message CreateMetadataAccountV3Event {
+    string metadata = 1;
+    string mint = 2;
+    string update_authority = 3;
+    DataV2 data = 4;
+    bool is_mutable = 5;
+    optional CollectionDetails collection_details = 6;
+}
+
+message DataV2 {
+    string name = 1;
+    string symbol = 2;
+    string uri = 3;
+    uint32 seller_fee_basis_points = 4;
+    repeated Creator creators = 5;
+    optional Collection collection = 6;
+    optional Uses uses = 7;
+}
+
+message Uses {
+    UseMethod use_method = 1;
+    uint64 remaining = 2;
+    uint64 total = 3;
+}
+
+enum UseMethod {
+    NULL = 0;
+    BURN = 1;
+    MULTIPLE = 2;
+    SINGLE = 3;
+}
+
+message Collection {
+    bool verified = 1;
+    string key = 2;
+}
+
+message CollectionDetails {
+    oneof version {
+        CollectionDetailsV1 v1 = 1;
+        CollectionDetailsV2 v2 = 2;
+    }
+}
+
+message CollectionDetailsV1 {
+    uint64 size = 1;
+}
+
+message CollectionDetailsV2 {
+    repeated uint64 padding = 1;
+}
+
+message Creator {
+    string address = 1;
+    bool verified = 2;
+    uint32 share = 3;
+}

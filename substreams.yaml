@@ -1,0 +1,25 @@
+specVersion: v0.1.0
+package:
+  name: 'mpl_token_metadata_events'
+  version: v0.1.1
+
+protobuf:
+  files:
+    - mpl_token_metadata.proto
+  importPaths:
+    - ./proto
+
+binaries:
+  default:
+    type: wasm/rust-v1
+    file: target/wasm32-unknown-unknown/release/metaplex_substream.wasm
+
+modules:
+  - name: mpl_token_metadata_block_events
+    kind: map
+    inputs:
+      - source: sf.solana.type.v1.Block
+    output:
+      type: proto:mpl_token_metadata.MplTokenMetadataBlockEvents
+
+network: solana
