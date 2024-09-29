@@ -1,0 +1,124 @@
+syntax = "proto3";
+
+package spl_token;
+
+message SplTokenBlockEvents {
+    repeated SplTokenTransactionEvents transactions = 1;
+}
+
+message SplTokenTransactionEvents {
+    string signature = 1;
+    repeated SplTokenEvent events = 3;
+}
+
+message SplTokenEvent {
+    oneof event {
+        TransferEvent transfer = 1;
+        InitializeMintEvent initialize_mint = 2;
+        InitializeImmutableOwnerEvent initialize_immutable_owner = 3;
+        InitializeAccountEvent initialize_account = 4;
+        InitializeMultisigEvent initialize_multisig = 5;
+        ApproveEvent approve = 6;
+        MintToEvent mint_to = 7;
+        RevokeEvent revoke = 8;
+        SetAuthorityEvent set_authority = 9;
+        BurnEvent burn = 10;
+        CloseAccountEvent close_account = 11;
+        FreezeAccountEvent freeze_account = 12;
+        ThawAccountEvent thaw_account = 13;
+        SyncNativeEvent sync_native = 14;
+    }
+}
+
+message InitializeMintEvent {
+    string mint = 1;
+    uint32 decimals = 2;
+    string mint_authority = 3;
+    optional string freeze_authority = 4;
+}
+
+message InitializeAccountEvent {
+    TokenAccount account = 1;
+}
+
+message InitializeMultisigEvent {
+    string multisig = 1;
+    repeated string signers = 2;
+    uint32 m = 3;
+}
+
+message TransferEvent {
+    TokenAccount source = 1;
+    TokenAccount destination = 2;
+    string authority = 3;
+    uint64 amount = 4;
+}
+
+message ApproveEvent {
+    TokenAccount source = 1;
+    string delegate = 2;
+    uint64 amount = 3;
+}
+
+message RevokeEvent {
+    TokenAccount source = 1;
+}
+
+message SetAuthorityEvent {
+    string mint = 1;
+    string authority = 2;
+    AuthorityType authority_type = 3;
+    optional string new_authority = 4;
+}
+
+message MintToEvent {
+    string mint = 1;
+    string mint_authority = 2;
+    TokenAccount destination = 3;
+    uint64 amount = 4;
+}
+
+message BurnEvent {
+    TokenAccount source = 1;
+    string authority = 3;
+    uint64 amount = 2;
+}
+
+message CloseAccountEvent {
+    TokenAccount source = 1;
+    string destination = 2;
+    // TODO: amount
+}
+
+message FreezeAccountEvent {
+    TokenAccount source = 1;
+    string freeze_authority = 2;
+}
+
+message ThawAccountEvent {
+    TokenAccount source = 1;
+    string freeze_authority = 2;
+}
+
+message InitializeImmutableOwnerEvent {
+    TokenAccount account = 1;
+}
+
+message SyncNativeEvent {
+    TokenAccount account = 1;
+    // TODO: amount
+}
+
+message TokenAccount {
+    string address = 1;
+    string owner = 2;
+    string mint = 3;
+}
+
+enum AuthorityType {
+    Null = 0;
+    MintTokens = 1;
+    FreezeAccount = 2;
+    AccountOwner = 3;
+    CloseAccount = 4;
+}
