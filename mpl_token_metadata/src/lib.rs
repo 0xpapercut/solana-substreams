@@ -18,7 +18,7 @@ use pb::mpl_token_metadata::*;
 use pb::mpl_token_metadata::mpl_token_metadata_event::Event;
 
 #[substreams::handlers::map]
-fn mpl_token_metadata_block_events(block: Block) -> Result<MplTokenMetadataBlockEvents, Error> {
+fn mpl_token_metadata_events(block: Block) -> Result<MplTokenMetadataBlockEvents, Error> {
     let transactions = parse_block(&block);
     Ok(MplTokenMetadataBlockEvents { transactions })
 }

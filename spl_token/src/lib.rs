@@ -14,7 +14,7 @@ use pb::spl_token::*;
 use pb::spl_token::spl_token_event::Event;
 
 #[substreams::handlers::map]
-fn spl_token_block_events(block: Block) -> Result<SplTokenBlockEvents, Error> {
+fn spl_token_events(block: Block) -> Result<SplTokenBlockEvents, Error> {
     Ok(SplTokenBlockEvents { transactions: parse_block(&block)? })
 }
 

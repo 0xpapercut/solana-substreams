@@ -15,7 +15,7 @@ binaries:
     file: target/wasm32-unknown-unknown/release/metaplex_substream.wasm
 
 modules:
-  - name: mpl_token_metadata_block_events
+  - name: mpl_token_metadata_events
     kind: map
     inputs:
       - source: sf.solana.type.v1.Block

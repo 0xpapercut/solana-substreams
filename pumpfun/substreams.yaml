@@ -15,7 +15,7 @@ binaries:
     file: target/wasm32-unknown-unknown/release/pumpfun_substream.wasm
 
 modules:
-  - name: pumpfun_block_events
+  - name: pumpfun_events
     kind: map
     inputs:
       - source: sf.solana.type.v1.Block
