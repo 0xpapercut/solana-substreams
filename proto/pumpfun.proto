@@ -1,0 +1,64 @@
+syntax = "proto3";
+
+package pumpfun;
+
+message PumpfunBlockEvents {
+    repeated PumpfunTransactionEvents transactions = 1;
+}
+
+message PumpfunTransactionEvents {
+    string signature = 1;
+    repeated PumpfunEvent events = 2;
+}
+
+message PumpfunEvent {
+    oneof event {
+        InitializeEvent initialize = 1;
+        SetParamsEvent set_params = 2;
+        SwapEvent swap = 3;
+        WithdrawEvent withdraw = 4;
+        CreateEvent create = 5;
+    }
+}
+
+message CreateEvent {
+    string user = 1;
+    string name = 2;
+    string symbol = 3;
+    string uri = 4;
+    string mint = 5;
+    string bonding_curve = 6;
+    string associated_bonding_curve = 7;
+    string metadata = 8;
+}
+
+message InitializeEvent {
+    string user = 1;
+}
+
+message SetParamsEvent {
+    string user = 1;
+    string fee_recipient = 2;
+    uint64 initial_virtual_token_reserves = 3;
+    uint64 initial_virtual_sol_reserves = 4;
+    uint64 initial_real_token_reserves = 5;
+    uint64 token_total_supply = 6;
+    uint64 fee_basis_points = 7;
+}
+
+message SwapEvent {
+    string user = 1;
+    string mint = 2;
+    string bonding_curve = 3;
+    optional uint64 sol_amount = 4;
+    uint64 token_amount = 5;
+    string direction = 6;
+    optional uint64 virtual_sol_reserves = 7;
+    optional uint64 virtual_token_reserves = 8;
+    optional uint64 real_sol_reserves = 9;
+    optional uint64 real_token_reserves = 10;
+}
+
+message WithdrawEvent {
+    string mint = 1;
+}
