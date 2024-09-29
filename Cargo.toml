@@ -1,0 +1,13 @@
+[workspace]
+members = [
+    "raydium_amm",
+    "spl_token",
+    "pumpfun",
+    "system_program",
+    "mpl_token_metadata",
+]
+
+[profile.release]
+lto = true
+opt-level = 's'
+strip = "debuginfo"
