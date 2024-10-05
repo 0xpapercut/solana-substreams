@@ -554,11 +554,11 @@ dependencies = [
  "bs58 0.5.1",
  "lazy_static",
  "prost",
- "spl-token-substream 0.1.1 (git+https://github.com/0xpapercut/spl-token-substream?branch=main)",
+ "spl-token-substream",
  "substreams",
  "substreams-solana",
  "substreams-solana-utils",
- "system-program-substream 0.1.1 (git+https://github.com/0xpapercut/system-program-substream?branch=main)",
+ "system-program-substream",
 ]
 
 [[package]]
@@ -584,7 +584,7 @@ dependencies = [
  "regex",
  "safe-transmute",
  "serde",
- "spl-token-substream 0.1.1 (git+https://github.com/0xpapercut/spl-token-substream?branch=main)",
+ "spl-token-substream",
  "substreams",
  "substreams-solana",
  "substreams-solana-utils",
@@ -672,20 +672,6 @@ dependencies = [
 [[package]]
 name = "spl-token-substream"
 version = "0.1.1"
-dependencies = [
- "anyhow",
- "bs58 0.5.1",
- "prost",
- "substreams",
- "substreams-solana",
- "substreams-solana-utils",
- "thiserror",
-]
-
-[[package]]
-name = "spl-token-substream"
-version = "0.1.1"
-source = "git+https://github.com/0xpapercut/spl-token-substream?branch=main#4400854ba50aa01ac18aed8280ebda2646845ae2"
 dependencies = [
  "anyhow",
  "bs58 0.5.1",
@@ -847,22 +833,6 @@ dependencies = [
 [[package]]
 name = "system-program-substream"
 version = "0.1.1"
-dependencies = [
- "anyhow",
- "borsh",
- "bs58 0.5.1",
- "lazy_static",
- "prost",
- "substreams",
- "substreams-database-change",
- "substreams-solana",
- "substreams-solana-utils",
-]
-
-[[package]]
-name = "system-program-substream"
-version = "0.1.1"
-source = "git+https://github.com/0xpapercut/system-program-substream?branch=main#80269f437520449791fe593afb6f775f451acd14"
 dependencies = [
  "anyhow",
  "borsh",

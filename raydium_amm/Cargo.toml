@@ -11,7 +11,7 @@ crate-type = ["lib", "cdylib"]
 substreams = "^0.5.0"
 substreams-solana = { git = "https://github.com/streamingfast/substreams-solana", branch = "master" }
 substreams-solana-utils = { git = "https://github.com/0xpapercut/substreams-solana-utils", branch = "main" }
-spl-token-substream = { git = "https://github.com/0xpapercut/spl-token-substream", branch = "main" }
+spl-token-substream = { path = "../spl_token"}
 prost = "0.11"
 bs58 = "0.5.0"
 bincode = "1.3.3"
