@@ -27,7 +27,6 @@ fn pumpfun_events(block: Block) -> Result<PumpfunBlockEvents, Error> {
 }
 
 pub fn parse_block(block: &Block) -> Result<Vec<PumpfunTransactionEvents>, Error> {
-    substreams::log::println(format!("{:?}", block.block_time.as_ref().unwrap()));
     let mut block_events: Vec<PumpfunTransactionEvents> = Vec::new();
     for transaction in block.transactions() {
         let events = parse_transaction(transaction)?;
