@@ -2,7 +2,7 @@ ENDPOINT ?= mainnet.sol.streamingfast.io:443
 
 .PHONY: build
 build:
-	cargo build --target wasm32-unknown-unknown --release
+	CARGO_TARGET_DIR=./target cargo build --target wasm32-unknown-unknown --release
 
 .PHONY: stream
 stream: build
