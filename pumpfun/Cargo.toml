@@ -11,8 +11,8 @@ crate-type = ["lib", "cdylib"]
 substreams = "^0.5.0"
 substreams-solana = { git = "https://github.com/streamingfast/substreams-solana", branch = "master" }
 substreams-solana-utils = { git = "https://github.com/0xpapercut/substreams-solana-utils", branch = "main" }
-spl-token-substream = { git = "https://github.com/0xpapercut/spl-token-substream", branch = "main" }
-system-program-substream = { git = "https://github.com/0xpapercut/system-program-substream", branch = "main" }
+spl-token-substream = { path = "../spl_token"}
+system-program-substream = { path = "../system_program" }
 prost = "0.11"
 bs58 = "0.5.0"
 borsh = { version = "1.5.1", features = ["derive"] }
