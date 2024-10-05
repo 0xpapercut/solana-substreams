@@ -76,7 +76,6 @@ pub struct SellInstruction {
 
 impl SellInstruction {
     fn unpack(data: &[u8]) -> Result<Self, &'static str> {
-        substreams::log::println(format!("{:?}", data));
         Self::deserialize(&mut &data[..]).map_err(|_| "Failed to deserialize SellInstruction.")
     }
 }
