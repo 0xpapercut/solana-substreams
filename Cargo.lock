@@ -574,6 +574,7 @@ dependencies = [
 name = "raydium-amm-substream"
 version = "0.1.1"
 dependencies = [
+ "anyhow",
  "arrayref",
  "base64",
  "bincode",
@@ -761,8 +762,8 @@ dependencies = [
 
 [[package]]
 name = "substreams-solana-utils"
-version = "0.1.1"
-source = "git+https://github.com/0xpapercut/substreams-solana-utils?branch=main#f1cca8717046c8d3d4da34bf19235300274856b8"
+version = "0.1.2"
+source = "git+https://github.com/0xpapercut/substreams-solana-utils?branch=main#ee35a2e789e6c252fce3cbeede6cfd71c9b86625"
 dependencies = [
  "anyhow",
  "base64",

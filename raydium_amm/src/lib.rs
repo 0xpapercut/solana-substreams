@@ -1,6 +1,6 @@
 use regex;
+use anyhow::{anyhow, Error, Context};
 
-use substreams::errors::Error;
 use substreams_solana::pb::sf::solana::r#type::v1::ConfirmedTransaction;
 use substreams_solana::pb::sf::solana::r#type::v1::Block;
 
@@ -50,6 +50,13 @@ pub fn parse_transaction(transaction: &ConfirmedTransaction) -> Result<Vec<Raydi
     let mut events: Vec<RaydiumAmmEvent> = Vec::new();
 
     let context = get_context(transaction)?;
+    if context.signature.to_string() != "4EqqQv1DG4iwJAhhKuRTdfqLZVbmtgeTUUa6AMDTXXm1jwTs7edfJFLQWGATiAy2zBN6sRnXvu4Fnuy3ueKsBVNj" {
+        return Ok(Vec::new());
+    } else {
+        // assert!(transaction.meta.as_ref().unwrap().log_messages.iter().all(|x| x == "Log truncated"));
+        // return Ok(Vec::new());
+    }
+    substreams::log::println(format!("{}", context.signature.to_string()));
     let instructions = get_structured_instructions(transaction)?;
 
     for instruction in instructions.flattened().iter() {
@@ -126,7 +133,7 @@ fn _parse_swap_instruction<'a>(
 
     let direction = (if mint_out == coin_mint { "coin" } else { "pc" }).to_string();
 
-    let (pool_coin_amount, pool_pc_amount) = match parse_log(instruction) {
+    let (pool_coin_amount, pool_pc_amount) = match parse_raydium_log(instruction) {
         Ok(RayLog::SwapBaseIn(swap_base_in)) => {
             (Some(swap_base_in.pool_coin), Some(swap_base_in.pool_pc))
         },
@@ -171,7 +178,7 @@ fn _parse_initialize_instruction<'a>(
     let coin_mint = coin_transfer.source.unwrap().mint;
     let lp_mint = lp_mint_to.mint;
 
-    let market = match parse_log(instruction) {
+    let market = match parse_raydium_log(instruction) {
         Ok(RayLog::Init(init)) => Some(Pubkey(init.market).to_string()),
         _ => None,
     };
@@ -209,7 +216,7 @@ fn _parse_deposit_instruction<'a>(
     let coin_mint = coin_transfer.source.unwrap().mint;
     let lp_mint = lp_mint_to.mint;
 
-    let (pool_pc_amount, pool_coin_amount, pool_lp_amount) = match parse_log(instruction) {
+    let (pool_pc_amount, pool_coin_amount, pool_lp_amount) = match parse_raydium_log(instruction) {
         Ok(RayLog::Deposit(deposit)) => {
             (Some(deposit.pool_pc), Some(deposit.pool_coin), Some(deposit.pool_lp))
         },
@@ -250,7 +257,7 @@ fn _parse_withdraw_instruction<'a>(
     let coin_mint = coin_transfer.source.unwrap().mint;
     let lp_mint = lp_burn.source.unwrap().mint;
 
-    let (pool_pc_amount, pool_coin_amount, pool_lp_amount) = match parse_log(instruction) {
+    let (pool_pc_amount, pool_coin_amount, pool_lp_amount) = match parse_raydium_log(instruction) {
         Ok(RayLog::Withdraw(withdraw)) => {
             (Some(withdraw.pool_pc), Some(withdraw.pool_coin), Some(withdraw.pool_lp))
         },
@@ -309,9 +316,9 @@ fn _parse_withdraw_pnl_instruction(
     }
 }
 
-fn parse_log(instruction: &StructuredInstruction) -> Result<RayLog, String> {
+fn parse_raydium_log(instruction: &StructuredInstruction) -> Result<RayLog, Error> {
     let re = regex::Regex::new(r"ray_log: (.+)").unwrap();
-    let log_message = instruction.logs().iter().rev().find_map(|log| {
+    let log_message = instruction.logs().as_ref().context("Failed to parse logs due to truncation")?.iter().rev().find_map(|log| {
         if let Log::Program(program_log) = log {
             Some(program_log.message().unwrap())
         } else {
@@ -321,8 +328,8 @@ fn parse_log(instruction: &StructuredInstruction) -> Result<RayLog, String> {
     match log_message {
         Some(message) => match re.captures(message.as_str()) {
             Some(captures) => Ok(decode_ray_log(&captures[1])),
-            None => return Err("Failed to capture log message".to_string()),
+            None => return Err(anyhow!("Failed to capture log message")),
         },
-        None => return Err("Log message not found".to_string()),
+        None => return Err(anyhow!("Log message not found")),
     }
 }

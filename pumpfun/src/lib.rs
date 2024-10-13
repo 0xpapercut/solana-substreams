@@ -1,3 +1,4 @@
+use anyhow::Context;
 use anyhow::{anyhow, Error};
 
 use substreams_solana::pb::sf::solana::r#type::v1::ConfirmedTransaction;
@@ -247,7 +248,7 @@ fn _parse_withdraw_instruction(
 }
 
 fn parse_pumpfun_log(instruction: &StructuredInstruction) -> Result<PumpfunLog, Error> {
-    let data = instruction.logs().iter().find_map(|log| match log {
+    let data = instruction.logs().as_ref().context("Failed to parse logs due to truncation")?.iter().find_map(|log| match log {
         Log::Data(data_log) => data_log.data().ok(),
         _ => None,
     }).ok_or(anyhow!("Couldn't find data log."))?;
