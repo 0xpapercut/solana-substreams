@@ -111,9 +111,9 @@ dependencies = [
 
 [[package]]
 name = "bytemuck"
-version = "1.18.0"
+version = "1.19.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "94bbb0ad554ad961ddc5da507a12a29b14e4ae5bda06b19f575a3e6079d2e2ae"
+checksum = "8334215b81e418a0a7bdb8ef0849474f40bb10c8b71f1c4ed315cff49f32494d"
 
 [[package]]
 name = "bytes"
@@ -372,12 +372,9 @@ dependencies = [
 
 [[package]]
 name = "once_cell"
-version = "1.20.1"
+version = "1.20.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "82881c4be219ab5faaf2ad5e5e5ecdff8c66bd7402ca3160975c93b24961afd1"
-dependencies = [
- "portable-atomic",
-]
+checksum = "1261fe7e33c73b354eab43b1273a57c8f967d0391e80353e51f764ac02cf6775"
 
 [[package]]
 name = "pad"
@@ -444,12 +441,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "portable-atomic"
-version = "1.9.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "cc9c68a3f6da06753e9335d63e27f6b9754dd1920d941135b7ea8224f141adb2"
-
-[[package]]
 name = "prettyplease"
 version = "0.1.25"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -493,9 +484,9 @@ dependencies = [
 
 [[package]]
 name = "proc-macro2"
-version = "1.0.86"
+version = "1.0.87"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "5e719e8df665df0d1c8fbfd238015744736151d4445ec0836b8e628aae103b77"
+checksum = "b3e4daa0dcf6feba26f985457cdf104d4b4256fc5a09547140f3631bb076b19a"
 dependencies = [
  "unicode-ident",
 ]
@@ -769,30 +760,17 @@ dependencies = [
 ]
 
 [[package]]
-name = "substreams-solana-program-instructions"
-version = "0.1.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b2d2eac3fee28a079bd3af5573bb6d43cf9667d89ce577fc7dd40113bb31e9e1"
-dependencies = [
- "anyhow",
- "num_enum",
- "substreams",
-]
-
-[[package]]
 name = "substreams-solana-utils"
-version = "0.1.0"
+version = "0.1.1"
+source = "git+https://github.com/0xpapercut/substreams-solana-utils?branch=main#f1cca8717046c8d3d4da34bf19235300274856b8"
 dependencies = [
  "anyhow",
  "base64",
  "borsh",
  "bs58 0.5.1",
- "lazy_static",
  "regex",
  "substreams",
  "substreams-solana",
- "substreams-solana-program-instructions",
- "thiserror",
 ]
 
 [[package]]
