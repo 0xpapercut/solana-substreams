@@ -1,20 +1,20 @@
 [package]
 name = "mpl-token-metadata-substream"
-version = "0.1.2"
-edition = "2021"
+version.workspace = true
+edition.workspace = true
 
 [lib]
 name = "mpl_token_metadata_substream"
 crate-type = ["lib", "cdylib"]
 
 [dependencies]
-substreams = "^0.5.0"
-substreams-solana = { git = "https://github.com/streamingfast/substreams-solana", branch = "master" }
-substreams-solana-utils = { git = "https://github.com/0xpapercut/substreams-solana-utils", tag = "v0.1.2" }
-prost = "0.11"
-bs58 = "0.5.0"
-borsh = { version = "1.5.1", features = ["derive"] }
-lazy_static = "1.5.0"
-num-derive = "0.4.2"
-num-traits = "0.2.19"
-thiserror = "1.0.63"
+substreams = { workspace = true }
+substreams-solana = { workspace = true }
+substreams-solana-utils = { workspace = true }
+prost = { workspace = true }
+bs58 = { workspace = true }
+borsh = { workspace = true }
+lazy_static = { workspace = true }
+num-derive = { workspace = true }
+num-traits = { workspace = true }
+thiserror = { workspace = true }

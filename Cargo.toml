@@ -8,6 +8,30 @@ members = [
 ]
 resolver = "2"
 
+[workspace.package]
+version = "0.1.2"
+edition = "2021"
+
+[workspace.dependencies]
+substreams = "^0.5.0"
+substreams-solana = { git = "https://github.com/streamingfast/substreams-solana", branch = "master" }
+substreams-solana-utils = { git = "https://github.com/0xpapercut/substreams-solana-utils", tag = "v0.1.2" }
+prost = "0.11"
+bs58 = "0.5.0"
+borsh = { version = "1.5.1", features = ["derive"] }
+lazy_static = "1.5.0"
+anyhow = "1.0.86"
+thiserror = "1.0.63"
+bincode = "1.3.3"
+base64 = "0.22.1"
+serde = { version = "1.0.197", features = ["derive"] }
+arrayref = "0.3.8"
+safe-transmute = "0.11.3"
+bytemuck = "1.17.0"
+regex = "1.10.6"
+num-derive = "0.4.2"
+num-traits = "0.2.19"
+
 [profile.release]
 lto = true
 opt-level = 's'
