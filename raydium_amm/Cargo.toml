@@ -1,6 +1,6 @@
 [package]
 name = "raydium-amm-substream"
-version = "0.1.1"
+version = "0.1.2"
 edition = "2021"
 
 [lib]
@@ -10,13 +10,13 @@ crate-type = ["lib", "cdylib"]
 [dependencies]
 substreams = "^0.5.0"
 substreams-solana = { git = "https://github.com/streamingfast/substreams-solana", branch = "master" }
-substreams-solana-utils = { git = "https://github.com/0xpapercut/substreams-solana-utils", branch = "main" }
+substreams-solana-utils = { git = "https://github.com/0xpapercut/substreams-solana-utils", tag = "v0.1.2" }
 spl-token-substream = { path = "../spl_token"}
 prost = "0.11"
 bs58 = "0.5.0"
 bincode = "1.3.3"
 base64 = "0.22.1"
-serde = { version = "1.0.208", features = ["derive"] }
+serde = { version = "1.0.197", features = ["derive"] }
 arrayref = "0.3.8"
 safe-transmute = "0.11.3"
 bytemuck = "1.17.0"
