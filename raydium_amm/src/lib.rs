@@ -24,7 +24,7 @@ use pb::raydium_amm::raydium_amm_event::Event;
 #[substreams::handlers::map]
 fn raydium_amm_events(block: Block) -> Result<RaydiumAmmBlockEvents, Error> {
     let transactions = parse_block(&block);
-    Ok(RaydiumAmmBlockEvents { transactions})
+    Ok(RaydiumAmmBlockEvents { transactions })
 }
 
 pub fn parse_block(block: &Block) -> Vec<RaydiumAmmTransactionEvents> {
@@ -50,13 +50,6 @@ pub fn parse_transaction(transaction: &ConfirmedTransaction) -> Result<Vec<Raydi
     let mut events: Vec<RaydiumAmmEvent> = Vec::new();
 
     let context = get_context(transaction)?;
-    if context.signature.to_string() != "4EqqQv1DG4iwJAhhKuRTdfqLZVbmtgeTUUa6AMDTXXm1jwTs7edfJFLQWGATiAy2zBN6sRnXvu4Fnuy3ueKsBVNj" {
-        return Ok(Vec::new());
-    } else {
-        // assert!(transaction.meta.as_ref().unwrap().log_messages.iter().all(|x| x == "Log truncated"));
-        // return Ok(Vec::new());
-    }
-    substreams::log::println(format!("{}", context.signature.to_string()));
     let instructions = get_structured_instructions(transaction)?;
 
     for instruction in instructions.flattened().iter() {
