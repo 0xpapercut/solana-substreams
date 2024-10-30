@@ -16,7 +16,7 @@ pub struct MplTokenMetadataTransactionEvents {
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct MplTokenMetadataEvent {
-    #[prost(oneof="mpl_token_metadata_event::Event", tags="1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56")]
+    #[prost(oneof="mpl_token_metadata_event::Event", tags="1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58")]
     pub event: ::core::option::Option<mpl_token_metadata_event::Event>,
 }
 /// Nested message and enum types in `MplTokenMetadataEvent`.
@@ -136,6 +136,10 @@ pub mod mpl_token_metadata_event {
         VerifySizedCollectionItem(super::VerifySizedCollectionItemEvent),
         #[prost(message, tag="56")]
         VerifyCollection(super::VerifyCollectionEvent),
+        #[prost(message, tag="57")]
+        Resize(super::ResizeEvent),
+        #[prost(message, tag="58")]
+        CloseAccounts(super::CloseAccountsEvent),
     }
 }
 #[allow(clippy::derive_partial_eq_without_eq)]
@@ -169,10 +173,6 @@ pub struct CloseEscrowAccountEvent {
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct ConvertMasterEditionV1ToV2Event {
-}
-#[allow(clippy::derive_partial_eq_without_eq)]
-#[derive(Clone, PartialEq, ::prost::Message)]
-pub struct CreateEvent {
 }
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
@@ -308,15 +308,7 @@ pub struct UnverifySizedCollectionItemEvent {
 }
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
-pub struct UpdateEvent {
-}
-#[allow(clippy::derive_partial_eq_without_eq)]
-#[derive(Clone, PartialEq, ::prost::Message)]
 pub struct UpdateMetadataAccountEvent {
-}
-#[allow(clippy::derive_partial_eq_without_eq)]
-#[derive(Clone, PartialEq, ::prost::Message)]
-pub struct UpdateMetadataAccountV2Event {
 }
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
@@ -360,6 +352,14 @@ pub struct VerifyCollectionEvent {
 }
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
+pub struct ResizeEvent {
+}
+#[allow(clippy::derive_partial_eq_without_eq)]
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct CloseAccountsEvent {
+}
+#[allow(clippy::derive_partial_eq_without_eq)]
+#[derive(Clone, PartialEq, ::prost::Message)]
 pub struct CreateMetadataAccountV3Event {
     #[prost(string, tag="1")]
     pub metadata: ::prost::alloc::string::String,
@@ -373,6 +373,249 @@ pub struct CreateMetadataAccountV3Event {
     pub is_mutable: bool,
     #[prost(message, optional, tag="6")]
     pub collection_details: ::core::option::Option<CollectionDetails>,
+}
+#[allow(clippy::derive_partial_eq_without_eq)]
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct CreateEvent {
+    #[prost(string, tag="1")]
+    pub metadata: ::prost::alloc::string::String,
+    #[prost(string, tag="2")]
+    pub mint: ::prost::alloc::string::String,
+    #[prost(string, tag="3")]
+    pub mint_authority: ::prost::alloc::string::String,
+    #[prost(string, tag="4")]
+    pub update_authority: ::prost::alloc::string::String,
+    #[prost(message, optional, tag="5")]
+    pub asset_data: ::core::option::Option<AssetData>,
+    #[prost(uint32, optional, tag="6")]
+    pub decimals: ::core::option::Option<u32>,
+    #[prost(message, optional, tag="7")]
+    pub print_supply: ::core::option::Option<PrintSupply>,
+}
+#[allow(clippy::derive_partial_eq_without_eq)]
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct UpdateEvent {
+    #[prost(string, tag="1")]
+    pub authority: ::prost::alloc::string::String,
+    #[prost(string, tag="2")]
+    pub mint: ::prost::alloc::string::String,
+    #[prost(string, tag="3")]
+    pub metadata: ::prost::alloc::string::String,
+    #[prost(oneof="update_event::UpdateArgs", tags="4, 5, 6, 7, 8, 9, 10, 11, 12")]
+    pub update_args: ::core::option::Option<update_event::UpdateArgs>,
+}
+/// Nested message and enum types in `UpdateEvent`.
+pub mod update_event {
+    #[allow(clippy::derive_partial_eq_without_eq)]
+#[derive(Clone, PartialEq, ::prost::Oneof)]
+    pub enum UpdateArgs {
+        #[prost(message, tag="4")]
+        V1(super::UpdateArgsV1),
+        #[prost(message, tag="5")]
+        AsUpdateAuthorityV2(super::UpdateArgsAsUpdateAuthorityV2),
+        #[prost(message, tag="6")]
+        AsAuthorityItemDelegateV2(super::UpdateArgsAsAuthorityItemDelegateV2),
+        #[prost(message, tag="7")]
+        AsCollectionDelegateV2(super::UpdateArgsAsCollectionDelegateV2),
+        #[prost(message, tag="8")]
+        AsDataDelegateV2(super::UpdateArgsAsDataDelegateV2),
+        #[prost(message, tag="9")]
+        AsProgrammableConfigDelegateV2(super::UpdateArgsAsProgrammableConfigDelegateV2),
+        #[prost(message, tag="10")]
+        AsDataItemDelegateV2(super::UpdateArgsAsDataItemDelegateV2),
+        #[prost(message, tag="11")]
+        AsCollectionItemDelegateV2(super::UpdateArgsAsCollectionItemDelegateV2),
+        #[prost(message, tag="12")]
+        AsProgrammableConfigItemDelegateV2(super::UpdateArgsAsProgrammableConfigItemDelegateV2),
+    }
+}
+#[allow(clippy::derive_partial_eq_without_eq)]
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct UpdateMetadataAccountV2Event {
+    #[prost(message, optional, tag="1")]
+    pub data: ::core::option::Option<DataV2>,
+    #[prost(string, optional, tag="2")]
+    pub update_authority: ::core::option::Option<::prost::alloc::string::String>,
+    #[prost(bool, optional, tag="3")]
+    pub primary_sale_happened: ::core::option::Option<bool>,
+    #[prost(bool, optional, tag="4")]
+    pub is_mutable: ::core::option::Option<bool>,
+}
+#[allow(clippy::derive_partial_eq_without_eq)]
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct UpdateArgsV1 {
+    #[prost(string, optional, tag="1")]
+    pub new_update_authority: ::core::option::Option<::prost::alloc::string::String>,
+    #[prost(message, optional, tag="2")]
+    pub data: ::core::option::Option<Data>,
+    #[prost(bool, optional, tag="3")]
+    pub primary_sale_happened: ::core::option::Option<bool>,
+    #[prost(bool, optional, tag="4")]
+    pub is_mutable: ::core::option::Option<bool>,
+    #[prost(message, optional, tag="5")]
+    pub collection: ::core::option::Option<CollectionToggle>,
+    #[prost(message, optional, tag="6")]
+    pub collection_details: ::core::option::Option<CollectionDetailsToggle>,
+    #[prost(message, optional, tag="7")]
+    pub uses: ::core::option::Option<UsesToggle>,
+    #[prost(message, optional, tag="8")]
+    pub rule_set: ::core::option::Option<RuleSetToggle>,
+    #[prost(message, optional, tag="9")]
+    pub authorization_data: ::core::option::Option<AuthorizationData>,
+}
+#[allow(clippy::derive_partial_eq_without_eq)]
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct UpdateArgsAsUpdateAuthorityV2 {
+    #[prost(string, optional, tag="1")]
+    pub new_update_authority: ::core::option::Option<::prost::alloc::string::String>,
+    #[prost(message, optional, tag="2")]
+    pub data: ::core::option::Option<Data>,
+    #[prost(bool, optional, tag="3")]
+    pub primary_sale_happened: ::core::option::Option<bool>,
+    #[prost(bool, optional, tag="4")]
+    pub is_mutable: ::core::option::Option<bool>,
+    #[prost(message, optional, tag="5")]
+    pub collection: ::core::option::Option<CollectionToggle>,
+    #[prost(message, optional, tag="6")]
+    pub collection_details: ::core::option::Option<CollectionDetailsToggle>,
+    #[prost(message, optional, tag="7")]
+    pub uses: ::core::option::Option<UsesToggle>,
+    #[prost(message, optional, tag="8")]
+    pub rule_set: ::core::option::Option<RuleSetToggle>,
+    #[prost(message, optional, tag="9")]
+    pub token_standard: ::core::option::Option<TokenStandard>,
+    #[prost(message, optional, tag="10")]
+    pub authorization_data: ::core::option::Option<AuthorizationData>,
+}
+#[allow(clippy::derive_partial_eq_without_eq)]
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct UpdateArgsAsAuthorityItemDelegateV2 {
+    #[prost(string, optional, tag="1")]
+    pub new_update_authority: ::core::option::Option<::prost::alloc::string::String>,
+    #[prost(bool, optional, tag="2")]
+    pub primary_sale_happened: ::core::option::Option<bool>,
+    #[prost(bool, optional, tag="3")]
+    pub is_mutable: ::core::option::Option<bool>,
+    #[prost(message, optional, tag="4")]
+    pub token_standard: ::core::option::Option<TokenStandard>,
+    #[prost(message, optional, tag="5")]
+    pub authorization_data: ::core::option::Option<AuthorizationData>,
+}
+#[allow(clippy::derive_partial_eq_without_eq)]
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct UpdateArgsAsCollectionDelegateV2 {
+    #[prost(message, optional, tag="1")]
+    pub collection: ::core::option::Option<CollectionToggle>,
+    #[prost(message, optional, tag="2")]
+    pub authorization_data: ::core::option::Option<AuthorizationData>,
+}
+#[allow(clippy::derive_partial_eq_without_eq)]
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct UpdateArgsAsDataDelegateV2 {
+    #[prost(message, optional, tag="1")]
+    pub data: ::core::option::Option<Data>,
+    #[prost(message, optional, tag="2")]
+    pub authorization_data: ::core::option::Option<AuthorizationData>,
+}
+#[allow(clippy::derive_partial_eq_without_eq)]
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct UpdateArgsAsProgrammableConfigDelegateV2 {
+    #[prost(message, optional, tag="1")]
+    pub rule_set: ::core::option::Option<RuleSetToggle>,
+    #[prost(message, optional, tag="2")]
+    pub authorization_data: ::core::option::Option<AuthorizationData>,
+}
+#[allow(clippy::derive_partial_eq_without_eq)]
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct UpdateArgsAsDataItemDelegateV2 {
+    #[prost(message, optional, tag="1")]
+    pub data: ::core::option::Option<Data>,
+    #[prost(message, optional, tag="2")]
+    pub authorization_data: ::core::option::Option<AuthorizationData>,
+}
+#[allow(clippy::derive_partial_eq_without_eq)]
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct UpdateArgsAsCollectionItemDelegateV2 {
+    #[prost(message, optional, tag="1")]
+    pub collection: ::core::option::Option<CollectionToggle>,
+    #[prost(message, optional, tag="2")]
+    pub authorization_data: ::core::option::Option<AuthorizationData>,
+}
+#[allow(clippy::derive_partial_eq_without_eq)]
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct UpdateArgsAsProgrammableConfigItemDelegateV2 {
+    #[prost(message, optional, tag="1")]
+    pub rule_set: ::core::option::Option<RuleSetToggle>,
+    #[prost(message, optional, tag="2")]
+    pub authorization_data: ::core::option::Option<AuthorizationData>,
+}
+#[allow(clippy::derive_partial_eq_without_eq)]
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct Data {
+    #[prost(string, tag="1")]
+    pub name: ::prost::alloc::string::String,
+    #[prost(string, tag="2")]
+    pub symbol: ::prost::alloc::string::String,
+    #[prost(string, tag="3")]
+    pub uri: ::prost::alloc::string::String,
+    #[prost(uint32, tag="4")]
+    pub seller_fee_basis_points: u32,
+    #[prost(message, repeated, tag="5")]
+    pub creators: ::prost::alloc::vec::Vec<Creator>,
+}
+#[allow(clippy::derive_partial_eq_without_eq)]
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct PrintSupply {
+}
+#[allow(clippy::derive_partial_eq_without_eq)]
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct AssetData {
+    #[prost(string, tag="1")]
+    pub name: ::prost::alloc::string::String,
+    #[prost(string, tag="2")]
+    pub symbol: ::prost::alloc::string::String,
+    #[prost(string, tag="3")]
+    pub uri: ::prost::alloc::string::String,
+    #[prost(uint32, tag="4")]
+    pub seller_fee_basis_points: u32,
+    #[prost(message, repeated, tag="5")]
+    pub creators: ::prost::alloc::vec::Vec<Creator>,
+    #[prost(bool, tag="6")]
+    pub primary_sale_happened: bool,
+    #[prost(bool, tag="7")]
+    pub is_mutable: bool,
+    #[prost(message, optional, tag="8")]
+    pub token_standard: ::core::option::Option<TokenStandard>,
+    #[prost(message, optional, tag="9")]
+    pub collection: ::core::option::Option<Collection>,
+    #[prost(message, optional, tag="10")]
+    pub uses: ::core::option::Option<Uses>,
+    #[prost(message, optional, tag="11")]
+    pub collection_details: ::core::option::Option<CollectionDetails>,
+}
+#[allow(clippy::derive_partial_eq_without_eq)]
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct RuleSetToggle {
+}
+#[allow(clippy::derive_partial_eq_without_eq)]
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct CollectionToggle {
+}
+#[allow(clippy::derive_partial_eq_without_eq)]
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct AuthorizationData {
+}
+#[allow(clippy::derive_partial_eq_without_eq)]
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct CollectionDetailsToggle {
+}
+#[allow(clippy::derive_partial_eq_without_eq)]
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct UsesToggle {
+}
+#[allow(clippy::derive_partial_eq_without_eq)]
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct TokenStandard {
 }
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
@@ -464,7 +707,7 @@ impl UseMethod {
     /// (if the ProtoBuf definition does not change) and safe for programmatic use.
     pub fn as_str_name(&self) -> &'static str {
         match self {
-            UseMethod::Null => "NULL",
+            UseMethod::Null => "USE_METHOD_NULL",
             UseMethod::Burn => "BURN",
             UseMethod::Multiple => "MULTIPLE",
             UseMethod::Single => "SINGLE",
@@ -473,10 +716,42 @@ impl UseMethod {
     /// Creates an enum from field names used in the ProtoBuf definition.
     pub fn from_str_name(value: &str) -> ::core::option::Option<Self> {
         match value {
-            "NULL" => Some(Self::Null),
+            "USE_METHOD_NULL" => Some(Self::Null),
             "BURN" => Some(Self::Burn),
             "MULTIPLE" => Some(Self::Multiple),
             "SINGLE" => Some(Self::Single),
+            _ => None,
+        }
+    }
+}
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash, PartialOrd, Ord, ::prost::Enumeration)]
+#[repr(i32)]
+pub enum Toggle {
+    Null = 0,
+    None = 1,
+    Clear = 2,
+    Set = 3,
+}
+impl Toggle {
+    /// String value of the enum field names used in the ProtoBuf definition.
+    ///
+    /// The values are not transformed in any way and thus are considered stable
+    /// (if the ProtoBuf definition does not change) and safe for programmatic use.
+    pub fn as_str_name(&self) -> &'static str {
+        match self {
+            Toggle::Null => "TOGGLE_NULL",
+            Toggle::None => "NONE",
+            Toggle::Clear => "CLEAR",
+            Toggle::Set => "SET",
+        }
+    }
+    /// Creates an enum from field names used in the ProtoBuf definition.
+    pub fn from_str_name(value: &str) -> ::core::option::Option<Self> {
+        match value {
+            "TOGGLE_NULL" => Some(Self::Null),
+            "NONE" => Some(Self::None),
+            "CLEAR" => Some(Self::Clear),
+            "SET" => Some(Self::Set),
             _ => None,
         }
     }

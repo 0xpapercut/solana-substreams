@@ -69,6 +69,8 @@ message MplTokenMetadataEvent {
         UseEvent use = 54;
         VerifySizedCollectionItemEvent verify_sized_collection_item = 55;
         VerifyCollectionEvent verify_collection = 56;
+        ResizeEvent resize = 57;
+        CloseAccountsEvent close_accounts = 58;
     }
 }
 
@@ -80,7 +82,6 @@ message BurnEditionNftEvent {}
 message BurnNftEvent {}
 message CloseEscrowAccountEvent {}
 message ConvertMasterEditionV1ToV2Event {}
-message CreateEvent {}
 message CreateEscrowAccountEvent {}
 message CreateMasterEditionEvent {}
 message CreateMasterEditionV3Event {}
@@ -114,9 +115,7 @@ message UnlockEvent {}
 message UnverifyEvent {}
 message UnverifyCollectionEvent {}
 message UnverifySizedCollectionItemEvent {}
-message UpdateEvent {}
 message UpdateMetadataAccountEvent {}
-message UpdateMetadataAccountV2Event {}
 message UpdatePrimarySaleHappenedViaTokenEvent {}
 message UtilizeEvent {}
 message PrintEvent {}
@@ -127,6 +126,8 @@ message CollectEvent {}
 message UseEvent {}
 message VerifySizedCollectionItemEvent {}
 message VerifyCollectionEvent {}
+message ResizeEvent {}
+message CloseAccountsEvent {}
 
 message CreateMetadataAccountV3Event {
     string metadata = 1;
@@ -136,6 +137,137 @@ message CreateMetadataAccountV3Event {
     bool is_mutable = 5;
     optional CollectionDetails collection_details = 6;
 }
+
+message CreateEvent {
+    string metadata = 1;
+    string mint = 2;
+    string mint_authority = 3;
+    string update_authority = 4;
+    AssetData asset_data = 5;
+    optional uint32 decimals = 6;
+    optional PrintSupply print_supply = 7;
+}
+
+message UpdateEvent {
+    string authority = 1;
+    string mint = 2;
+    string metadata = 3;
+    oneof update_args {
+        UpdateArgsV1 v1 = 4;
+        UpdateArgsAsUpdateAuthorityV2 as_update_authority_v2 = 5;
+        UpdateArgsAsAuthorityItemDelegateV2 as_authority_item_delegate_v2 = 6;
+        UpdateArgsAsCollectionDelegateV2 as_collection_delegate_v2 = 7;
+        UpdateArgsAsDataDelegateV2 as_data_delegate_v2 = 8;
+        UpdateArgsAsProgrammableConfigDelegateV2 as_programmable_config_delegate_v2 = 9;
+        UpdateArgsAsDataItemDelegateV2 as_data_item_delegate_v2 = 10;
+        UpdateArgsAsCollectionItemDelegateV2 as_collection_item_delegate_v2 = 11;
+        UpdateArgsAsProgrammableConfigItemDelegateV2 as_programmable_config_item_delegate_v2 = 12;
+    }
+}
+
+message UpdateMetadataAccountV2Event {
+    optional DataV2 data = 1;
+    optional string update_authority = 2;
+    optional bool primary_sale_happened = 3;
+    optional bool is_mutable = 4;
+}
+
+message UpdateArgsV1 {
+    optional string new_update_authority = 1;
+    optional Data data = 2;
+    optional bool primary_sale_happened = 3;
+    optional bool is_mutable = 4;
+    CollectionToggle collection = 5;
+    CollectionDetailsToggle collection_details = 6;
+    UsesToggle uses = 7;
+    RuleSetToggle rule_set = 8;
+    optional AuthorizationData authorization_data = 9;
+}
+
+message UpdateArgsAsUpdateAuthorityV2 {
+    optional string new_update_authority = 1;
+    optional Data data = 2;
+    optional bool primary_sale_happened = 3;
+    optional bool is_mutable = 4;
+    CollectionToggle collection = 5;
+    CollectionDetailsToggle collection_details = 6;
+    UsesToggle uses = 7;
+    RuleSetToggle rule_set = 8;
+    optional TokenStandard token_standard = 9;
+    optional AuthorizationData authorization_data = 10;
+}
+
+message UpdateArgsAsAuthorityItemDelegateV2 {
+    optional string new_update_authority = 1;
+    optional bool primary_sale_happened = 2;
+    optional bool is_mutable = 3;
+    optional TokenStandard token_standard = 4;
+    optional AuthorizationData authorization_data = 5;
+}
+
+message UpdateArgsAsCollectionDelegateV2 {
+    CollectionToggle collection = 1;
+    optional AuthorizationData authorization_data = 2;
+}
+
+message UpdateArgsAsDataDelegateV2 {
+    optional Data data = 1;
+    optional AuthorizationData authorization_data = 2;
+}
+
+
+message UpdateArgsAsProgrammableConfigDelegateV2 {
+    RuleSetToggle rule_set = 1;
+    optional AuthorizationData authorization_data = 2;
+}
+
+
+message UpdateArgsAsDataItemDelegateV2 {
+    optional Data data = 1;
+    optional AuthorizationData authorization_data = 2;
+}
+
+message UpdateArgsAsCollectionItemDelegateV2 {
+    CollectionToggle collection = 1;
+    optional AuthorizationData authorization_data = 2;
+}
+
+message UpdateArgsAsProgrammableConfigItemDelegateV2 {
+    RuleSetToggle rule_set = 1;
+    optional AuthorizationData authorization_data = 2;
+}
+
+message Data {
+    string name = 1;
+    string symbol = 2;
+    string uri = 3;
+    uint32 seller_fee_basis_points = 4;
+    repeated Creator creators = 5;
+}
+
+message PrintSupply {}
+
+message AssetData {
+    string name = 1;
+    string symbol = 2;
+    string uri = 3;
+    uint32 seller_fee_basis_points = 4;
+    repeated Creator creators = 5;
+    bool primary_sale_happened = 6;
+    bool is_mutable = 7;
+    TokenStandard token_standard = 8;
+    optional Collection collection = 9;
+    optional Uses uses = 10;
+    optional CollectionDetails collection_details = 11;
+}
+
+message RuleSetToggle {}
+message CollectionToggle {}
+message AuthorizationData {}
+message CollectionDetailsToggle {}
+message UsesToggle {}
+
+message TokenStandard {}
 
 message DataV2 {
     string name = 1;
@@ -154,7 +286,7 @@ message Uses {
 }
 
 enum UseMethod {
-    NULL = 0;
+    USE_METHOD_NULL = 0;
     BURN = 1;
     MULTIPLE = 2;
     SINGLE = 3;
@@ -184,4 +316,11 @@ message Creator {
     string address = 1;
     bool verified = 2;
     uint32 share = 3;
+}
+
+enum Toggle {
+    TOGGLE_NULL = 0;
+    NONE = 1;
+    CLEAR = 2;
+    SET = 3;
 }
