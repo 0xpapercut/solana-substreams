@@ -91,6 +91,7 @@ pub fn parse_instruction(
             Ok(Some(Event::ConvertMasterEditionV1ToV2(ConvertMasterEditionV1ToV2Event {})))
         },
         MetadataInstruction::Create(_) => {
+            // _parse_create_instruction(instruction, context, create).map(|x| Some(Event::Create(x)))
             Ok(Some(Event::Create(CreateEvent {})))
         },
         MetadataInstruction::CreateEscrowAccount => {
@@ -196,12 +197,14 @@ pub fn parse_instruction(
             Ok(Some(Event::UnverifySizedCollectionItem(UnverifySizedCollectionItemEvent {})))
         },
         MetadataInstruction::Update(_) => {
+            // _parse_update_instruction(instruction, context, update).map(|x| Some(Event::Update(x)))
             Ok(Some(Event::Update(UpdateEvent {})))
         },
         MetadataInstruction::UpdateMetadataAccount => {
             Ok(Some(Event::UpdateMetadataAccount(UpdateMetadataAccountEvent {})))
         },
         MetadataInstruction::UpdateMetadataAccountV2(_) => {
+            // _parse_update_metadata_account_v2_instruction(instruction, context, update_metadata_account_v2).map(|x| Some(Event::UpdateMetadataAccountV2(x)))
             Ok(Some(Event::UpdateMetadataAccountV2(UpdateMetadataAccountV2Event {})))
         },
         MetadataInstruction::UpdatePrimarySaleHappenedViaToken => {
@@ -234,6 +237,12 @@ pub fn parse_instruction(
         MetadataInstruction::VerifyCollection => {
             Ok(Some(Event::VerifyCollection(VerifyCollectionEvent {})))
         },
+        MetadataInstruction::Resize => {
+            Ok(Some(Event::Resize(ResizeEvent {})))
+        },
+        MetadataInstruction::CloseAccounts => {
+            Ok(Some(Event::CloseAccounts(CloseAccountsEvent {})))
+        }
     }
 }
 
@@ -257,6 +266,112 @@ fn _parse_create_metadata_account_v3_instruction<'a>(
         is_mutable,
         collection_details,
     })
+}
+
+// fn _parse_create_instruction<'a>(
+//     instruction: &StructuredInstruction<'a>,
+//     _context: &TransactionContext,
+//     create: mpl_token_metadata::instruction::CreateArgs,
+// ) -> Result<CreateEvent, String> {
+//     unimplemented!()
+// }
+
+// fn _parse_update_instruction<'a>(
+//     instruction: &StructuredInstruction,
+//     context: &TransactionContext,
+//     update: mpl_token_metadata::instruction::UpdateArgs,
+// ) -> Result<UpdateEvent, String> {
+//     let metadata = instruction.accounts()[0].to_string();
+//     let delta = (instruction.accounts()[6] == SYSTEM_PROGRAM_ID) as usize;
+//     let mint = instruction.accounts()[1 + delta].to_string();
+//     let authority = instruction.accounts()[2 + delta].to_string();
+
+//     let update_args = match update {
+//         mpl_token_metadata::instruction::UpdateArgs::V1 { new_update_authority, data, primary_sale_happened, is_mutable, collection, collection_details, uses, rule_set, authorization_data } => {
+//             Some(update_event::UpdateArgs::V1(UpdateArgsV1 {
+//                 new_update_authority: new_update_authority.map(|x| x.to_string()),
+//                 data: data.map(|x| x.into()),
+//                 primary_sale_happened,
+//                 is_mutable,
+//                 collection: Some(CollectionToggle {}),
+//                 collection_details: Some(CollectionDetailsToggle {}),
+//                 uses: Some(UsesToggle {}),
+//                 rule_set: Some(RuleSetToggle {}),
+//                 authorization_data: Some(AuthorizationData {}),
+//             }))
+//         },
+//         mpl_token_metadata::instruction::UpdateArgs::AsUpdateAuthorityV2 { new_update_authority, data, primary_sale_happened, is_mutable, collection, collection_details, uses, rule_set, token_standard, authorization_data } => {
+//             Some(update_event::UpdateArgs::AsUpdateAuthorityV2(UpdateArgsAsUpdateAuthorityV2 {
+//                 new_update_authority: None,
+//                 data: None,
+//                 primary_sale_happened: None,
+//                 is_mutable: None,
+//                 collection: None,
+//                 collection_details: None,
+//                 uses: None,
+//                 rule_set: None,
+//                 token_standard: None,
+//                 authorization_data: None,
+//             }))
+//         },
+//         mpl_token_metadata::instruction::UpdateArgs::AsAuthorityItemDelegateV2 { new_update_authority, primary_sale_happened, is_mutable, token_standard, authorization_data } => {
+//             Some(update_event::UpdateArgs::AsAuthorityItemDelegateV2(UpdateArgsAsAuthorityItemDelegateV2 {
+//                 new_update_authority: None,
+//                 primary_sale_happened: None,
+//                 is_mutable: None,
+//                 token_standard: None,
+//                 authorization_data: None,
+//             }))
+//         },
+//         mpl_token_metadata::instruction::UpdateArgs::AsCollectionDelegateV2 { collection, authorization_data } => {
+//             None
+//         },
+//         mpl_token_metadata::instruction::UpdateArgs::AsDataDelegateV2 { data, authorization_data } => {
+//             None
+//         },
+//         mpl_token_metadata::instruction::UpdateArgs::AsProgrammableConfigDelegateV2 { rule_set, authorization_data } => {
+//             None
+//         },
+//         mpl_token_metadata::instruction::UpdateArgs::AsDataItemDelegateV2 { data, authorization_data } => {
+//             Some(update_event::UpdateArgs::AsDataItemDelegateV2(UpdateArgsAsDataItemDelegateV2  {
+//                 data: data.map(|x| x.into()),
+//                 authorization_data: None,
+//             }))
+//         },
+//         mpl_token_metadata::instruction::UpdateArgs::AsCollectionItemDelegateV2 { collection, authorization_data } => {
+//             None
+//         },
+//         mpl_token_metadata::instruction::UpdateArgs::AsProgrammableConfigItemDelegateV2 { rule_set, authorization_data } => {
+//             None
+//         },
+//     };
+
+//     Ok(UpdateEvent {
+//         authority,
+//         metadata,
+//         mint,
+//         update_args,
+//     })
+// }
+
+// fn _parse_update_metadata_account_v2_instruction<'a>(
+//     instruction: &StructuredInstruction,
+//     context: &TransactionContext,
+//     update_metadata_account_v2: mpl_token_metadata::instruction::UpdateMetadataAccountArgsV2,
+// ) -> Result<UpdateMetadataAccountV2Event, String> {
+//     unimplemented!()
+// }
+
+impl From<mpl_token_metadata::state::Data> for Data {
+    fn from(value: mpl_token_metadata::state::Data) -> Self {
+        Data {
+            name: value.name,
+            symbol: value.symbol,
+            uri: value.uri,
+            seller_fee_basis_points: value.seller_fee_basis_points.into(),
+            creators: value.creators.unwrap_or_else(Vec::new).iter().map(|x| x.into()).collect(),
+        }
+    }
 }
 
 impl From<mpl_token_metadata::state::DataV2> for DataV2 {

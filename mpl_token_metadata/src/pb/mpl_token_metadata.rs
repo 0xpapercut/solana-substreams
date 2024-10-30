@@ -377,70 +377,49 @@ pub struct CreateMetadataAccountV3Event {
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct CreateEvent {
-    #[prost(string, tag="1")]
-    pub metadata: ::prost::alloc::string::String,
-    #[prost(string, tag="2")]
-    pub mint: ::prost::alloc::string::String,
-    #[prost(string, tag="3")]
-    pub mint_authority: ::prost::alloc::string::String,
-    #[prost(string, tag="4")]
-    pub update_authority: ::prost::alloc::string::String,
-    #[prost(message, optional, tag="5")]
-    pub asset_data: ::core::option::Option<AssetData>,
-    #[prost(uint32, optional, tag="6")]
-    pub decimals: ::core::option::Option<u32>,
-    #[prost(message, optional, tag="7")]
-    pub print_supply: ::core::option::Option<PrintSupply>,
 }
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct UpdateEvent {
-    #[prost(string, tag="1")]
-    pub authority: ::prost::alloc::string::String,
-    #[prost(string, tag="2")]
-    pub mint: ::prost::alloc::string::String,
-    #[prost(string, tag="3")]
-    pub metadata: ::prost::alloc::string::String,
-    #[prost(oneof="update_event::UpdateArgs", tags="4, 5, 6, 7, 8, 9, 10, 11, 12")]
-    pub update_args: ::core::option::Option<update_event::UpdateArgs>,
-}
-/// Nested message and enum types in `UpdateEvent`.
-pub mod update_event {
-    #[allow(clippy::derive_partial_eq_without_eq)]
-#[derive(Clone, PartialEq, ::prost::Oneof)]
-    pub enum UpdateArgs {
-        #[prost(message, tag="4")]
-        V1(super::UpdateArgsV1),
-        #[prost(message, tag="5")]
-        AsUpdateAuthorityV2(super::UpdateArgsAsUpdateAuthorityV2),
-        #[prost(message, tag="6")]
-        AsAuthorityItemDelegateV2(super::UpdateArgsAsAuthorityItemDelegateV2),
-        #[prost(message, tag="7")]
-        AsCollectionDelegateV2(super::UpdateArgsAsCollectionDelegateV2),
-        #[prost(message, tag="8")]
-        AsDataDelegateV2(super::UpdateArgsAsDataDelegateV2),
-        #[prost(message, tag="9")]
-        AsProgrammableConfigDelegateV2(super::UpdateArgsAsProgrammableConfigDelegateV2),
-        #[prost(message, tag="10")]
-        AsDataItemDelegateV2(super::UpdateArgsAsDataItemDelegateV2),
-        #[prost(message, tag="11")]
-        AsCollectionItemDelegateV2(super::UpdateArgsAsCollectionItemDelegateV2),
-        #[prost(message, tag="12")]
-        AsProgrammableConfigItemDelegateV2(super::UpdateArgsAsProgrammableConfigItemDelegateV2),
-    }
 }
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct UpdateMetadataAccountV2Event {
-    #[prost(message, optional, tag="1")]
-    pub data: ::core::option::Option<DataV2>,
-    #[prost(string, optional, tag="2")]
-    pub update_authority: ::core::option::Option<::prost::alloc::string::String>,
-    #[prost(bool, optional, tag="3")]
-    pub primary_sale_happened: ::core::option::Option<bool>,
-    #[prost(bool, optional, tag="4")]
-    pub is_mutable: ::core::option::Option<bool>,
 }
+// message CreateEvent {
+//      string metadata = 1;
+//      string mint = 2;
+//      string mint_authority = 3;
+//      string update_authority = 4;
+//      AssetData asset_data = 5;
+//      optional uint32 decimals = 6;
+//      optional PrintSupply print_supply = 7;
+// }
+
+// message UpdateEvent {
+//      string authority = 1;
+//      string mint = 2;
+//      string metadata = 3;
+//      oneof update_args {
+//          UpdateArgsV1 v1 = 4;
+//          UpdateArgsAsUpdateAuthorityV2 as_update_authority_v2 = 5;
+//          UpdateArgsAsAuthorityItemDelegateV2 as_authority_item_delegate_v2 = 6;
+//          UpdateArgsAsCollectionDelegateV2 as_collection_delegate_v2 = 7;
+//          UpdateArgsAsDataDelegateV2 as_data_delegate_v2 = 8;
+//          UpdateArgsAsProgrammableConfigDelegateV2 as_programmable_config_delegate_v2 = 9;
+//          UpdateArgsAsDataItemDelegateV2 as_data_item_delegate_v2 = 10;
+//          UpdateArgsAsCollectionItemDelegateV2 as_collection_item_delegate_v2 = 11;
+//          UpdateArgsAsProgrammableConfigItemDelegateV2 as_programmable_config_item_delegate_v2 = 12;
+//      }
+// }
+
+// message UpdateMetadataAccountV2Event {
+//      optional DataV2 data = 1;
+//      optional string update_authority = 2;
+//      optional bool primary_sale_happened = 3;
+//      optional bool is_mutable = 4;
+// }
+
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct UpdateArgsV1 {

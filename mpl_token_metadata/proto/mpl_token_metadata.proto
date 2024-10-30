@@ -138,39 +138,43 @@ message CreateMetadataAccountV3Event {
     optional CollectionDetails collection_details = 6;
 }
 
-message CreateEvent {
-    string metadata = 1;
-    string mint = 2;
-    string mint_authority = 3;
-    string update_authority = 4;
-    AssetData asset_data = 5;
-    optional uint32 decimals = 6;
-    optional PrintSupply print_supply = 7;
-}
+message CreateEvent {}
+message UpdateEvent {}
+message UpdateMetadataAccountV2Event {}
 
-message UpdateEvent {
-    string authority = 1;
-    string mint = 2;
-    string metadata = 3;
-    oneof update_args {
-        UpdateArgsV1 v1 = 4;
-        UpdateArgsAsUpdateAuthorityV2 as_update_authority_v2 = 5;
-        UpdateArgsAsAuthorityItemDelegateV2 as_authority_item_delegate_v2 = 6;
-        UpdateArgsAsCollectionDelegateV2 as_collection_delegate_v2 = 7;
-        UpdateArgsAsDataDelegateV2 as_data_delegate_v2 = 8;
-        UpdateArgsAsProgrammableConfigDelegateV2 as_programmable_config_delegate_v2 = 9;
-        UpdateArgsAsDataItemDelegateV2 as_data_item_delegate_v2 = 10;
-        UpdateArgsAsCollectionItemDelegateV2 as_collection_item_delegate_v2 = 11;
-        UpdateArgsAsProgrammableConfigItemDelegateV2 as_programmable_config_item_delegate_v2 = 12;
-    }
-}
+// message CreateEvent {
+//     string metadata = 1;
+//     string mint = 2;
+//     string mint_authority = 3;
+//     string update_authority = 4;
+//     AssetData asset_data = 5;
+//     optional uint32 decimals = 6;
+//     optional PrintSupply print_supply = 7;
+// }
 
-message UpdateMetadataAccountV2Event {
-    optional DataV2 data = 1;
-    optional string update_authority = 2;
-    optional bool primary_sale_happened = 3;
-    optional bool is_mutable = 4;
-}
+// message UpdateEvent {
+//     string authority = 1;
+//     string mint = 2;
+//     string metadata = 3;
+//     oneof update_args {
+//         UpdateArgsV1 v1 = 4;
+//         UpdateArgsAsUpdateAuthorityV2 as_update_authority_v2 = 5;
+//         UpdateArgsAsAuthorityItemDelegateV2 as_authority_item_delegate_v2 = 6;
+//         UpdateArgsAsCollectionDelegateV2 as_collection_delegate_v2 = 7;
+//         UpdateArgsAsDataDelegateV2 as_data_delegate_v2 = 8;
+//         UpdateArgsAsProgrammableConfigDelegateV2 as_programmable_config_delegate_v2 = 9;
+//         UpdateArgsAsDataItemDelegateV2 as_data_item_delegate_v2 = 10;
+//         UpdateArgsAsCollectionItemDelegateV2 as_collection_item_delegate_v2 = 11;
+//         UpdateArgsAsProgrammableConfigItemDelegateV2 as_programmable_config_item_delegate_v2 = 12;
+//     }
+// }
+
+// message UpdateMetadataAccountV2Event {
+//     optional DataV2 data = 1;
+//     optional string update_authority = 2;
+//     optional bool primary_sale_happened = 3;
+//     optional bool is_mutable = 4;
+// }
 
 message UpdateArgsV1 {
     optional string new_update_authority = 1;
