@@ -32,6 +32,8 @@ message InitializeEvent {
     string lpMint = 8;
     uint32 nonce = 9;
     optional string market = 10;
+    optional uint64 userPcPreBalance = 11;
+    optional uint64 userCoinPreBalance = 12;
 }
 
 message DepositEvent {
@@ -46,6 +48,8 @@ message DepositEvent {
     optional uint64 poolPcAmount = 9;
     optional uint64 poolCoinAmount = 10;
     optional uint64 poolLpAmount = 11;
+    optional uint64 userPcPreBalance = 12;
+    optional uint64 userCoinPreBalance = 13;
 }
 
 message WithdrawEvent {
@@ -60,6 +64,8 @@ message WithdrawEvent {
     optional uint64 poolPcAmount = 9;
     optional uint64 poolCoinAmount = 10;
     optional uint64 poolLpAmount = 11;
+    optional uint64 userPcPreBalance = 12;
+    optional uint64 userCoinPreBalance = 13;
 }
 
 message WithdrawPnlEvent {
@@ -83,4 +89,6 @@ message SwapEvent {
     optional uint64 poolCoinAmount = 9;
     string pcMint = 10;
     string coinMint = 11;
+    optional uint64 userPreBalanceIn = 12;
+    optional uint64 userPreBalanceOut = 13;
 }

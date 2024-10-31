@@ -49,10 +49,10 @@ pub fn parse_transaction(transaction: &ConfirmedTransaction) -> Result<Vec<Raydi
 
     let mut events: Vec<RaydiumAmmEvent> = Vec::new();
 
-    let context = get_context(transaction)?;
+    let mut context = get_context(transaction)?;
     let instructions = get_structured_instructions(transaction)?;
-
     for instruction in instructions.flattened().iter() {
+        context.update_balance(&instruction.instruction);
         if instruction.program_id() != RAYDIUM_AMM_PROGRAM_ID {
             continue;
         }
@@ -117,8 +117,11 @@ fn _parse_swap_instruction<'a>(
 
     let amount_in = transfer_in.amount;
     let amount_out = transfer_out.amount;
-    let mint_in = transfer_in.source.unwrap().mint;
-    let mint_out = transfer_out.source.unwrap().mint;
+    let mint_in = transfer_in.source.as_ref().unwrap().mint.clone();
+    let mint_out = transfer_out.source.as_ref().unwrap().mint.clone();
+
+    let user_pre_balance_in = transfer_in.source.unwrap().pre_balance;
+    let user_pre_balance_out = transfer_out.destination.unwrap().pre_balance;
 
     let delta = if instruction.accounts().len() == 17 { 0 } else { 1 };
     let coin_mint = context.get_token_account(&instruction.accounts()[4 + delta]).unwrap().mint.to_string();
@@ -148,6 +151,8 @@ fn _parse_swap_instruction<'a>(
         pool_pc_amount,
         coin_mint,
         pc_mint,
+        user_pre_balance_in,
+        user_pre_balance_out,
     })
 }
 
@@ -167,9 +172,12 @@ fn _parse_initialize_instruction<'a>(
     let pc_init_amount = pc_transfer.amount;
     let coin_init_amount = coin_transfer.amount;
     let lp_init_amount = lp_mint_to.amount;
-    let pc_mint = pc_transfer.source.unwrap().mint;
-    let coin_mint = coin_transfer.source.unwrap().mint;
+    let pc_mint = pc_transfer.source.as_ref().unwrap().mint.clone();
+    let coin_mint = coin_transfer.source.as_ref().unwrap().mint.clone();
     let lp_mint = lp_mint_to.mint;
+
+    let user_pc_pre_balance = pc_transfer.source.unwrap().pre_balance;
+    let user_coin_pre_balance = coin_transfer.source.unwrap().pre_balance;
 
     let market = match parse_raydium_log(instruction) {
         Ok(RayLog::Init(init)) => Some(Pubkey(init.market).to_string()),
@@ -187,6 +195,8 @@ fn _parse_initialize_instruction<'a>(
         lp_mint,
         nonce: nonce as u32,
         market,
+        user_pc_pre_balance,
+        user_coin_pre_balance,
     })
 }
 
@@ -205,9 +215,12 @@ fn _parse_deposit_instruction<'a>(
     let pc_amount = pc_transfer.amount;
     let coin_amount = coin_transfer.amount;
     let lp_amount = lp_mint_to.amount;
-    let pc_mint = pc_transfer.source.unwrap().mint;
-    let coin_mint = coin_transfer.source.unwrap().mint;
+    let pc_mint = pc_transfer.source.as_ref().unwrap().mint.clone();
+    let coin_mint = coin_transfer.source.as_ref().unwrap().mint.clone();
     let lp_mint = lp_mint_to.mint;
+
+    let user_pc_pre_balance = pc_transfer.source.unwrap().pre_balance;
+    let user_coin_pre_balance = coin_transfer.source.unwrap().pre_balance;
 
     let (pool_pc_amount, pool_coin_amount, pool_lp_amount) = match parse_raydium_log(instruction) {
         Ok(RayLog::Deposit(deposit)) => {
@@ -228,6 +241,8 @@ fn _parse_deposit_instruction<'a>(
         pool_pc_amount,
         pool_coin_amount,
         pool_lp_amount,
+        user_pc_pre_balance,
+        user_coin_pre_balance,
     })
 }
 
@@ -250,6 +265,9 @@ fn _parse_withdraw_instruction<'a>(
     let coin_mint = coin_transfer.source.unwrap().mint;
     let lp_mint = lp_burn.source.unwrap().mint;
 
+    let user_pc_pre_balance = pc_transfer.destination.unwrap().pre_balance;
+    let user_coin_pre_balance = coin_transfer.destination.unwrap().pre_balance;
+
     let (pool_pc_amount, pool_coin_amount, pool_lp_amount) = match parse_raydium_log(instruction) {
         Ok(RayLog::Withdraw(withdraw)) => {
             (Some(withdraw.pool_pc), Some(withdraw.pool_coin), Some(withdraw.pool_lp))
@@ -269,6 +287,8 @@ fn _parse_withdraw_instruction<'a>(
         pool_pc_amount,
         pool_coin_amount,
         pool_lp_amount,
+        user_pc_pre_balance,
+        user_coin_pre_balance,
     })
 }
 

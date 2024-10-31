@@ -59,6 +59,10 @@ pub struct InitializeEvent {
     pub nonce: u32,
     #[prost(string, optional, tag="10")]
     pub market: ::core::option::Option<::prost::alloc::string::String>,
+    #[prost(uint64, optional, tag="11")]
+    pub user_pc_pre_balance: ::core::option::Option<u64>,
+    #[prost(uint64, optional, tag="12")]
+    pub user_coin_pre_balance: ::core::option::Option<u64>,
 }
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
@@ -85,6 +89,10 @@ pub struct DepositEvent {
     pub pool_coin_amount: ::core::option::Option<u64>,
     #[prost(uint64, optional, tag="11")]
     pub pool_lp_amount: ::core::option::Option<u64>,
+    #[prost(uint64, optional, tag="12")]
+    pub user_pc_pre_balance: ::core::option::Option<u64>,
+    #[prost(uint64, optional, tag="13")]
+    pub user_coin_pre_balance: ::core::option::Option<u64>,
 }
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
@@ -111,6 +119,10 @@ pub struct WithdrawEvent {
     pub pool_coin_amount: ::core::option::Option<u64>,
     #[prost(uint64, optional, tag="11")]
     pub pool_lp_amount: ::core::option::Option<u64>,
+    #[prost(uint64, optional, tag="12")]
+    pub user_pc_pre_balance: ::core::option::Option<u64>,
+    #[prost(uint64, optional, tag="13")]
+    pub user_coin_pre_balance: ::core::option::Option<u64>,
 }
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
@@ -153,5 +165,9 @@ pub struct SwapEvent {
     pub pc_mint: ::prost::alloc::string::String,
     #[prost(string, tag="11")]
     pub coin_mint: ::prost::alloc::string::String,
+    #[prost(uint64, optional, tag="12")]
+    pub user_pre_balance_in: ::core::option::Option<u64>,
+    #[prost(uint64, optional, tag="13")]
+    pub user_pre_balance_out: ::core::option::Option<u64>,
 }
 // @@protoc_insertion_point(module)
