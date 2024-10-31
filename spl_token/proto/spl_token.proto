@@ -52,8 +52,6 @@ message TransferEvent {
     TokenAccount destination = 2;
     string authority = 3;
     uint64 amount = 4;
-    optional uint64 source_pre_balance = 5;
-    optional uint64 destination_pre_balance = 6;
 }
 
 message ApproveEvent {
@@ -115,6 +113,8 @@ message TokenAccount {
     string address = 1;
     string owner = 2;
     string mint = 3;
+    optional uint64 pre_balance = 4;
+    optional uint64 post_balance = 5;
 }
 
 enum AuthorityType {

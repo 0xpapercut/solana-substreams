@@ -91,12 +91,10 @@ pub struct TransferEvent {
     pub destination: ::core::option::Option<TokenAccount>,
     #[prost(string, tag="3")]
     pub authority: ::prost::alloc::string::String,
+    /// optional uint64 source_pre_balance = 5;
+    /// optional uint64 destination_pre_balance = 6;
     #[prost(uint64, tag="4")]
     pub amount: u64,
-    #[prost(uint64, optional, tag="5")]
-    pub source_pre_balance: ::core::option::Option<u64>,
-    #[prost(uint64, optional, tag="6")]
-    pub destination_pre_balance: ::core::option::Option<u64>,
 }
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
@@ -195,6 +193,10 @@ pub struct TokenAccount {
     pub owner: ::prost::alloc::string::String,
     #[prost(string, tag="3")]
     pub mint: ::prost::alloc::string::String,
+    #[prost(uint64, optional, tag="4")]
+    pub pre_balance: ::core::option::Option<u64>,
+    #[prost(uint64, optional, tag="5")]
+    pub post_balance: ::core::option::Option<u64>,
 }
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash, PartialOrd, Ord, ::prost::Enumeration)]
 #[repr(i32)]
