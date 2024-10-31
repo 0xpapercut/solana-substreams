@@ -39,15 +39,15 @@ pub fn parse_transaction(transaction: &ConfirmedTransaction) -> Result<Vec<SplTo
 
     let mut events: Vec<SplTokenEvent> = Vec::new();
 
-    let context = get_context(transaction)?;
+    let mut context = get_context(transaction)?;
     let instructions = get_structured_instructions(transaction)?;
 
     for instruction in instructions.flattened().iter() {
-        if instruction.program_id() != TOKEN_PROGRAM_ID {
-            continue;
+        if instruction.program_id() == TOKEN_PROGRAM_ID {
+            let event = parse_instruction(instruction, &context)?;
+            events.push(SplTokenEvent { event });
         }
-        let event = parse_instruction(instruction, &context)?;
-        events.push(SplTokenEvent { event });
+        context.update_balance(&instruction.instruction);
     }
 
     Ok(events)
@@ -186,13 +186,22 @@ fn _parse_initialize_mint_instruction(
 
 fn _parse_initialize_account_instruction(
     instruction: &StructuredInstruction,
-    context: &TransactionContext,
-    _owner: Option<Pubkey>,
+    _context: &TransactionContext,
+    owner: Option<Pubkey>,
 ) -> Result<InitializeAccountEvent, &'static str> {
-    let account = context.get_token_account(&instruction.accounts()[0]).unwrap();
+    let address = instruction.accounts()[0].to_string();
+    let mint = instruction.accounts()[1].to_string();
+    let owner = match owner {
+        Some(pubkey) => pubkey.to_string(),
+        None => instruction.accounts()[2].to_string(),
+    };
 
     Ok(InitializeAccountEvent {
-        account: Some(account.into())
+        account: Some(TokenAccount {
+            address,
+            mint,
+            owner,
+        })
     })
 }
 
@@ -232,6 +241,8 @@ fn _parse_transfer_instruction(
         destination: Some(destination.into()),
         amount,
         authority,
+        source_pre_balance: source.balance,
+        destination_pre_balance: destination.balance,
     })
 }
 
