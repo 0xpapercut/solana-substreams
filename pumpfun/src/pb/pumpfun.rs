@@ -103,6 +103,8 @@ pub struct SwapEvent {
     pub real_sol_reserves: ::core::option::Option<u64>,
     #[prost(uint64, optional, tag="10")]
     pub real_token_reserves: ::core::option::Option<u64>,
+    #[prost(uint64, optional, tag="11")]
+    pub user_token_pre_balance: ::core::option::Option<u64>,
 }
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]

@@ -4,6 +4,7 @@ use anyhow::{anyhow, Error};
 use substreams_solana::pb::sf::solana::r#type::v1::ConfirmedTransaction;
 use substreams_solana::pb::sf::solana::r#type::v1::Block;
 
+use substreams_solana_utils::spl_token::TOKEN_PROGRAM_ID;
 use substreams_solana_utils as utils;
 use utils::instruction::{get_structured_instructions, StructuredInstruction, StructuredInstructions};
 use utils::system_program::SYSTEM_PROGRAM_ID;
@@ -175,6 +176,10 @@ fn _parse_buy_instruction<'a>(
     let system_transfer = system_program_substream::parse_transfer_instruction(system_transfer_instruction.as_ref(), context)?;
     let sol_amount = Some(system_transfer.lamports);
 
+    let token_transfer_instruction = instruction.inner_instructions().iter().find(|x| x.program_id() == TOKEN_PROGRAM_ID).unwrap().clone();
+    let token_transfer = spl_token_substream::parse_transfer_instruction(token_transfer_instruction.as_ref(), context).map_err(|e| anyhow!(e))?;
+    let user_token_pre_balance = token_transfer.destination.unwrap().pre_balance;
+
     let trade = match parse_pumpfun_log(instruction) {
         Ok(PumpfunLog::Trade(trade)) => Some(trade),
         _ => None,
@@ -197,12 +202,13 @@ fn _parse_buy_instruction<'a>(
         virtual_token_reserves,
         real_sol_reserves,
         real_token_reserves,
+        user_token_pre_balance,
     })
 }
 
 fn _parse_sell_instruction(
     instruction: &StructuredInstruction,
-    _context: &TransactionContext,
+    context: &TransactionContext,
     sell: pumpfun::instruction::SellInstruction,
 ) -> Result<SwapEvent, Error> {
     let mint = instruction.accounts()[2].to_string();
@@ -222,6 +228,10 @@ fn _parse_sell_instruction(
 
     let direction = "sol".to_string();
 
+    let token_transfer_instruction = instruction.inner_instructions().iter().find(|x| x.program_id() == TOKEN_PROGRAM_ID).unwrap().clone();
+    let token_transfer = spl_token_substream::parse_transfer_instruction(token_transfer_instruction.as_ref(), context).map_err(|e| anyhow!(e))?;
+    let user_token_pre_balance = token_transfer.source.unwrap().pre_balance;
+
     Ok(SwapEvent {
         user,
         mint,
@@ -233,6 +243,7 @@ fn _parse_sell_instruction(
         virtual_token_reserves,
         real_sol_reserves,
         real_token_reserves,
+        user_token_pre_balance,
     })
 }
 

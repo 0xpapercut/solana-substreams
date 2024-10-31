@@ -57,6 +57,7 @@ message SwapEvent {
     optional uint64 virtual_token_reserves = 8;
     optional uint64 real_sol_reserves = 9;
     optional uint64 real_token_reserves = 10;
+    optional uint64 user_token_pre_balance = 11;
 }
 
 message WithdrawEvent {
