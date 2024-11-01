@@ -290,7 +290,7 @@ checksum = "78ca9ab1a0babb1e7d5695e3530886289c18cf2f87ec19a575a0abdce112e3a3"
 
 [[package]]
 name = "mpl-token-metadata-substream"
-version = "0.1.3"
+version = "0.1.4"
 dependencies = [
  "borsh",
  "bs58 0.5.1",
@@ -547,7 +547,7 @@ dependencies = [
 
 [[package]]
 name = "pumpfun-substream"
-version = "0.1.3"
+version = "0.1.4"
 dependencies = [
  "anyhow",
  "borsh",
@@ -572,7 +572,7 @@ dependencies = [
 
 [[package]]
 name = "raydium-amm-substream"
-version = "0.1.3"
+version = "0.1.4"
 dependencies = [
  "anyhow",
  "arrayref",
@@ -672,7 +672,7 @@ dependencies = [
 
 [[package]]
 name = "spl-token-substream"
-version = "0.1.2"
+version = "0.1.4"
 dependencies = [
  "anyhow",
  "bs58 0.5.1",
@@ -751,8 +751,8 @@ dependencies = [
 
 [[package]]
 name = "substreams-solana-utils"
-version = "0.1.3"
-source = "git+https://github.com/0xpapercut/substreams-solana-utils?tag=v0.1.3#a50b773304b4decb48f3e4eb60228391d8a1e93c"
+version = "0.1.4"
+source = "git+https://github.com/0xpapercut/substreams-solana-utils?tag=v0.1.4#2576dbf5af7e21fc82df2793243e7812515be998"
 dependencies = [
  "anyhow",
  "base64",
@@ -799,7 +799,7 @@ dependencies = [
 
 [[package]]
 name = "system-program-substream"
-version = "0.1.1"
+version = "0.1.4"
 dependencies = [
  "anyhow",
  "borsh",
