@@ -49,6 +49,8 @@ message TransferEvent {
     string funding_account = 1;
     string recipient_account = 2;
     uint64 lamports = 3;
+    AccountBalance funding_account_balance = 4;
+    AccountBalance recipient_account_balance = 5;
 }
 
 message CreateAccountWithSeedEvent {
@@ -111,8 +113,15 @@ message TransferWithSeedEvent {
     uint64 lamports = 4;
     string from_seed = 5;
     string from_owner = 6;
+    AccountBalance funding_account_balance = 7;
+    AccountBalance recipient_account_balance = 8;
 }
 
 message UpgradeNonceAccountEvent {
     string nonce_account = 1;
+}
+
+message AccountBalance {
+    uint64 pre_balance = 1;
+    uint64 post_balance = 2;
 }

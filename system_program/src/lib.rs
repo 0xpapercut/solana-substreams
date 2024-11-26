@@ -146,17 +146,21 @@ fn _parse_assign_instruction(
 
 fn _parse_transfer_instruction(
     instruction: &StructuredInstruction,
-    _context: &TransactionContext,
+    context: &TransactionContext,
     transfer: &system_program::Transfer,
 ) -> Result<TransferEvent, Error> {
     let funding_account = instruction.accounts()[0].to_string();
     let recipient_account = instruction.accounts()[1].to_string();
     let lamports = transfer.lamports;
+    let funding_account_balance = context.account_balances.get(instruction.instruction.accounts()[0] as usize).map(|x| x.clone().into());
+    let recipient_account_balance = context.account_balances.get(instruction.instruction.accounts()[1] as usize).map(|x| x.clone().into());
 
     Ok(TransferEvent {
         funding_account,
         recipient_account,
         lamports,
+        funding_account_balance,
+        recipient_account_balance,
     })
 }
 
@@ -298,7 +302,7 @@ fn _parse_assign_with_seed_instruction(
 
 fn _parse_transfer_with_seed_instruction(
     instruction: &StructuredInstruction,
-    _context: &TransactionContext,
+    context: &TransactionContext,
     transfer_with_seed: system_program::TransferWithSeed
 ) -> Result<TransferWithSeedEvent, Error> {
     let funding_account = instruction.accounts()[0].to_string();
@@ -307,6 +311,8 @@ fn _parse_transfer_with_seed_instruction(
     let from_owner = transfer_with_seed.from_owner.to_string();
     let from_seed = transfer_with_seed.from_seed.0.clone();
     let lamports = transfer_with_seed.lamports;
+    let funding_account_balance = context.account_balances.get(instruction.instruction.accounts()[0] as usize).map(|x| x.clone().into());
+    let recipient_account_balance = context.account_balances.get(instruction.instruction.accounts()[1] as usize).map(|x| x.clone().into());
 
     Ok(TransferWithSeedEvent {
         funding_account,
@@ -315,6 +321,8 @@ fn _parse_transfer_with_seed_instruction(
         from_owner,
         from_seed,
         lamports,
+        funding_account_balance,
+        recipient_account_balance,
     })
 }
 
@@ -456,5 +464,14 @@ pub fn parse_upgrade_nonce_account_instruction<'a>(
     match parse_instruction(instruction, context)? {
         Some(Event::UpgradeNonceAccount(event)) => Ok(event),
         _ => Err(anyhow!("Not an UpgradeNonceAccountInstruction."))
+    }
+}
+
+impl From<utils::account::AccountBalance> for AccountBalance {
+    fn from(value: utils::account::AccountBalance) -> Self {
+        Self {
+            pre_balance: value.pre_balance,
+            post_balance: value.post_balance,
+        }
     }
 }

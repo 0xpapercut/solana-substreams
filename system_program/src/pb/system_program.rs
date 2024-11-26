@@ -89,6 +89,10 @@ pub struct TransferEvent {
     pub recipient_account: ::prost::alloc::string::String,
     #[prost(uint64, tag="3")]
     pub lamports: u64,
+    #[prost(message, optional, tag="4")]
+    pub funding_account_balance: ::core::option::Option<AccountBalance>,
+    #[prost(message, optional, tag="5")]
+    pub recipient_account_balance: ::core::option::Option<AccountBalance>,
 }
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
@@ -195,11 +199,23 @@ pub struct TransferWithSeedEvent {
     pub from_seed: ::prost::alloc::string::String,
     #[prost(string, tag="6")]
     pub from_owner: ::prost::alloc::string::String,
+    #[prost(message, optional, tag="7")]
+    pub funding_account_balance: ::core::option::Option<AccountBalance>,
+    #[prost(message, optional, tag="8")]
+    pub recipient_account_balance: ::core::option::Option<AccountBalance>,
 }
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct UpgradeNonceAccountEvent {
     #[prost(string, tag="1")]
     pub nonce_account: ::prost::alloc::string::String,
+}
+#[allow(clippy::derive_partial_eq_without_eq)]
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct AccountBalance {
+    #[prost(uint64, tag="1")]
+    pub pre_balance: u64,
+    #[prost(uint64, tag="2")]
+    pub post_balance: u64,
 }
 // @@protoc_insertion_point(module)
