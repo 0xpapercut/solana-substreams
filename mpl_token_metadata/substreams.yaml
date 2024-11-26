@@ -3,6 +3,9 @@ package:
   name: 'mpl_token_metadata_events'
   version: v0.1.4
 
+imports:
+  sol: https://spkg.io/streamingfast/solana-common-v0.3.0.spkg
+
 protobuf:
   files:
     - mpl_token_metadata.proto
@@ -18,7 +21,7 @@ modules:
   - name: mpl_token_metadata_events
     kind: map
     inputs:
-      - source: sf.solana.type.v1.Block
+      - map: sol:blocks_without_votes
     output:
       type: proto:mpl_token_metadata.MplTokenMetadataBlockEvents
 

@@ -3,6 +3,9 @@ package:
   name: 'raydium_amm_events'
   version: v0.1.4
 
+imports:
+  sol: https://spkg.io/streamingfast/solana-common-v0.3.0.spkg
+
 protobuf:
   files:
     - raydium_amm.proto
@@ -18,7 +21,7 @@ modules:
   - name: raydium_amm_events
     kind: map
     inputs:
-      - source: sf.solana.type.v1.Block
+      - map: sol:blocks_without_votes
     output:
       type: proto:raydium_amm.RaydiumAmmBlockEvents
 

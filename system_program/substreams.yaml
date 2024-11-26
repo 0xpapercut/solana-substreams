@@ -3,6 +3,9 @@ package:
   name: 'system_program_events'
   version: v0.1.4
 
+imports:
+  sol: https://spkg.io/streamingfast/solana-common-v0.3.0.spkg
+
 protobuf:
   files:
     - system_program.proto
@@ -18,7 +21,7 @@ modules:
   - name: system_program_events
     kind: map
     inputs:
-      - source: sf.solana.type.v1.Block
+      - map: sol:blocks_without_votes
     output:
       type: proto:system_program.SystemProgramBlockEvents
 
