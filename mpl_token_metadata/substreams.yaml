@@ -1,7 +1,7 @@
 specVersion: v0.1.0
 package:
   name: 'mpl_token_metadata_events'
-  version: v0.1.4
+  version: v0.1.5
 
 imports:
   sol: https://spkg.io/streamingfast/solana-common-v0.3.0.spkg
