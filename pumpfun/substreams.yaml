@@ -1,7 +1,10 @@
 specVersion: v0.1.0
 package:
   name: 'pumpfun_events'
-  version: v0.1.5
+  version: v0.1.7
+  description: Pumpfun events substream
+  url: https://github.com/0xpapercut/solana-substreams
+  image: ./pumpfun.png
 
 imports:
   sol: https://spkg.io/streamingfast/solana-common-v0.3.0.spkg

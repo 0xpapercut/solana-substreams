@@ -1,7 +1,10 @@
 specVersion: v0.1.0
 package:
   name: 'spl_token_events'
-  version: v0.1.5
+  version: v0.1.7
+  description: SPL Token Program events substream
+  url: https://github.com/0xpapercut/solana-substreams
+  image: ./sol.png
 
 imports:
   sol: https://spkg.io/streamingfast/solana-common-v0.3.0.spkg
